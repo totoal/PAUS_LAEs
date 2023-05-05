@@ -169,7 +169,8 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
 
 if __name__ == '__main__':
     zs_list = [[0., 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1.], [1., 1.25],
-                [1.25, 1.5], [1.5, 1.75], [1.75, 2.]]
+               [1.25, 1.5], [1.5, 1.75], [1.75, 2.], [2., 2.25], [2.25, 2.50],
+               [2.50, 2.75]]
     for z_min, z_max in zs_list:
         r_min = 16
         r_max = 24
@@ -179,7 +180,7 @@ if __name__ == '__main__':
         surname = 'PAUS_contaminants_2'
         main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname)
 
-    zs_list = [[1.75, 2.25], [2.25, 2.5], [2.5, 2.75], [2.75, 3],
+    zs_list = [[2.25, 2.5], [2.5, 2.75], [2.75, 3],
                [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
     for z_min, z_max in zs_list:
         r_min = 16
