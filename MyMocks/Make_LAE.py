@@ -71,13 +71,13 @@ def main(part, survey_name):
     # w_lya = 1215.67
 
     # Mock parameters.
-    z_lya = [2, 4.25]
+    z_lya = [2.55, 5]
     obs_area = 12.5  # deg**2
 
     # Wavelength array where to evaluate the spectrum
 
     w_min = 3000   # Minimum wavelength
-    w_max = 11000  # Maximum wavelegnth
+    w_max = 12000  # Maximum wavelegnth
     N_bins = 10000  # Number of bins
 
     w_Arr = np.linspace(w_min, w_max, N_bins)
