@@ -2,21 +2,71 @@
 
 import csv
 
-import numpy as np
-from Make_QSO_altered_2 import add_errors
+import pickle
 
-from my_utilities import *
+import numpy as np
+from Make_QSO_altered_2 import schechter
+
+from jpasLAEs.utils import z_volume
 
 import pandas as pd
 
 from scipy.integrate import simpson
 
+from my_utilities import generate_spectrum
+
+from astropy.cosmology import Planck18 as cosmo
+import astropy.units as u
+
 from time import time
 import os
 import sys
 
+def synth_phot(SEDs, w_Arr, tcurves, which_filters=[]):
+    phot_len = len(tcurves['tag'])
+    pm = np.zeros(phot_len)
 
-def main(part, survey_name, t_or_t):
+    if len(which_filters) == 0:
+        which_filters = np.arange(phot_len)
+
+    for fil in which_filters:
+        w = np.array(tcurves['w'][fil])
+        t = np.array(tcurves['t'][fil])
+
+        # Cut w and t where the transmission is grater than some value for
+        # performance and bugs
+        cut_t_curve = (t > 0.05)
+        w = w[cut_t_curve]
+        t = t[cut_t_curve]
+
+        sed_interp = np.interp(w, w_Arr, SEDs, left=np.inf)
+
+        sed_int = np.trapz(w * t * sed_interp, w)
+        t_int = np.trapz(w * t, w)
+
+        pm[fil] = sed_int / t_int
+    return pm[which_filters]
+
+
+def L_flux_to_g(L_Arr, rand_z_Arr, rand_EW_Arr):
+    dL_Arr = cosmo.luminosity_distance(rand_z_Arr).to(u.cm).value
+    return 10**L_Arr / ((1 + rand_z_Arr) * rand_EW_Arr * 4*np.pi * dL_Arr**2)
+
+def Load_BC03_grid_data():
+
+    path = '/home/alberto/cosmos/LAEs/MyMocks/TAU_PROJECT/BC03_Interpolation/'
+
+    name = 'data_from_BC03.npy'
+
+    file_name = path + '/' + name
+
+    loaded_model = np.load(file_name, allow_pickle=True,
+                           encoding='latin1').item()
+
+    return loaded_model
+
+
+def main(part, survey_name):
     # Line wavelengths
     # w_lya = 1215.67
 
@@ -26,8 +76,8 @@ def main(part, survey_name, t_or_t):
 
     # Wavelength array where to evaluate the spectrum
 
-    w_min = 2500   # Minimum wavelength
-    w_max = 10000  # Maximum wavelegnth
+    w_min = 3000   # Minimum wavelength
+    w_max = 11000  # Maximum wavelegnth
     N_bins = 10000  # Number of bins
 
     w_Arr = np.linspace(w_min, w_max, N_bins)
@@ -84,7 +134,7 @@ def main(part, survey_name, t_or_t):
     # Compute g_Arr
     g_Arr = L_flux_to_g(L_Arr, z_Arr, e_Arr)
 
-    # Intergalactic medium mean absortion parameters: (From Faucher et al)
+    # Intergalactic medium mean absortion parameters: (From Faucher et al.)
     T_A = -0.001845
     T_B = 3.924
 
@@ -98,8 +148,10 @@ def main(part, survey_name, t_or_t):
         allow_pickle=True).item()
 
     # Let's load the data of the gSDSS filter
-    gSDSS_lambda_Arr_f, gSDSS_Transmission_Arr_f = Load_Filter('gSDSS')
-    gSDSS_lambda_pivot, gSDSS_FWHM = FWHM_lambda_pivot_filter('gSDSS')
+    paus_tcurves_dir = '/home/alberto/almacen/PAUS_data/OUT_FILTERS'
+    g_dat = np.genfromtxt(f'{paus_tcurves_dir}/AOD_BBFL_g.txt')
+    gSDSS_lambda_Arr_f, gSDSS_Transmission_Arr_f = g_dat[:, 0] * 10, g_dat[:, 1]
+    gSDSS_lambda_pivot, gSDSS_FWHM = 4774., 1472.
 
     gSDSS_data = {}
 
@@ -112,7 +164,7 @@ def main(part, survey_name, t_or_t):
 
     dirname = '/home/alberto/almacen/Source_cats'
     filename =\
-        f'{dirname}/LAE_{obs_area}deg_z{z_lya[0]}-{z_lya[1]}_{t_or_t}_{survey_name}_VUDS_deep_0'
+        f'{dirname}/LAE_{obs_area}deg_z{z_lya[0]}-{z_lya[1]}_{survey_name}_0'
 
     if not os.path.exists(filename):
         os.mkdir(filename)
@@ -123,15 +175,18 @@ def main(part, survey_name, t_or_t):
     SED_writer = csv.writer(SED_file)
     SED_no_line_writer = csv.writer(SED_no_line_file)
 
-    tcurves = np.load('../npy/tcurves.npy', allow_pickle=True).item()
+    path_to_paus_data = '/home/alberto/almacen/PAUS_data'
+    with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'rb') as f:
+        tcurves = pickle.load(f)
+
     # define a different tcurves only with r and i
     tcurves_sampling = {}
-    tcurves_sampling['tag'] = [tcurves['tag'][-3],
-                               tcurves['tag'][-1], tcurves['tag'][-2]]
-    tcurves_sampling['w'] = [tcurves['w'][-3],
-                             tcurves['w'][-1], tcurves['w'][-2]]
-    tcurves_sampling['t'] = [tcurves['t'][-3],
-                             tcurves['t'][-1], tcurves['t'][-2]]
+    tcurves_sampling['tag'] = [tcurves['tag'][-5],
+                               tcurves['tag'][-3], tcurves['tag'][-4]]
+    tcurves_sampling['w'] = [tcurves['w'][-5],
+                             tcurves['w'][-3], tcurves['w'][-4]]
+    tcurves_sampling['t'] = [tcurves['t'][-5],
+                             tcurves['t'][-3], tcurves['t'][-4]]
 
     w_Arr_reduced = np.interp(
         np.linspace(0, len(w_Arr), 1000), np.arange(len(w_Arr)), w_Arr
@@ -143,7 +198,7 @@ def main(part, survey_name, t_or_t):
     good = np.where(g_Arr > 1e-19)[0]
     N_good_sources = len(good)
 
-    pm_SEDs = np.zeros((60, N_good_sources))
+    pm_SEDs = np.zeros((46, N_good_sources))
     pm_SEDs_no_line = np.copy(pm_SEDs)
 
     # Initialize mask for the second cut. Used later
@@ -179,7 +234,7 @@ def main(part, survey_name, t_or_t):
                     Noise_w_Arr, Noise_Arr, T_A, T_B,
                     gSDSS_data
                 )
-            aux_pm = JPAS_synth_phot(SEDs_no_line, w_Arr, tcurves_sampling)
+            aux_pm = synth_phot(SEDs_no_line, w_Arr, tcurves_sampling)
 
             if aux_pm[1] - aux_pm[0] < 0.5e-18:
                 count = 0
@@ -192,8 +247,8 @@ def main(part, survey_name, t_or_t):
             good2[j] = False
             continue
 
-        pm_SEDs[:, j] = JPAS_synth_phot(SEDs, w_Arr, tcurves)
-        pm_SEDs_no_line[:, j] = JPAS_synth_phot(SEDs_no_line, w_Arr, tcurves)
+        pm_SEDs[:, j] = synth_phot(SEDs, w_Arr, tcurves)
+        pm_SEDs_no_line[:, j] = synth_phot(SEDs_no_line, w_Arr, tcurves)
 
         SED_writer.writerow(np.interp(w_Arr_reduced, w_Arr, SEDs))
         SED_no_line_writer.writerow(np.interp(w_Arr_reduced, w_Arr, SEDs_no_line))
@@ -224,9 +279,7 @@ def main(part, survey_name, t_or_t):
 if __name__ == '__main__':
     t0 = time()
 
-    for survey_name in ['jnep']:
-        for t_or_t in ['train']:
-            main(sys.argv[1], survey_name, t_or_t)
+    main(sys.argv[1], 'PAUS')
 
     m, s = divmod(int(time() - t0), 60)
     print('Elapsed: {}m {}s'.format(m, s))
