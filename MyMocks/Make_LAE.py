@@ -195,7 +195,7 @@ def main(part, survey_name):
     z_out_Arr = []
     EW_out_Arr = []
 
-    good = np.where(g_Arr > 1e-19)[0]
+    good = np.where(g_Arr > 5e-19)[0] # 5e-19 ~ magAB=25
     N_good_sources = len(good)
 
     pm_SEDs = np.zeros((46, N_good_sources))
