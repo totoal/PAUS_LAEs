@@ -3,6 +3,8 @@ import os
 import numpy as np
 import pandas as pd
 
+import pickle
+
 
 def effective_wavelength(transmission, wavelength):
     """
@@ -90,6 +92,13 @@ w_central = np.zeros_like(paus_fil_names)
 w_max_trans = np.zeros_like(paus_fil_names)
 fwhm_Arr = np.zeros_like(paus_fil_names)
 
+# Let's also generate the paus_tcurves dictionary
+tcurves = {
+    'tag': [],
+    'w': [],
+    't': []
+}
+
 for i, name in enumerate(paus_fil_names):
     if name[:2] == 'NB':
         dat = np.genfromtxt(f'{paus_tcurves_dir}/AOD_D_{name[2:]}.dat')
@@ -98,6 +107,10 @@ for i, name in enumerate(paus_fil_names):
 
     w_Arr = dat[:, 0]
     t_Arr = dat[:, 1]
+
+    tcurves['w'].append(w_Arr * 10)
+    tcurves['t'].append(t_Arr)
+    tcurves['tag'].append(name)
 
     w_central[i] = effective_wavelength(t_Arr, w_Arr) * 10
     fwhm_Arr[i] = fwhm(t_Arr, w_Arr) * 10
@@ -162,4 +175,7 @@ data = {
     'color': colors
 }
 
-pd.DataFrame(data).to_csv('/home/alberto/almacen/PAUS_data/Filter_properties.csv')
+path_to_paus_data = '/home/alberto/almacen/PAUS_data'
+pd.DataFrame(data).to_csv(f'{path_to_paus_data}/Filter_properties.csv')
+with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'wb') as f:
+    pickle.dump(tcurves, f)
