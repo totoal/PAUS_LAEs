@@ -9,7 +9,7 @@ matplotlib.rcParams.update({'font.size': 16})
 
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
-w_central = data_tab['w_eff']
+w_central = np.array(data_tab['w_eff'])
 
 def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False, fs=15):
     '''
@@ -20,7 +20,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False, fs=15):
         flx = flx * 1e17
         err = err * 1e17
 
-    cmap = data_tab['color']
+    cmap = np.array(data_tab['color'])
 
     data_max = np.max(flx)
     data_min = np.min(flx)
@@ -41,8 +41,8 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False, fs=15):
         for i, w in enumerate(w_central[-6:]):
             ax.errorbar(w_central[i - 6], flx[i - 6], yerr=err[i - 6],
                         markeredgecolor='dimgray',
-                        fmt='^', markerfacecolor=cmap[i - 6], markersize=10,
-                        ecolor='dimgray', capsize=4, capthick=1)
+                        fmt='^', markerfacecolor=cmap[i - 6], markersize=12,
+                        ecolor='dimgray', capsize=4, capthick=1, alpha=0.8)
 
     try:
         if set_ylim:
