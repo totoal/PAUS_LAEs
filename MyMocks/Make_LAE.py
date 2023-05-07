@@ -5,7 +5,6 @@ import csv
 import pickle
 
 import numpy as np
-from Make_QSO_altered_2 import schechter
 
 from jpasLAEs.utils import z_volume
 
@@ -21,6 +20,12 @@ import astropy.units as u
 from time import time
 import os
 import sys
+
+def schechter(L, phistar, Lstar, alpha):
+    '''
+    Just the regular Schechter function
+    '''
+    return (phistar / Lstar) * (L / Lstar)**alpha * np.exp(-L / Lstar)
 
 def synth_phot(SEDs, w_Arr, tcurves, which_filters=[]):
     phot_len = len(tcurves['tag'])
