@@ -11,7 +11,8 @@ fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
 w_central = np.array(data_tab['w_eff'])
 
-def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False, fs=15):
+def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
+                     fs=15, sdss_range_mode=False):
     '''
     Generates a plot with the JPAS data.
     '''
@@ -39,6 +40,9 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False, fs=15):
     # If BBs are included, plot them
     if len(flx) > 40:
         for i, w in enumerate(w_central[-6:]):
+            if sdss_range_mode is True:
+                if i == 0 or i == 5:
+                    continue
             ax.errorbar(w_central[i - 6], flx[i - 6], yerr=err[i - 6],
                         markeredgecolor='dimgray',
                         fmt='^', markerfacecolor=cmap[i - 6], markersize=12,
