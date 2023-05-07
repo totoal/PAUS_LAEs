@@ -20,7 +20,7 @@ with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'rb') as f:
 
 def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
     # Load the SDSS catalog
-    filename_pm_DR16 = ('../LAEs/csv/PAUS-PHOTOSPECTRA_QSO_Superset_DR16_v2.csv')
+    filename_pm_DR16 = '/home/alberto/almacen/PAUS_data/PAUS-PHOTOSPECTRA_QSO_Superset_DR16_v2.csv'
 
     pm_SEDs_DR16 = pd.read_csv(
         filename_pm_DR16, usecols=np.arange(1, 50)).to_numpy()[:, 0:46]
