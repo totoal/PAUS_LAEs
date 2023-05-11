@@ -1,6 +1,7 @@
 from jpasLAEs import *
 
 from load_paus_mocks import load_mocks_dict, add_errors
+from paus_utils import *
 
 import numpy as np
 import pandas as pd
@@ -13,6 +14,8 @@ def compute_LF_corrections(mocks_dict, field_name):
 
 
     ## Now we have the mock with the errors, do everything else
+
+    # First select LAEs (code the functions to do so)
         
     return
 
