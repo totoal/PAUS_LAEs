@@ -10,6 +10,7 @@ matplotlib.rcParams.update({'font.size': 16})
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
 w_central = np.array(data_tab['w_eff'])
+fwhm_Arr = np.array(data_tab['fwhm'])
 
 def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
                      fs=15, sdss_range_mode=False):
