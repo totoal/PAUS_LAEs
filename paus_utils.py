@@ -12,8 +12,10 @@ data_tab = pd.read_csv(fil_properties_dir)
 w_central = np.array(data_tab['w_eff'])
 fwhm_Arr = np.array(data_tab['fwhm'])
 
-def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
-                     fs=15, sdss_range_mode=False):
+w_lya = 1215.67
+
+def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
+                     fs=15, sdss_range_mode=False, plot_BBs=True):
     '''
     Generates a plot with the JPAS data.
     '''
@@ -39,14 +41,14 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
                     markersize=7, ecolor='dimgray', capsize=4, capthick=1, linestyle='',
                     zorder=-99)
     # If BBs are included, plot them
-    if len(flx) > 40:
+    if (len(flx) > 40) and plot_BBs:
         for i, w in enumerate(w_central[-6:]):
             if sdss_range_mode is True:
                 if i == 0 or i == 5:
                     continue
             ax.errorbar(w_central[i - 6], flx[i - 6], yerr=err[i - 6],
                         markeredgecolor='dimgray',
-                        fmt='^', markerfacecolor=cmap[i - 6], markersize=12,
+                        fmt='^', markerfacecolor=cmap[i - 6], markersize=13,
                         ecolor='dimgray', capsize=4, capthick=1, alpha=0.8)
 
     try:
@@ -55,7 +57,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
     except:
         pass
 
-    ax.set_xlabel('$\lambda$ \AA', size=fs)
+    ax.set_xlabel('$\lambda$ (\AA)', size=fs)
     if e17scale:
         ax.set_ylabel(
             r'$f_\lambda\cdot10^{17}$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
@@ -64,3 +66,35 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=False,
             '$f_\lambda$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
 
     return ax
+    
+
+def z_NB(cont_line_pos):
+    '''
+    Computes the Lyman-alpha redshift (z) for a given continuum narrowband (NB) index.
+
+    Parameters
+    ----------
+    cont_line_pos : int or array-like of ints
+        Index or indices of the continuum narrowband(s) to compute the redshift for.
+
+    Returns
+    -------
+    z : float or array-like of floats
+        The corresponding redshift(s) of the Lyman-alpha emission line.
+
+    Notes
+    -----
+    This function assumes that the input continuum narrowband indices correspond to adjacent
+    narrowbands centered at wavelengths increasing from the blue to the red end of the spectrum.
+    '''
+    cont_line_pos = np.atleast_1d(cont_line_pos)
+
+    w1 = w_central[cont_line_pos.astype(int)]
+    w2 = w_central[cont_line_pos.astype(int) + 1]
+
+    w = (w2 - w1) * cont_line_pos % 1 + w1
+
+    if len(w) > 1:
+        return w / w_lya - 1
+    else:
+        return (w / w_lya - 1)[0]
