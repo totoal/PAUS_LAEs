@@ -7,58 +7,18 @@ import pickle
 
 
 def effective_wavelength(transmission, wavelength):
-    """
-    Calculates the effective wavelength of an optical filter given its transmission curve.
+    intergral_top = np.trapz(transmission * wavelength, wavelength)
+    intergral_bot = np.trapz(transmission * 1. / wavelength, wavelength)
 
-    Parameters:
-    transmission (array-like): The transmission values of the filter.
-    wavelength (array-like): The wavelengths corresponding to the transmission values.
+    lambda_pivot = np.sqrt(intergral_top * 1. / intergral_bot)
 
-    Returns:
-    float: The effective wavelength of the filter.
-    """
-
-    # Normalize the transmission curve.
-    norm_transmission = transmission / np.trapz(transmission, wavelength)
-
-    # Calculate the weighted average of the wavelength.
-    weighted_wavelength = np.trapz(wavelength * norm_transmission, wavelength)
-
-    # Calculate the area under the transmission curve.
-    area = np.trapz(norm_transmission, wavelength)
-
-    # Calculate the effective wavelength.
-    effective_wavelength = weighted_wavelength / area
-
-    return effective_wavelength
+    return lambda_pivot
 
 
 def fwhm(transmission, wavelength):
-    """
-    Calculates the Full Width at Half Maximum (FWHM) of an optical filter given its transmission curve.
+    mask = transmission > np.amax(transmission) * 0.5
 
-    Parameters:
-    transmission (array-like): The transmission values of the filter.
-    wavelength (array-like): The wavelengths corresponding to the transmission values.
-
-    Returns:
-    float: The FWHM of the filter in units of wavelength.
-    """
-
-    # Find the maximum transmission value and its corresponding wavelength.
-    max_trans = np.max(transmission)
-
-    # Find the two wavelengths on either side of
-    # the maximum where the transmission is closest to the half maximum value.
-    left_idx = np.argsort(np.abs(max_trans / 2 - transmission))[:10].min()
-    right_idx = np.argsort(np.abs(max_trans / 2 - transmission))[:10].max()
-
-    # Get the wavelengths at the edges of the FWHM.
-    left_wavelength = wavelength[left_idx]
-    right_wavelength = wavelength[right_idx]
-
-    # Compute the FWHM.
-    fwhm = right_wavelength - left_wavelength
+    fwhm = wavelength[mask][-1] - wavelength[mask][0]
 
     return fwhm
 
@@ -80,11 +40,11 @@ for name in tcurves_file_list:
 # Sort it so that the first 40 are NB and the last 6 are BBs
 paus_fil_names = paus_fil_names[6:] + paus_fil_names[:6]
 paus_fil_names[-6:] = (paus_fil_names[-2]
-     + paus_fil_names[-5]
-     + paus_fil_names[-3]
-     + paus_fil_names[-4]
-     + paus_fil_names[-1]
-     + paus_fil_names[-6])
+                       + paus_fil_names[-5]
+                       + paus_fil_names[-3]
+                       + paus_fil_names[-4]
+                       + paus_fil_names[-1]
+                       + paus_fil_names[-6])
 
 # Now compute the central wavelength of each filter
 
