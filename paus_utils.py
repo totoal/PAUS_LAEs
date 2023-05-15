@@ -98,3 +98,9 @@ def z_NB(cont_line_pos):
         return w / w_lya - 1
     else:
         return (w / w_lya - 1)[0]
+
+def lya_redshift(w_obs):
+    '''
+    Returns the Ly alpha redshift of an observed wavelength
+    '''
+    return w_obs / w_lya - 1
