@@ -98,6 +98,10 @@ def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
 
 def is_there_line(pm_flx, pm_err, cont_est, cont_err, ew0min,
                   mask=None, obs=False, sigma=3):
+    '''
+    Returns a matrix of the same shape of pm_flx, with bool values whether
+    there is a significant flux excess or not.
+    '''
     if not obs:
         z_nb_Arr = (w_central[:40] / w_lya - 1)
         ew_Arr = ew0min * (1 + z_nb_Arr)
@@ -209,6 +213,32 @@ def identify_lines(line_Arr, qso_flx, cont_flx, nb_min=0, first=False):
 
 
 def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
+    '''
+    Apply selection criteria to a list of Lyman-alpha (Lya) line candidates.
+
+    Parameters:
+    -----------
+    lya_lines : array_like
+        List of Lya line candidates.
+    other_lines : list of list
+        List of lists with the indices of the other lines
+        detected for each Lya line candidate.
+    pm_flx : array_like
+        Matrix of the photometric flux values.
+    z_Arr : array_like
+        Array of redshift values.
+    mask : array_like, optional
+        Boolean array to be used as a mask.
+
+    Returns:
+    --------
+    nice_lya : array_like
+        A boolean array of the same length as `lya_lines`, where True means a good candidate.
+    color_mask : array_like
+        A boolean array indicating if the color criteria is met.
+    mlines_mask : array_like
+        A boolean array indicating if the mask for the other lines is met.
+    '''
     # TODO: Check colors of PAUS. Extend to all BBs
     i = flux_to_mag(pm_flx[-3], w_central[-3])
     r = flux_to_mag(pm_flx[-4], w_central[-4])
