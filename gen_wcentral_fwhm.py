@@ -7,6 +7,21 @@ import pickle
 
 
 def effective_wavelength(transmission, wavelength):
+    '''
+    Compute the effective wavelength of a filter given its transmission curve.
+
+    Parameters:
+    -----------
+    transmission : array_like
+        Array of transmission values for a filter as a function of wavelength.
+    wavelength : array_like
+        Array of wavelengths in units of angstroms corresponding to the transmission values.
+
+    Returns:
+    --------
+    float
+        The effective wavelength of the filter in units of angstroms.
+    '''
     intergral_top = np.trapz(transmission * wavelength, wavelength)
     intergral_bot = np.trapz(transmission * 1. / wavelength, wavelength)
 
@@ -15,7 +30,22 @@ def effective_wavelength(transmission, wavelength):
     return lambda_pivot
 
 
-def fwhm(transmission, wavelength):
+def wavelength_fwhm(transmission, wavelength):
+    '''
+    Compute the full-width at half-maximum (FWHM) of a filter given its transmission curve.
+
+    Parameters:
+    -----------
+    transmission : array_like
+        Array of transmission values for a filter as a function of wavelength.
+    wavelength : array_like
+        Array of wavelengths in units of angstroms corresponding to the transmission values.
+
+    Returns:
+    --------
+    float
+        The FWHM of the filter in units of angstroms.
+    '''
     mask = transmission > np.amax(transmission) * 0.5
 
     fwhm = wavelength[mask][-1] - wavelength[mask][0]
@@ -73,7 +103,7 @@ for i, name in enumerate(paus_fil_names):
     tcurves['tag'].append(name)
 
     w_central[i] = effective_wavelength(t_Arr, w_Arr) * 10
-    fwhm_Arr[i] = fwhm(t_Arr, w_Arr) * 10
+    fwhm_Arr[i] = wavelength_fwhm(t_Arr, w_Arr) * 10
     w_max_trans[i] = w_Arr[np.argmax(t_Arr)] * 10
 
 colors = [
