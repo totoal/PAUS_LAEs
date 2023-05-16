@@ -5,14 +5,19 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import patheffects
-matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
-matplotlib.rc('text', usetex=True)
+import matplotlib.colors
+# matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+# matplotlib.rc('text', usetex=True)
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['font.family'] = 'STIXGeneral'
 matplotlib.rcParams.update({'font.size': 16})
+
+import numpy as np
 
 
 def main():
     # Initialize figure and axes
-    fig, ax = plt.subplots(figsize=(15, 5))
+    fig, ax = plt.subplots(figsize=(20, 7))
 
     ###########################
     ### Transmission curves ###
@@ -26,9 +31,9 @@ def main():
         f'{path_to_paus_data}/Filter_properties.csv')
 
     # Plot each curve
-    for i, filter_name in enumerate(tcurves['tag']):
+    for i, _ in enumerate(tcurves['tag']):
         ax.plot(tcurves['w'][i], tcurves['t'][i],
-                lw=1.5, c=filter_properties['color'][i])
+                lw=2, c=filter_properties['color'][i])
 
     ##################################
     ### Filter names and redshifts ###
@@ -50,20 +55,23 @@ def main():
     for i in range(40):
         w_eff = filter_properties['w_eff'][i]
         fwhm = filter_properties['fwhm'][i]
-        color = filter_properties['color'][i]
+        color = matplotlib.colors.to_rgb(filter_properties['color'][i])
+        btext_color = np.array(color) * 0.7
+        this_patheffects = [patheffects.withStroke(linewidth=0.8,
+                                                   foreground=btext_color)]
+
         ax.plot([w_eff - 0.5 * fwhm, w_eff + 0.5 * fwhm],
                 [height_list[i]] * 2,
-                lw=2, c=color)
+                lw=2.5, c=color)
 
         # Filter name
-        nb_fontsize = 11
+        nb_fontsize = 13.5
 
         filter_name_delta_h = 0.04
         ax.text(w_eff, bar_NB_h + filter_name_delta_h,
                 filter_properties['name'][i],
                 color=color, ha='center', va='bottom',
-                path_effects=[
-                    patheffects.withStroke(linewidth=0.3, foreground='dimgray')],
+                path_effects=this_patheffects,
                 fontsize=nb_fontsize, rotation='vertical')
 
         # Lya redshift
@@ -71,34 +79,41 @@ def main():
         z_text_delta_h = -0.035
         ax.text(w_eff, bar_NB_h + z_text_delta_h, z_text,
                 color=color, ha='center', va='top',
-                path_effects=[
-                    patheffects.withStroke(linewidth=0.3, foreground='dimgray')],
+                path_effects=this_patheffects,
                 fontsize=nb_fontsize, rotation='vertical')
 
 
     # Text indicating z_lya
-    ax.text(4200, bar_NB_h + z_text_delta_h - 0.01,
-            r'$z_{\mathrm{Ly}\alpha}$', fontsize=14,
+    ax.text(4200, bar_NB_h + z_text_delta_h - 0.015,
+            r'$z_{\mathrm{Ly}\alpha}$', fontsize=nb_fontsize+1,
+            path_effects=[patheffects.withStroke(linewidth=0.3, foreground='k')],
             va='top')
 
     # Now, the BBs
-    bar_BB_h = 0.93
+    bar_BB_h = 0.925
 
     for i in range(40, 46):
         w_eff = filter_properties['w_eff'][i]
         fwhm = filter_properties['fwhm'][i]
-        color = filter_properties['color'][i]
-        ax.errorbar(w_eff, bar_BB_h + 0.005 * (i%2),
+        color = matplotlib.colors.to_rgb(filter_properties['color'][i])
+        btext_color = np.array(color) * 0.7
+        this_patheffects = [patheffects.withStroke(linewidth=0.3, foreground=color)]
+        
+        if i > 41:
+            this_bar_BB_h = bar_BB_h + 0.015 * (i%2)
+        else:
+            this_bar_BB_h = bar_BB_h
+
+        ax.errorbar(w_eff, this_bar_BB_h,
                     xerr=fwhm * 0.5,
                     capsize=3, capthick=3,
                     ecolor=color, elinewidth=3)
 
-        ax.text(w_eff, bar_BB_h + 0.01 + 0.005,
+        ax.text(w_eff, bar_BB_h + 0.01 + 0.007,
                 filter_properties['name'][i],
                 color=color, ha='center', va='bottom',
-                path_effects=[
-                    patheffects.withStroke(linewidth=0.3, foreground='dimgray')],
-                fontsize=13)
+                path_effects=this_patheffects,
+                fontsize=nb_fontsize+2)
 
 
     #######################
@@ -108,7 +123,7 @@ def main():
     ax.set(xlim=(3000, 11000), ylim=(0, 1),
            xlabel='Wavelength [\AA]',
            ylabel='Response [A. U.]',
-           facecolor='gainsboro')
+           facecolor='darkgrey')
 
     plt.savefig('figures/filter_transmission_curves.pdf',
                 bbox_inches='tight', pad_inches=0.1, facecolor='w')
