@@ -5,7 +5,7 @@ import pandas as pd
 import pickle
 
 from scipy.integrate import dblquad
-from scipy.interpolate import interp2d
+from scipy.interpolate import RectBivariateSpline
 
 from my_utilities import *
 
@@ -50,7 +50,6 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
 
     F_line = np.array(Lya_fts['LyaF']) * 1e-17
     F_line_err = np.array(Lya_fts['LyaF_err']) * 1e-17
-    F_lya_snr = F_line / F_line_err
     EW0 = np.array(Lya_fts['LyaEW']) / (1 + z_Arr)
     dL = cosmo.luminosity_distance(z_Arr).to(u.cm).value
     L = np.log10(F_line * 4*np.pi * dL ** 2)
@@ -58,14 +57,18 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
     F_line_NV = np.array(Lya_fts['NVF']) * 1e-17
     F_line_NV_err = np.array(Lya_fts['NVF_err']) * 1e-17
     EW0_NV = np.array(Lya_fts['NVEW']) / (1 + z_Arr)
-    # EW_NV_err = np.array(Lya_fts['NVFEW_err'])
-    L_NV = np.log10(F_line_NV * 4*np.pi * dL ** 2)
+
+    L_NV = np.ones_like(F_line_NV) * -99.
+    mask_positive_NV = (F_line_NV > 0)
+    L_NV = np.log10(F_line_NV[mask_positive_NV]
+                    * 4*np.pi * dL[mask_positive_NV] ** 2)
 
     model = pd.read_csv('/home/alberto/cosmos/LAEs/MyMocks/csv/PD2016-QSO_LF.csv')
     counts_model_2D = model.to_numpy()[:-1, 1:-1].astype(float) * 1e-4 * area_obs
     r_yy = np.arange(15.75, 24.25, 0.5)
     z_xx = np.arange(0.5, 6, 1)
-    f_counts = interp2d(z_xx, r_yy, counts_model_2D)
+    # Interpolate 2D the model
+    f_counts = RectBivariateSpline(z_xx, r_yy, counts_model_2D.T)
 
     N_src = int(dblquad(f_counts, r_min, r_max, z_min, z_max)[0] * 2)
 
