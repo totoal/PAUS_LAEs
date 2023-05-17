@@ -60,7 +60,7 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
 
     L_NV = np.ones_like(F_line_NV) * -99.
     mask_positive_NV = (F_line_NV > 0)
-    L_NV = np.log10(F_line_NV[mask_positive_NV]
+    L_NV[mask_positive_NV] = np.log10(F_line_NV[mask_positive_NV]
                     * 4*np.pi * dL[mask_positive_NV] ** 2)
 
     model = pd.read_csv('/home/alberto/cosmos/LAEs/MyMocks/csv/PD2016-QSO_LF.csv')
