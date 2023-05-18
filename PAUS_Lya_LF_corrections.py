@@ -26,20 +26,21 @@ def compute_LF_corrections(mocks_dict, field_name, nb_min, nb_max):
 
 def main(nb_min, nb_max):
     # Load the mocks
-    mock_SFG_path = ''
-    mock_QSO_cont_path = ''
-    mock_QSO_LAEs_loL_path = ''
-    mock_QSO_LAEs_hiL_path = ''
-    mock_GAL_path = ''
+    source_cats_dir = '/home/alberto/almacen/Source_cats'
+    mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
+    mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
+    mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
+    mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
+    mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
     mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_path)
 
     # List of PAUS fields
-    field_list = ['foo', 'bar']
-    for field_name in field_list:
-        compute_LF_corrections(mocks_dict, field_name,
-                               nb_min, nb_max)
+    # field_list = ['foo', 'bar']
+    # for field_name in field_list:
+    #     compute_LF_corrections(mocks_dict, field_name,
+    #                            nb_min, nb_max)
 
     return
 
