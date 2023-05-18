@@ -2,25 +2,29 @@ from jpasLAEs import *
 
 from load_paus_mocks import load_mocks_dict, add_errors
 from paus_utils import *
+from LAE_selection_method import *
 
 import numpy as np
 import pandas as pd
 
 
-def compute_LF_corrections(mocks_dict, field_name):
+def compute_LF_corrections(mocks_dict, field_name, nb_min, nb_max):
     # Modify the mocks adding errors according to the corresponding field
-    for mock in mocks_dict:
+    for mock_name, mock in mocks_dict.items():
+        print(mock_name)
         mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name)
 
+        ## Now we have the mock with the errors, do everything else for
+        ## each mock
 
-    ## Now we have the mock with the errors, do everything else
-
-    # First select LAEs (code the functions to do so)
+        ## First select LAEs
+        mock = select_LAEs(mock, nb_min, nb_max,
+                           ew0min_lya=30, ewmin_other=100)
+        print(f'N nice_lya = {sum(mock["nice_lya"])}')
         
-    return
 
 
-def main():
+def main(nb_min, nb_max):
     # Load the mocks
     mock_SFG_path = ''
     mock_QSO_cont_path = ''
@@ -34,9 +38,10 @@ def main():
     # List of PAUS fields
     field_list = ['foo', 'bar']
     for field_name in field_list:
-        compute_LF_corrections(mocks_dict, field_name)
+        compute_LF_corrections(mocks_dict, field_name,
+                               nb_min, nb_max)
 
     return
 
 if __name__ == '__main__':
-    main()
+    main(1, 5)
