@@ -74,7 +74,7 @@ def load_gal_mock(path_to_mock, cat_fraction):
                              np.zeros(len(sel))])
 
     # Precompute r and mask by r. Otherwise the mock is too large
-    r_mag = flux_to_mag(cat['flx'][-4], w_central[-4])
+    r_mag = flux_to_mag(cat['flx_0'][-4], w_central[-4])
     mag_mask = np.array(r_mag < 24.5)
     cat['flx_0'] = cat['flx_0'][:, mag_mask]
 
@@ -104,7 +104,7 @@ def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
         elif i > 0 and i < 4:
             mocks_dict[mock_name] = load_qso_mock(mock_path)
         elif i == 4:
-            mocks_dict[mock_name] = load_gal_mock(mock_path)
+            mocks_dict[mock_name] = load_gal_mock(mock_path, 0.01)
     
     return mocks_dict
 
