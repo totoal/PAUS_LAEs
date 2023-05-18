@@ -138,7 +138,7 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
     hdr = (
         tcurves['tag']
         + [s + '_e' for s in tcurves['tag']]
-        + ['z', 'EW0', 'L_lya', 'F_line', 'F_line_err']
+        + ['zspec', 'EW0', 'L_lya', 'F_line', 'F_line_err']
         + ['EW0_NV', 'L_NV', 'F_line_NV', 'F_line_NV_err']
         + ['mjd', 'fiber', 'plate']
     )

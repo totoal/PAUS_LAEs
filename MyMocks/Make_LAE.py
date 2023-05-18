@@ -272,7 +272,7 @@ def main(part, survey_name):
     np.save(filename + '/w_Arr.npy', w_Arr_reduced)
 
     hdr = tcurves['tag'] + [s + '_e' for s in tcurves['tag']] + \
-        ['z', 'EW0', 'L_lya']
+        ['zspec', 'EW0', 'L_lya']
 
     pd.DataFrame(
         data=np.hstack((pm_SEDs.T[good2], pm_SEDs_err.T[good2],
