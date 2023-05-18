@@ -302,3 +302,45 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         nice_lya = nice_lya & mask
 
     return nice_lya, color_mask, mlines_mask
+
+def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
+                ewmin_other=100):
+        N_sources = cat['flx'].shape[1]
+        # Estimate continuum
+        cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
+                                                IGM_T_correct=True, N_nb=6)
+        cont_est_other, cont_err_other = estimate_continuum(cat['flx'], cat['err'],
+                                                            IGM_T_correct=False,
+                                                            N_nb=6)
+
+        # Identify NB excess
+        is_line_lya = is_there_line(cat['flx'], cat['err'], cont_est, cont_err,
+                                    ew0min=ew0min_lya)
+        is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
+                                      cont_err_other, ew0min=ewmin_other)
+        lya_lines = identify_lines(is_line_lya, cat['flx'],
+                                   cont_est, first=True)
+        other_lines = identify_lines(is_line_other, cat['flx'],
+                                     cont_est_other, first=False)
+
+        # Estimate redshift (z_Arr)
+        z_Arr = z_NB(lya_lines)
+
+        snr = np.empty(N_sources)
+        for src in range(N_sources):
+            l = lya_lines[src]
+            snr[src] = cat['flx'][l, src] / cat['err'][l, src]
+
+        nb_mask = (lya_lines >= nb_min) & (lya_lines <= nb_max)
+        snr_mask = (snr >= 6)
+
+        nice_lya_mask = snr_mask & nb_mask
+
+        nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
+                                        z_Arr, mask=nice_lya_mask)
+        
+        # Add columns to cat
+        cat['nice_lya'] = nice_lya
+        cat['z_NB'] = z_Arr
+
+        return cat
