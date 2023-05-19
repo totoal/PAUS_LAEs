@@ -1,4 +1,4 @@
-from jpasLAEs import *
+from jpasLAEs.utils import smooth_Image, bin_centers
 
 from load_paus_mocks import load_mocks_dict, add_errors
 from paus_utils import *
@@ -56,7 +56,91 @@ def L_lya_bias(cat):
     return cat
 
 
-def compute_LF_corrections(mocks_dict, field_name, nb_min, nb_max):
+def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
+                         nb_min, nb_max, ew0_min=30):
+    # Perturb L
+    N_iter = 500
+
+    hist_dict = {}
+    for key in mock_dict.keys():
+        hist_dict[f'{key}_nice'] = np.empty((len(L_bins) - 1,
+                                             len(r_bins) - 1, N_iter))
+        hist_dict[f'{key}_sel'] = np.empty((len(L_bins) - 1,
+                                            len(r_bins) - 1, N_iter))
+
+    for mock_name, mock in mock_dict.items():
+        N_sources = len(mock['zspec'])
+        for k in range(N_iter):
+            # Generate random numbers
+            randN = np.random.randn(N_sources)
+            L_perturbed = np.empty(N_sources)
+            L_perturbed[randN <= 0] = (mock['L_lya_corr']
+                                    + mock['L_lya_corr_err'][0] * randN)[randN <= 0]
+            L_perturbed[randN > 0] = (mock['L_lya_corr']
+                                    + mock['L_lya_corr_err'][1] * randN)[randN > 0]
+            L_perturbed[np.isnan(L_perturbed)] = 0.
+
+            nice_mask = (mock['nice_lya'] & mock['nice_z']
+                         & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max)
+                         & (mock['EW0_lya_spec'] >= ew0_min))
+            hist_dict[f'{mock_name}_nice'][..., k] =\
+                np.histogram2d(L_perturbed[nice_mask], mock['r_mag'][nice_mask],
+                               bins=[L_bins, r_bins])[0]
+            
+            sel_mask = (mock['nice_lya']
+                        & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max))
+            hist_dict[f'{mock_name}_sel'][..., k] =\
+                np.histogram2d(L_perturbed[sel_mask], mock['r_mag'][sel_mask],
+                               bins=[L_bins, r_bins])[0]
+
+        # Apply area factor
+        hist_dict[f'{mock_name}_nice'] /= area_dict[mock_name]
+        hist_dict[f'{mock_name}_sel'] /= area_dict[mock_name]
+        
+        # Take the median
+        hist_dict[f'{mock_name}_nice'] = np.median(hist_dict[f'{mock_name}_nice'],
+                                                   axis=2)
+        hist_dict[f'{mock_name}_sel'] = np.median(hist_dict[f'{mock_name}_sel'],
+                                                  axis=2)
+
+        # Compute parent histograms
+        parent_mask = ((NB_z(mock['zspec']) >= nb_min)
+                       & (NB_z(mock['zspec']) <= nb_max)
+                       & (mock['EW0_lya_spec'] >= ew0_min))
+        hist_dict[f'{mock_name}_parent'] =\
+            np.histogram2d(mock['L_lya_spec'][parent_mask],
+                           mock['r_mag'][parent_mask],
+                           bins=[L_bins, r_bins]) / area_dict[mock_name]
+
+    h2d_nice = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
+    h2d_sel = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
+    h2d_parent = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
+
+    for key in mock_dict.keys():
+        h2d_nice += hist_dict[f'{mock_name}_nice']
+        h2d_sel += hist_dict[f'{mock_name}_sel']
+        h2d_parent += hist_dict[f'{mock_name}_parent']
+
+    # Make the mats smooooooth
+    r_bins_c = bin_centers(r_bins)
+    L_bins_c = bin_centers(L_bins)
+
+    h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, 0.15, 0.3)
+    h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, 0.15, 0.3)
+    h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, 0.15, 0.3)
+
+    # np.save(f'{dirname}/h2d_nice_smooth_{survey_name}', h2d_nice_smooth)
+    # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)
+    # np.save(f'{dirname}/h2d_parent_smooth_{survey_name}', h2d_parent_smooth)
+
+    puri2d = (1 + h2d_sel_smooth / h2d_nice_smooth) ** -1
+    comp2d = h2d_nice_smooth / h2d_parent_smooth
+
+    return puri2d, comp2d
+
+
+def compute_LF_corrections(mocks_dict, area_dict,
+                           field_name, nb_min, nb_max, mag_min, mag_max):
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mocks_dict.items():
         print(mock_name)
@@ -71,19 +155,19 @@ def compute_LF_corrections(mocks_dict, field_name, nb_min, nb_max):
                            check_nice_z=True)
         print(f'N nice_lya = {sum(mock["nice_lya"])}')
 
+        # L_lya bias ocrrection
+        mock = L_lya_bias(mock)
+
         # Now produce the correction matrices
+        r_bins = np.linspace(mag_min, mag_max, 200 + 1)
+        L_bins = np.linspace(40, 47, 200 + 1)
+
 
 
 
 def main(nb_min, nb_max):
     # State the mock area in deg²:
     gal_fraction = 0.01
-
-    SFG_area = 400
-    QSO_cont_area = 200
-    QSO_LAEs_loL_area = 400
-    QSO_LAEs_hiL_area = 4000
-    GAL_area = 59.97 * gal_fraction
 
     # Load the mocks
     source_cats_dir = '/home/alberto/almacen/Source_cats'
@@ -96,10 +180,18 @@ def main(nb_min, nb_max):
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_path, gal_fraction=gal_fraction)
 
+    area_dict = {
+        'SFG': 400,
+        'QSO_cont': 200,
+        'QSO_LAEs_loL': 400,
+        'QSO_LAEs_hiL': 4000,
+        'GAL': 59.97 * gal_fraction
+    }
+
     # List of PAUS fields
     # field_list = ['foo', 'bar']
     # for field_name in field_list:
-    #     compute_LF_corrections(mocks_dict, field_name,
+    #     compute_LF_corrections(mocks_dict, area_dict, field_name,
     #                            nb_min, nb_max)
 
     return
