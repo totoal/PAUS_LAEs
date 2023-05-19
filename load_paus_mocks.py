@@ -29,8 +29,8 @@ def load_qso_mock(path_to_mock):
     cat['flx_0'] = qso_data.to_numpy()[:, 1 : 1 + 46].T
 
     cat['zspec'] = qso_data['zspec']
-    cat['L_lya'] = qso_data['L_lya']
-    cat['EW0_lya'] = qso_data['EW0']
+    cat['L_lya_spec'] = qso_data['L_lya']
+    cat['EW0_lya_spec'] = qso_data['EW0']
 
     return cat
 
@@ -50,8 +50,8 @@ def load_sfg_mock(path_to_mock):
     cat['flx_0'] = sfg_data.to_numpy()[:, 1 : 1 + 46].T
 
     cat['zspec'] = sfg_data['zspec']
-    cat['L_lya'] = sfg_data['L_lya']
-    cat['EW0_lya'] = sfg_data['EW0']
+    cat['L_lya_spec'] = sfg_data['L_lya']
+    cat['EW0_lya_spec'] = sfg_data['EW0']
 
     return cat
 
@@ -81,8 +81,8 @@ def load_gal_mock(path_to_mock, cat_fraction):
     cat['zspec'] = np.array(tab[:, 4])[sel][mag_mask]
     
     # L_lya and EW0_lya are zero for all these objects.
-    cat['L_lya'] = np.zeros_like(cat['zspec'])
-    cat['EW0_lya'] = np.zeros_like(cat['zspec'])
+    cat['L_lya_spec'] = np.zeros_like(cat['zspec'])
+    cat['EW0_lya_spec'] = np.zeros_like(cat['zspec'])
 
     return cat
 
