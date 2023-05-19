@@ -25,6 +25,15 @@ def compute_LF_corrections(mocks_dict, field_name, nb_min, nb_max):
 
 
 def main(nb_min, nb_max):
+    # State the mock area in deg²:
+    gal_fraction = 0.01
+
+    SFG_area = 400
+    QSO_cont_area = 200
+    QSO_LAEs_loL_area = 400
+    QSO_LAEs_hiL_area = 4000
+    GAL_area = 59.97 * gal_fraction
+
     # Load the mocks
     source_cats_dir = '/home/alberto/almacen/Source_cats'
     mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
@@ -34,7 +43,7 @@ def main(nb_min, nb_max):
     mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
     mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
-                                 mock_GAL_path)
+                                 mock_GAL_path, gal_fraction=gal_fraction)
 
     # List of PAUS fields
     # field_list = ['foo', 'bar']
