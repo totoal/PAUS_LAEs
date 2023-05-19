@@ -342,5 +342,7 @@ def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
         # Add columns to cat
         cat['nice_lya'] = nice_lya
         cat['z_NB'] = z_Arr
+        cat['lya_NB'] = lya_lines
+        cat['other_lines_NBs'] = other_lines
 
         return cat
