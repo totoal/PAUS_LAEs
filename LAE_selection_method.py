@@ -308,7 +308,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     return nice_lya, color_mask, mlines_mask
 
 def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
-                ewmin_other=100):
+                ewmin_other=100, check_nice_z=False):
         N_sources = cat['flx'].shape[1]
         # Estimate continuum
         cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
@@ -342,12 +342,17 @@ def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
 
         nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
                                         z_Arr, mask=nice_lya_mask)
-        
+
         # Add columns to cat
         cat['nice_lya'] = nice_lya
         cat['z_NB'] = z_Arr
         cat['lya_NB'] = lya_lines
         cat['other_lines_NBs'] = other_lines
+
+        if check_nice_z:
+            nice_z = np.abs(z_Arr - cat['zspec']) < 0.16
+            cat['nice_z'] = nice_z
+        
 
         # Estimate L_lya, F_lya and EW0_lya
         cat = Lya_L_estimation(cat, cont_est, cont_err)
