@@ -87,6 +87,9 @@ def z_NB(cont_line_pos):
     This function assumes that the input continuum narrowband indices correspond to adjacent
     narrowbands centered at wavelengths increasing from the blue to the red end of the spectrum.
     '''
+    # Store a mask with the -1 values for the NB
+    mask_nondetection = (cont_line_pos == -1)
+
     cont_line_pos = np.atleast_1d(cont_line_pos)
 
     w1 = w_central[cont_line_pos.astype(int)]
@@ -94,10 +97,13 @@ def z_NB(cont_line_pos):
 
     w = (w2 - w1) * cont_line_pos % 1 + w1
 
+    Lya_z_Arr = w / w_lya - 1
+    Lya_z_Arr[mask_nondetection] = -1
+
     if len(w) > 1:
-        return w / w_lya - 1
+        return Lya_z_Arr
     else:
-        return (w / w_lya - 1)[0]
+        return Lya_z_Arr[0]
 
 def lya_redshift(w_obs):
     '''
