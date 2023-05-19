@@ -105,6 +105,31 @@ def z_NB(cont_line_pos):
     else:
         return Lya_z_Arr[0]
 
+def NB_z(z):
+    '''
+    Takes a redshift as an argument and returns the corresponding NB to that redshift.
+    Returns -1 if the Lya redshift is out of boundaries.
+    '''
+    z = np.atleast_1d(z)
+    w_central_NB = w_central[:40]
+    w_lya_obs = (z + 1) * 1215.67
+
+    n_NB = np.zeros(len(z)).astype(int)
+    for i, w in enumerate(w_lya_obs):
+        n_NB[i] = int(np.argmin(np.abs(w_central_NB - w)))
+
+
+
+    # 39 It's too much, so let's assign also -1
+    # 2.7 is the minimum redshift we can measure
+    n_NB[(n_NB < 0) | (n_NB > 39) | (z < 2.7)] = -1
+
+    # If only one value passed, return as a number instead of numpy array
+    if len(n_NB) == 1:
+        n_NB = n_NB[0]
+
+    return n_NB
+
 def lya_redshift(w_obs):
     '''
     Returns the Ly alpha redshift of an observed wavelength
