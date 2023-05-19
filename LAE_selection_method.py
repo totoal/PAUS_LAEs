@@ -3,6 +3,10 @@ import numpy as np
 from paus_utils import *
 from jpasLAEs.utils import flux_to_mag
 
+from astropy.cosmology import Planck18 as cosmo
+import astropy.units as u
+
+
 # Line rest-frame wavelengths (Angstroms)
 w_lya = 1215.67
 w_lyb = 1025.7220
@@ -17,7 +21,7 @@ def IGM_TRANSMISSION(w_Arr, A=-0.001845, B=3.924):
     '''
     Returns the IGM transmission associated to the Lya Break.
     '''
-    return np.exp(A * (w_Arr / w_lya)**B)
+    return np.exp(A * (w_Arr / w_lya) ** B)
 
 def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
                        only_right=False, N_nb_min=0, N_nb_max=30):
@@ -346,3 +350,48 @@ def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
         cat['other_lines_NBs'] = other_lines
 
         return cat
+
+def Lya_L_estimation(cat, cont_est, cont_est_err):
+    '''
+    Returns a catalog including L_lya and EW0_lya estimations
+    '''
+    Flambda_lya = (
+        cat['flx'][:, cat['lya_NB']] - cont_est[:, cat['lya_NB']]
+    ) * fwhm_Arr[cat['lya_NB']]
+    Flambda_lya_err = (
+        cat['err'][:, cat['lya_NB']] ** 2 + cont_est_err[:, cat['lya_NB']] ** 2
+    ) ** 0.5 * fwhm_Arr[cat['lya_NB']]
+
+    # Luminosity distance
+    def LumDist(z): return cosmo.luminosity_distance(z).to(u.cm).value
+    def Redshift(w): return w / 1215.67 - 1
+    dL = LumDist(cat['z_NB'])
+    dL_err = (
+        LumDist(Redshift(w_central[cat['lya_NB']]
+                         + 0.5 * fwhm_Arr[cat['lya_NB']]))
+        - LumDist(Redshift(w_central[cat['lya_NB']]))
+    )
+
+    z_NB_err = (Redshift(w_central['lya_NB']) + 0.5 * fwhm_Arr[cat['lya_NB']]
+                - Redshift(w_central['lya_NB']) - 0.5 * fwhm_Arr[cat['lya_NB']]) * 0.5
+
+    L_lya = np.log10(Flambda_lya * 4 * np.pi * dL**2)
+    L_lya_err = ((dL * Flambda_lya_err) ** 2
+                 + (2 * Flambda_lya * dL_err) ** 2
+                ) ** 0.5 * 4 * np.pi * dL
+
+    EW0_lya = Flambda_lya / cont_est[:, cat['lya_NB']] / (1 + cat['z_NB'])
+    EW0_lya_err = (
+        (1. / Flambda_lya * Flambda_lya_err) ** 2
+        + (1. / cont_est[:, cat['lya_NB']] * cont_est_err['lya_NB']) ** 2
+        + (1. / (1 + cat['z_NB']) * z_NB_err) ** 2
+    ) ** 0.5 * EW0_lya
+
+    cat['L_lya'] = L_lya
+    cat['L_lya_err'] = L_lya_err
+    cat['EW0_lya'] = EW0_lya
+    cat['EW0_lya_err'] = EW0_lya_err
+    cat['F_lya'] = Flambda_lya
+    cat['F_lya_err'] = Flambda_lya_err
+
+    return cat
