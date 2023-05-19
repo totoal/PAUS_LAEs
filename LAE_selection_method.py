@@ -349,6 +349,9 @@ def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
         cat['lya_NB'] = lya_lines
         cat['other_lines_NBs'] = other_lines
 
+        # Estimate L_lya, F_lya and EW0_lya
+        cat = Lya_L_estimation(cat, cont_est, cont_err)
+
         return cat
 
 def Lya_L_estimation(cat, cont_est, cont_est_err):
