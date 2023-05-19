@@ -88,7 +88,11 @@ def load_gal_mock(path_to_mock, cat_fraction):
 
 
 def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
-                    mock_QSO_LAEs_hiL_path, mock_GAL_path):
+                    mock_QSO_LAEs_hiL_path, mock_GAL_path, gal_fraction=0.1):
+    '''
+    Loads all the mocks needed to compute the Lya LF corrections, and returns
+    a dictionary of mocks.
+    '''
     mock_path_list = [mock_SFG_path,
                       mock_QSO_cont_path,
                       mock_QSO_LAEs_loL_path,
@@ -104,7 +108,7 @@ def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
         elif i > 0 and i < 4:
             mocks_dict[mock_name] = load_qso_mock(mock_path)
         elif i == 4:
-            mocks_dict[mock_name] = load_gal_mock(mock_path, 0.01)
+            mocks_dict[mock_name] = load_gal_mock(mock_path, gal_fraction)
     
     return mocks_dict
 
