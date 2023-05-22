@@ -152,9 +152,9 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
     h2d_parent = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
 
     for key in mock_dict.keys():
-        h2d_nice += hist_dict[f'{mock_name}_nice']
-        h2d_sel += hist_dict[f'{mock_name}_sel']
-        h2d_parent += hist_dict[f'{mock_name}_parent']
+        h2d_nice = h2d_nice + hist_dict[f'{key}_nice']
+        h2d_sel = h2d_sel + hist_dict[f'{key}_sel']
+        h2d_parent = h2d_parent + hist_dict[f'{key}_parent']
 
     # Make the mats smooooooth
     r_bins_c = bin_centers(r_bins)
@@ -168,8 +168,8 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
     # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)
     # np.save(f'{dirname}/h2d_parent_smooth_{survey_name}', h2d_parent_smooth)
 
-    puri2d = np.empty_like(h2d_nice)
-    comp2d = np.empty_like(h2d_nice)
+    puri2d = np.empty_like(h2d_nice_smooth)
+    comp2d = np.empty_like(h2d_nice_smooth)
 
     mask_nonzero_nice = (h2d_nice_smooth > 0)
     mask_nonzero_parent = (h2d_parent_smooth > 0)
@@ -222,6 +222,8 @@ def compute_LF_corrections(mocks_dict, area_dict,
     puri2d, comp2d = puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
                                             nb_min, nb_max, ew0_min=30)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
+    np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
+    np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
     np.save(f'{savedir}/puri2D_{field_name}.npy', puri2d)
     np.save(f'{savedir}/comp2D_{field_name}.npy', comp2d)
 
@@ -230,7 +232,7 @@ def compute_LF_corrections(mocks_dict, area_dict,
 
 def main(nb_min, nb_max, mag_min, mag_max):
     # Load only a fraction of the GAL mock because it's too heavy
-    gal_fraction = 0.01
+    gal_fraction = 0.1
     # Load the mocks
     source_cats_dir = '/home/alberto/almacen/Source_cats'
     mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
