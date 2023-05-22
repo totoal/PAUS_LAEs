@@ -27,6 +27,8 @@ def load_qso_mock(path_to_mock):
     cat = {}
 
     cat['flx_0'] = qso_data.to_numpy()[:, 1 : 1 + 46].T
+    # inf values set to 99.
+    cat['flx_0'][~np.isfinite(cat['flx_0'])] = 99.
 
     cat['zspec'] = qso_data['zspec']
     cat['L_lya_spec'] = qso_data['L_lya']
