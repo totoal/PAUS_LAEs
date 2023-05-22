@@ -117,7 +117,7 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
         hist_dict[f'{mock_name}_parent'] =\
             np.histogram2d(mock['L_lya_spec'][parent_mask],
                            mock['r_mag'][parent_mask],
-                           bins=[L_bins, r_bins]) / area_dict[mock_name]
+                           bins=[L_bins, r_bins])[0] / area_dict[mock_name]
 
     h2d_nice = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
     h2d_sel = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
@@ -174,11 +174,14 @@ def compute_LF_corrections(mocks_dict, area_dict,
         # L_lya bias ocrrection
         mock = L_lya_bias(mock)
 
-        # Now compute the correction matrices
-        r_bins = np.linspace(mag_min, mag_max, 200 + 1)
-        L_bins = np.linspace(40, 47, 200 + 1)
-        puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
-                             nb_min, nb_max, ew0_min=30)
+    # Now compute the correction matrices
+    r_bins = np.linspace(mag_min, mag_max, 200 + 1)
+    L_bins = np.linspace(40, 47, 200 + 1)
+    puri2d, comp2d = puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
+                                            nb_min, nb_max, ew0_min=30)
+    savedir = '/homer/alberto/almacen/PAUS_data/LF_corrections'
+    np.save(f'{savedir}/puri2D_{field_name}.npy', puri2d)
+    np.save(f'{savedir}/comp2D_{field_name}.npy', comp2d)
 
 
 
