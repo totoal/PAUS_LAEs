@@ -35,13 +35,33 @@ def compute_L_Lbin_err(cat, L_binning):
 
     return L_Lbin_err_plus, L_Lbin_err_minus, median
 
-def L_lya_bias(cat):
-    # Compute and save L corrections and errors
+def L_lya_bias_estimation(cat):
+    '''
+    Compute and save L corrections and errors
+    '''
     L_binning = np.logspace(40, 47, 25 + 1)
-    L_bin_c = [L_binning[i: i + 2].sum() * 0.5 for i in range(len(L_binning) - 1)]
 
     L_Lbin_err_plus, L_Lbin_err_minus, L_median =\
         compute_L_Lbin_err(cat, L_binning)
+
+    corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
+    np.save(f'{corr_dir}/L_nb_err_plus.npy', L_Lbin_err_plus)
+    np.save(f'{corr_dir}/L_nb_err_minus.npy', L_Lbin_err_minus)
+    np.save(f'{corr_dir}/L_bias.npy', L_median)
+    np.save(f'/{corr_dir}/L_nb_err_binning.npy', L_binning)
+
+
+def L_lya_bias_apply(cat):
+    '''
+    Applies the bias sustraction and estimates errors based in the
+    computations made by L_lya_bias_estimation.
+    '''
+    corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
+    L_Lbin_err_plus = np.load(f'{corr_dir}/L_nb_err_plus.npy')
+    L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus.npy')
+    L_median = np.load(f'{corr_dir}/L_bias.npy')
+    L_binning = np.load(f'/{corr_dir}/L_nb_err_binning.npy')
+    L_bin_c = [L_binning[i: i + 2].sum() * 0.5 for i in range(len(L_binning) - 1)]
 
     # Correct L_Arr with the median
     mask_median_L = (L_median < 10)
@@ -76,6 +96,12 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
                                             len(r_bins) - 1, N_iter))
 
     for mock_name, mock in mock_dict.items():
+        # If mock is `QSO_LAEs_loL` add extra mask to cut out high L_lya sources
+        if mock_name == 'QSO_LAEs_loL':
+            mask_hiL = mock['L_lya_spec'] < 44
+        else:
+            mask_hiL = np.ones_like(mock['L_lya_spec']).astype(bool)
+
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
             # Generate random numbers
@@ -89,13 +115,14 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
 
             nice_mask = (mock['nice_lya'] & mock['nice_z']
                          & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max)
-                         & (mock['EW0_lya_spec'] >= ew0_min))
+                         & (mock['EW0_lya_spec'] >= ew0_min) & mask_hiL)
             hist_dict[f'{mock_name}_nice'][..., k] =\
                 np.histogram2d(L_perturbed[nice_mask], mock['r_mag'][nice_mask],
                                bins=[L_bins, r_bins])[0]
             
             sel_mask = (mock['nice_lya']
-                        & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max))
+                        & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max)
+                        & mask_hiL)
             hist_dict[f'{mock_name}_sel'][..., k] =\
                 np.histogram2d(L_perturbed[sel_mask], mock['r_mag'][sel_mask],
                                bins=[L_bins, r_bins])[0]
@@ -113,7 +140,8 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
         # Compute parent histograms
         parent_mask = ((NB_z(mock['zspec']) >= nb_min)
                        & (NB_z(mock['zspec']) <= nb_max)
-                       & (mock['EW0_lya_spec'] >= ew0_min))
+                       & (mock['EW0_lya_spec'] >= ew0_min)
+                       & mask_hiL)
         hist_dict[f'{mock_name}_parent'] =\
             np.histogram2d(mock['L_lya_spec'][parent_mask],
                            mock['r_mag'][parent_mask],
@@ -171,8 +199,8 @@ def compute_LF_corrections(mocks_dict, area_dict,
                            check_nice_z=True)
         print(f'N nice_lya = {sum(mock["nice_lya"])}')
 
-        # L_lya bias ocrrection
-        mock = L_lya_bias(mock)
+    # L_lya bias correction with the QSO LAEs catalog as reference
+    L_lya_bias_estimation(mock['QSO_LAEs_loL'])
 
     # Now compute the correction matrices
     r_bins = np.linspace(mag_min, mag_max, 200 + 1)
@@ -205,7 +233,7 @@ def main(nb_min, nb_max, mag_min, mag_max):
         'SFG': 400,
         'QSO_cont': 200,
         'QSO_LAEs_loL': 400,
-        'QSO_LAEs_hiL': 4000,
+        'QSO_LAEs_hiL': 4000 + 400,
         'GAL': 59.97 * gal_fraction
     }
 
