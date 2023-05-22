@@ -79,7 +79,6 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
             # Generate random numbers
-            print(mock['L_lya_corr_err'])
             randN = np.random.randn(N_sources)
             L_perturbed = np.empty(N_sources)
             L_perturbed[randN <= 0] = (mock['L_lya_corr']
@@ -159,6 +158,9 @@ def compute_LF_corrections(mocks_dict, area_dict,
         mock['flx'] = mock['flx_0'] + mock['err'] * np.random.normal(size=mock['flx_0'].shape)
         # TODO: add_errors function
         # mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name)
+
+        # Compute r_mag
+        mock['r_mag'] = flux_to_mag(mock['flx'][-4], w_central[-4])
 
         ## Now we have the mock with the errors, do everything else for
         ## each mock
