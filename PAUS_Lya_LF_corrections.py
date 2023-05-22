@@ -168,8 +168,18 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
     # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)
     # np.save(f'{dirname}/h2d_parent_smooth_{survey_name}', h2d_parent_smooth)
 
-    puri2d = (1 + h2d_sel_smooth / h2d_nice_smooth) ** -1
-    comp2d = h2d_nice_smooth / h2d_parent_smooth
+    puri2d = np.empty_like(h2d_nice)
+    comp2d = np.empty_like(h2d_nice)
+
+    mask_nonzero_nice = (h2d_nice_smooth > 0)
+    mask_nonzero_parent = (h2d_parent_smooth > 0)
+    puri2d[mask_nonzero_nice] = (1 + h2d_sel_smooth[mask_nonzero_nice]\
+                                 / h2d_nice_smooth[mask_nonzero_nice]) ** -1
+    comp2d[mask_nonzero_parent] =\
+        h2d_nice_smooth[mask_nonzero_parent] / h2d_parent_smooth[mask_nonzero_parent]
+
+    puri2d[~mask_nonzero_nice] = np.nan
+    comp2d[~mask_nonzero_parent] = np.nan
 
     return puri2d, comp2d
 
