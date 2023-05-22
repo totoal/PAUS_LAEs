@@ -100,7 +100,7 @@ def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
                       mock_QSO_LAEs_loL_path,
                       mock_QSO_LAEs_hiL_path,
                       mock_GAL_path]
-    mock_name_list = ['SFG', 'QSO_cont', 'QSO_LAEs_LoL', 'QSO_LAEs_hiL',
+    mock_name_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
 
     mocks_dict = {}
