@@ -1,11 +1,12 @@
-from jpasLAEs.utils import smooth_Image, bin_centers
+from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux
 
 from load_paus_mocks import load_mocks_dict, add_errors
 from paus_utils import *
 from LAE_selection_method import *
 
+from scipy.stats import binned_statistic
+
 import numpy as np
-import pandas as pd
 
 def compute_L_Lbin_err(cat, L_binning):
     '''
@@ -39,7 +40,6 @@ def L_lya_bias(cat):
     L_binning = np.logspace(40, 47, 25 + 1)
     L_bin_c = [L_binning[i: i + 2].sum() * 0.5 for i in range(len(L_binning) - 1)]
 
-    Lmask = cat['nice_z'] & cat['nice_lya'] & (cat['L_lya_spec'] > 42.5)
     L_Lbin_err_plus, L_Lbin_err_minus, L_median =\
         compute_L_Lbin_err(cat, L_binning)
 
@@ -50,8 +50,15 @@ def L_lya_bias(cat):
                               np.log10(L_bin_c)[mask_median_L],
                               L_median[mask_median_L]))
 
+    # Apply bin err
+    L_binning_position = binned_statistic(10 ** cat['L_lya'], None,
+                                          'count', bins=L_binning).binnumber
+    L_binning_position[L_binning_position > len(L_binning) - 2] = len(L_binning) - 2
+    L_e_Arr_pm = [L_Lbin_err_minus[L_binning_position],
+                  L_Lbin_err_plus[L_binning_position]]
+
     cat['L_lya_corr'] = L_Arr_corr
-    cat['L_lya_corr_err'] = [L_Lbin_err_minus, L_Lbin_err_plus]
+    cat['L_lya_corr_err'] = L_e_Arr_pm
 
     return cat
 
@@ -72,6 +79,7 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
             # Generate random numbers
+            print(mock['L_lya_corr_err'])
             randN = np.random.randn(N_sources)
             L_perturbed = np.empty(N_sources)
             L_perturbed[randN <= 0] = (mock['L_lya_corr']
@@ -144,7 +152,13 @@ def compute_LF_corrections(mocks_dict, area_dict,
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mocks_dict.items():
         print(mock_name)
-        mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name)
+
+        ## PROVISIONAL ERRORS FOR TESTING
+        nominal_errs = mag_to_flux(23, w_central) / 3
+        mock['err'] = np.ones_like(mock['flx_0']) * nominal_errs.reshape(-1, 1)
+        mock['flx'] = mock['flx_0'] + mock['err'] * np.random.normal(size=mock['flx_0'].shape)
+        # TODO: add_errors function
+        # mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name)
 
         ## Now we have the mock with the errors, do everything else for
         ## each mock
@@ -158,14 +172,16 @@ def compute_LF_corrections(mocks_dict, area_dict,
         # L_lya bias ocrrection
         mock = L_lya_bias(mock)
 
-        # Now produce the correction matrices
+        # Now compute the correction matrices
         r_bins = np.linspace(mag_min, mag_max, 200 + 1)
         L_bins = np.linspace(40, 47, 200 + 1)
+        puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
+                             nb_min, nb_max, ew0_min=30)
 
 
 
 
-def main(nb_min, nb_max):
+def main(nb_min, nb_max, mag_min, mag_max):
     # State the mock area in deg²:
     gal_fraction = 0.01
 
@@ -189,12 +205,15 @@ def main(nb_min, nb_max):
     }
 
     # List of PAUS fields
-    # field_list = ['foo', 'bar']
-    # for field_name in field_list:
-    #     compute_LF_corrections(mocks_dict, area_dict, field_name,
-    #                            nb_min, nb_max)
+    field_list = ['foo']
+    for field_name in field_list:
+        compute_LF_corrections(mocks_dict, area_dict, field_name,
+                               nb_min, nb_max, mag_min, mag_max)
 
     return
 
 if __name__ == '__main__':
-    main(1, 5)
+    # args = (nb_min, nb_max, r_min, r_max)
+    args = (1, 5, 17, 24)
+
+    main(*args)
