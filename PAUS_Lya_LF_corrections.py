@@ -219,9 +219,8 @@ def compute_LF_corrections(mocks_dict, area_dict,
 
 
 def main(nb_min, nb_max, mag_min, mag_max):
-    # State the mock area in deg²:
+    # Load only a fraction of the GAL mock because it's too heavy
     gal_fraction = 0.01
-
     # Load the mocks
     source_cats_dir = '/home/alberto/almacen/Source_cats'
     mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
@@ -233,6 +232,7 @@ def main(nb_min, nb_max, mag_min, mag_max):
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_path, gal_fraction=gal_fraction)
 
+    # State the mock area in deg²:
     area_dict = {
         'SFG': 400,
         'QSO_cont': 200,
