@@ -262,7 +262,7 @@ def main(nb_min, nb_max, mag_min, mag_max):
         'GAL': 59.97 * gal_fraction
     }
 
-    for mock_name, area in area_dict:
+    for mock_name, area in area_dict.items():
         mocks_dict[mock_name]['area'] = area
 
     # List of PAUS fields
