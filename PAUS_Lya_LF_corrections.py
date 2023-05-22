@@ -203,7 +203,7 @@ def compute_LF_corrections(mocks_dict, area_dict,
     L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'])
 
     # Now apply the bias correction and compute L statistical errors
-    for mock in mocks_dict:
+    for _, mock in mocks_dict.items():
         mock = L_lya_bias_apply(mock)
 
     # Now compute the correction matrices
@@ -211,7 +211,7 @@ def compute_LF_corrections(mocks_dict, area_dict,
     L_bins = np.linspace(40, 47, 200 + 1)
     puri2d, comp2d = puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
                                             nb_min, nb_max, ew0_min=30)
-    savedir = '/homer/alberto/almacen/PAUS_data/LF_corrections'
+    savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     np.save(f'{savedir}/puri2D_{field_name}.npy', puri2d)
     np.save(f'{savedir}/comp2D_{field_name}.npy', comp2d)
 
