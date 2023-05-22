@@ -200,7 +200,7 @@ def compute_LF_corrections(mocks_dict, area_dict,
         print(f'N nice_lya = {sum(mock["nice_lya"])}')
 
     # L_lya bias correction with the QSO LAEs catalog as reference
-    L_lya_bias_estimation(mock['QSO_LAEs_loL'])
+    L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'])
 
     # Now apply the bias correction and compute L statistical errors
     for mock in mocks_dict:
