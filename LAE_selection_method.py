@@ -353,7 +353,6 @@ def select_LAEs(cat, nb_min, nb_max, ew0min_lya=30,
             nice_z = np.abs(z_Arr - cat['zspec']) < 0.16
             cat['nice_z'] = nice_z
         
-
         # Estimate L_lya, F_lya and EW0_lya
         cat = Lya_L_estimation(cat, cont_est, cont_err)
 
@@ -363,12 +362,19 @@ def Lya_L_estimation(cat, cont_est, cont_est_err):
     '''
     Returns a catalog including L_lya and EW0_lya estimations
     '''
+    mask_selected_NB = (cat['lya_NB'], np.arange(len(cat['lya_NB'])))
+
     Flambda_lya = (
-        cat['flx'][:, cat['lya_NB']] - cont_est[:, cat['lya_NB']]
+        cat['flx'][mask_selected_NB] - cont_est[mask_selected_NB]
     ) * fwhm_Arr[cat['lya_NB']]
     Flambda_lya_err = (
-        cat['err'][:, cat['lya_NB']] ** 2 + cont_est_err[:, cat['lya_NB']] ** 2
+        cat['err'][mask_selected_NB] ** 2 + cont_est_err[mask_selected_NB] ** 2
     ) ** 0.5 * fwhm_Arr[cat['lya_NB']]
+
+    # Flambda to zero if no selection
+    nice_lya = cat['nice_lya']
+    Flambda_lya[~nice_lya] = 0.
+    Flambda_lya_err[~nice_lya] = 0.
 
     # Luminosity distance
     def LumDist(z): return cosmo.luminosity_distance(z).to(u.cm).value
@@ -380,20 +386,30 @@ def Lya_L_estimation(cat, cont_est, cont_est_err):
         - LumDist(Redshift(w_central[cat['lya_NB']]))
     )
 
-    z_NB_err = (Redshift(w_central['lya_NB']) + 0.5 * fwhm_Arr[cat['lya_NB']]
-                - Redshift(w_central['lya_NB']) - 0.5 * fwhm_Arr[cat['lya_NB']]) * 0.5
+    z_NB_err = (Redshift(w_central[cat['lya_NB']]) + 0.5 * fwhm_Arr[cat['lya_NB']]
+                - Redshift(w_central[cat['lya_NB']]) - 0.5 * fwhm_Arr[cat['lya_NB']]) * 0.5
 
-    L_lya = np.log10(Flambda_lya * 4 * np.pi * dL**2)
-    L_lya_err = ((dL * Flambda_lya_err) ** 2
-                 + (2 * Flambda_lya * dL_err) ** 2
-                ) ** 0.5 * 4 * np.pi * dL
+    # L_lya to 99. if no selection
+    L_lya = np.ones_like(Flambda_lya) * 99
+    L_lya_err = np.zeros_like(Flambda_lya)
 
-    EW0_lya = Flambda_lya / cont_est[:, cat['lya_NB']] / (1 + cat['z_NB'])
-    EW0_lya_err = (
-        (1. / Flambda_lya * Flambda_lya_err) ** 2
-        + (1. / cont_est[:, cat['lya_NB']] * cont_est_err['lya_NB']) ** 2
-        + (1. / (1 + cat['z_NB']) * z_NB_err) ** 2
-    ) ** 0.5 * EW0_lya
+    L_lya[nice_lya] = np.log10(Flambda_lya[nice_lya]
+                               * 4 * np.pi * dL[nice_lya]**2)
+    L_lya_err[nice_lya] = ((dL[nice_lya] * Flambda_lya_err[nice_lya]) ** 2
+                 + (2 * Flambda_lya[nice_lya] * dL_err[nice_lya]) ** 2
+                ) ** 0.5 * 4 * np.pi * dL[nice_lya]
+
+
+    EW0_lya = np.zeros_like(L_lya)
+    EW0_lya_err = np.zeros_like(L_lya)
+    EW0_lya[nice_lya] = Flambda_lya[nice_lya] / cont_est[mask_selected_NB][nice_lya]\
+         / (1 + cat['z_NB'][nice_lya])
+    EW0_lya_err[nice_lya] = (
+        (1. / Flambda_lya[nice_lya] * Flambda_lya_err[nice_lya]) ** 2
+        + (1. / cont_est[mask_selected_NB][nice_lya]
+           * cont_est_err[mask_selected_NB][nice_lya]) ** 2
+        + (1. / (1 + cat['z_NB'][nice_lya]) * z_NB_err[nice_lya]) ** 2
+    ) ** 0.5 * EW0_lya[nice_lya]
 
     cat['L_lya'] = L_lya
     cat['L_lya_err'] = L_lya_err
