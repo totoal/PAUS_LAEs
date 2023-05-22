@@ -69,18 +69,18 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
     z_xx = np.arange(0.5, 6, 1)
     # Interpolate 2D the model
     f_counts = RectBivariateSpline(z_xx, r_yy, counts_model_2D.T,
-                                   kx=1, ky=1)
+                                    kx=1, ky=1)
 
     N_src = int(dblquad(f_counts, r_min, r_max, z_min, z_max)[0] * 2)
 
     # Re-bin distribution
     z_xx_new = np.linspace(z_min, z_max, 10000)
-    r_yy_new = np.linspace(r_min, r_max, 10000)
-    model_2D_interpolated = f_counts(z_xx_new, r_yy_new).flatten()
+    r_yy_new = np.linspace(r_min, r_max, 10001)
+    model_2D_interpolated = f_counts(z_xx_new, r_yy_new).T.flatten()
     model_2D_interpolated /= np.sum(model_2D_interpolated) # Normalize
     idx_sample = np.random.choice(np.arange(len(model_2D_interpolated)), N_src,
-                                  p=model_2D_interpolated)
-    idx_sample = np.unravel_index(idx_sample, (len(z_xx_new), len(r_yy_new)))
+                                    p=model_2D_interpolated)
+    idx_sample = np.unravel_index(idx_sample, (len(r_yy_new), len(z_xx_new)))
     out_z_Arr = z_xx_new[idx_sample[1]]
     out_r_Arr = r_yy_new[idx_sample[0]]
 
