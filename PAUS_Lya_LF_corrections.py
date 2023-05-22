@@ -83,7 +83,7 @@ def L_lya_bias_apply(cat):
     return cat
 
 
-def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
+def puricomp_corrections(mock_dict, L_bins, r_bins,
                          nb_min, nb_max, ew0_min=30):
     # Perturb L
     N_iter = 500
@@ -101,6 +101,8 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
             mask_hiL = mock['L_lya_spec'] < 44
         else:
             mask_hiL = np.ones_like(mock['L_lya_spec']).astype(bool)
+
+        area_obs = mock['area']
 
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
@@ -128,8 +130,8 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
                                bins=[L_bins, r_bins])[0]
 
         # Apply area factor
-        hist_dict[f'{mock_name}_nice'] /= area_dict[mock_name]
-        hist_dict[f'{mock_name}_sel'] /= area_dict[mock_name]
+        hist_dict[f'{mock_name}_nice'] /= area_obs
+        hist_dict[f'{mock_name}_sel'] /= area_obs
         
         # Take the median
         hist_dict[f'{mock_name}_nice'] = np.median(hist_dict[f'{mock_name}_nice'],
@@ -145,7 +147,7 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
         hist_dict[f'{mock_name}_parent'] =\
             np.histogram2d(mock['L_lya_spec'][parent_mask],
                            mock['r_mag'][parent_mask],
-                           bins=[L_bins, r_bins])[0] / area_dict[mock_name]
+                           bins=[L_bins, r_bins])[0] / area_obs
 
     h2d_nice = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
     h2d_sel = np.zeros((len(L_bins) - 1, len(r_bins) - 1))
@@ -184,8 +186,8 @@ def puricomp_corrections(mock_dict, area_dict, L_bins, r_bins,
     return puri2d, comp2d
 
 
-def compute_LF_corrections(mocks_dict, area_dict,
-                           field_name, nb_min, nb_max, mag_min, mag_max):
+def compute_LF_corrections(mocks_dict, field_name,
+                           nb_min, nb_max, mag_min, mag_max):
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mocks_dict.items():
         print(mock_name)
@@ -219,7 +221,7 @@ def compute_LF_corrections(mocks_dict, area_dict,
     # Now compute the correction matrices
     r_bins = np.linspace(mag_min, mag_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
-    puri2d, comp2d = puricomp_corrections(mocks_dict, area_dict, L_bins, r_bins,
+    puri2d, comp2d = puricomp_corrections(mocks_dict, L_bins, r_bins,
                                             nb_min, nb_max, ew0_min=30)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
@@ -253,10 +255,13 @@ def main(nb_min, nb_max, mag_min, mag_max):
         'GAL': 59.97 * gal_fraction
     }
 
+    for mock_name, area in area_dict:
+        mocks_dict[mock_name]['area'] = area
+
     # List of PAUS fields
     field_list = ['foo']
     for field_name in field_list:
-        compute_LF_corrections(mocks_dict, area_dict, field_name,
+        compute_LF_corrections(mocks_dict, field_name,
                                nb_min, nb_max, mag_min, mag_max)
 
     return
