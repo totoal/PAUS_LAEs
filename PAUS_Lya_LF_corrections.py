@@ -202,6 +202,10 @@ def compute_LF_corrections(mocks_dict, area_dict,
     # L_lya bias correction with the QSO LAEs catalog as reference
     L_lya_bias_estimation(mock['QSO_LAEs_loL'])
 
+    # Now apply the bias correction and compute L statistical errors
+    for mock in mocks_dict:
+        mock = L_lya_bias_apply(mock)
+
     # Now compute the correction matrices
     r_bins = np.linspace(mag_min, mag_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
@@ -233,7 +237,7 @@ def main(nb_min, nb_max, mag_min, mag_max):
         'SFG': 400,
         'QSO_cont': 200,
         'QSO_LAEs_loL': 400,
-        'QSO_LAEs_hiL': 4000 + 400,
+        'QSO_LAEs_hiL': 4000,
         'GAL': 59.97 * gal_fraction
     }
 
