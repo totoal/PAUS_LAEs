@@ -6,6 +6,8 @@ from LAE_selection_method import *
 
 from scipy.stats import binned_statistic
 
+import pickle
+
 import numpy as np
 
 def compute_L_Lbin_err(cat, L_binning):
@@ -228,6 +230,11 @@ def compute_LF_corrections(mocks_dict, field_name,
     np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
     np.save(f'{savedir}/puri2D_{field_name}.npy', puri2d)
     np.save(f'{savedir}/comp2D_{field_name}.npy', comp2d)
+
+    # Finally, let's save the full mocks in the final state to later compute
+    # 1D purity, completeness and other stuff.
+    with open(f'{savedir}/mock_dict_{field_name}.pkl', 'wb') as f:
+        pickle.dump(mocks_dict, f)
 
 
 
