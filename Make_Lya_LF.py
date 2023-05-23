@@ -101,7 +101,7 @@ def Lya_LF_matrix(cat, L_bins, field_name, LF_savedir,
         # The array of weights w
         w = np.random.rand(len(puri_k))
         # Mask very low completeness and randomly according to purity
-        include_mask = (w < puri_k) & (comp_k > 0.05)
+        include_mask = (w < puri_k) & (comp_k > 0.01)
         w[:] = 1.
         w[~include_mask] = 0.
         w[include_mask] = 1. / comp_k[include_mask]
@@ -122,7 +122,7 @@ def Lya_LF_matrix(cat, L_bins, field_name, LF_savedir,
         
 
 
-def main(nb_min, nb_max, field_name):
+def main(nb_min, nb_max, r_min, r_max, field_name):
     # First load the PAUS catalog of the desired field
 
     # TODO: Load the actual catalogs. For now, we test with the QSO mock
@@ -142,7 +142,7 @@ def main(nb_min, nb_max, field_name):
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
-    cat = select_LAEs(cat, nb_min, nb_max,
+    cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max,
                       ew0min_lya=30, ewmin_other=100)
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
 
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     for field_name in field_list:
         t0 = time.time()
 
-        main(1, 10, field_name)
+        main(1, 10, 17, 24, field_name)
 
         print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t0)))
 
