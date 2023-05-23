@@ -157,12 +157,16 @@ def main(nb_min, nb_max, field_name):
     # Define the LF L binning
     L_min, L_max = 40, 47
     N_bins = 30
-    L_bins = np.logspace(L_min, L_max, N_bins + 1)
+    L_bins = np.linspace(L_min, L_max, N_bins + 1)
 
     # Dir to save the LFs and subproducts
     LF_name = f'Lya_LF_nb{nb_min}-{nb_max}_{field_name}'
     LF_savedir = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
     os.makedirs(LF_savedir, exist_ok=True)
+
+    # Save the bins
+    np.save(f'{LF_savedir}/LF_L_bins.npy', L_bins)
+
 
     print('Making the LF')
     Lya_LF_matrix(cat, L_bins, field_name, LF_savedir)
