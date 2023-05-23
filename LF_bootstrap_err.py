@@ -57,8 +57,8 @@ if __name__ == '__main__':
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
             # boots = np.random.choice(np.arange(5), 5, replace=True)
-            # TODO: by now we only have 1 field (the mock)
-            boots = np.array([0, 0, 0, 0])
+            # TODO: by now we only have the 5 mocks
+            boots = np.array([2, 2, 2, 2, 2])
 
             this_hist_mat = bootstrapped_LFs(nb1, nb2, boots)
 

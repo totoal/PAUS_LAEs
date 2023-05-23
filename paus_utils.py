@@ -170,7 +170,6 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
         'QSO_LAEs_hiL': 4000,
         'GAL': 59.97 * 0.3
     }
-
         
     try:
         area = area_dict[region_name]
