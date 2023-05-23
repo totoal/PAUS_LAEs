@@ -1,4 +1,4 @@
-from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux
+from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux, hms_since_t0
 
 from load_paus_mocks import load_mocks_dict, add_errors
 from paus_utils import *
@@ -7,6 +7,7 @@ from LAE_selection_method import *
 from scipy.stats import binned_statistic
 
 import pickle
+import time
 
 import numpy as np
 
@@ -189,7 +190,7 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
 
 
 def compute_LF_corrections(mocks_dict, field_name,
-                           nb_min, nb_max, mag_min, mag_max):
+                           nb_min, nb_max, r_min, r_max):
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mocks_dict.items():
         print(mock_name)
@@ -208,7 +209,7 @@ def compute_LF_corrections(mocks_dict, field_name,
         ## each mock
 
         ## First select LAEs and estimate L_lya etc.
-        mock = select_LAEs(mock, nb_min, nb_max,
+        mock = select_LAEs(mock, nb_min, nb_max, r_min, r_max,
                            ew0min_lya=30, ewmin_other=100,
                            check_nice_z=True)
         print(f'N nice_lya = {sum(mock["nice_lya"])}')
@@ -221,7 +222,7 @@ def compute_LF_corrections(mocks_dict, field_name,
         mock = L_lya_bias_apply(mock)
 
     # Now compute the correction matrices
-    r_bins = np.linspace(mag_min, mag_max, 200 + 1)
+    r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
     puri2d, comp2d = puricomp_corrections(mocks_dict, L_bins, r_bins,
                                             nb_min, nb_max, ew0_min=30)
@@ -239,7 +240,7 @@ def compute_LF_corrections(mocks_dict, field_name,
 
 
 
-def main(nb_min, nb_max, mag_min, mag_max):
+def main(nb_min, nb_max, r_min, r_max):
     # Load only a fraction of the GAL mock because it's too heavy
     gal_fraction = 0.1
     # Load the mocks
@@ -269,12 +270,16 @@ def main(nb_min, nb_max, mag_min, mag_max):
     field_list = ['foo']
     for field_name in field_list:
         compute_LF_corrections(mocks_dict, field_name,
-                               nb_min, nb_max, mag_min, mag_max)
+                               nb_min, nb_max, r_min, r_max)
 
     return
 
 if __name__ == '__main__':
+    t00 = time.time()
+
     # args = (nb_min, nb_max, r_min, r_max)
     args = (1, 5, 17, 24)
 
     main(*args)
+
+    print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))
