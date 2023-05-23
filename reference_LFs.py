@@ -261,7 +261,9 @@ s18f = {
 fnam = '/home/alberto/almacen/literature_LF_data/LF_data_SpinosoEtAl2020/20200518_J0395_SNR5_LFdata.txt'
 loglya, ModLF, ModLF_pc16, ModLF_pc84 = np.genfromtxt(fnam, skip_header=3, usecols=(0,6,7,8), unpack=True)
 dLogL = loglya[1] - loglya[0]
-snr = ModLF / ModLF_pc16
+mask = ModLF_pc16 > 0
+snr = np.zeros_like(ModLF)
+snr[mask] = ModLF[mask] / ModLF_pc16[mask]
 ds20_z225 = {
     'logL': loglya[snr > 1],
     'Phi': ModLF[snr > 1],
@@ -278,7 +280,9 @@ ds20_z225 = {
 fnam = '/home/alberto/almacen/literature_LF_data/LF_data_SpinosoEtAl2020/20200518_J0410_SNR5_LFdata.txt'
 loglya, ModLF, ModLF_pc16, ModLF_pc84 = np.genfromtxt(fnam, skip_header=3, usecols=(0,6,7,8), unpack=True)
 dLogL = loglya[1] - loglya[0]
-snr = ModLF / ModLF_pc16
+mask = ModLF_pc16 > 0
+snr = np.zeros_like(ModLF)
+snr[mask] = ModLF[mask] / ModLF_pc16[mask]
 ds20_z237 = {
     'logL': loglya[snr > 1],
     'Phi': ModLF[snr > 1],
@@ -295,7 +299,9 @@ ds20_z237 = {
 fnam = '/home/alberto/almacen/literature_LF_data/LF_data_SpinosoEtAl2020/20200518_J0430_SNR5_LFdata.txt'
 loglya, ModLF, ModLF_pc16, ModLF_pc84 = np.genfromtxt(fnam, skip_header=3, usecols=(0,6,7,8), unpack=True)
 dLogL = loglya[1] - loglya[0]
-snr = ModLF / ModLF_pc16
+mask = ModLF_pc16 > 0
+snr = np.zeros_like(ModLF)
+snr[mask] = ModLF[mask] / ModLF_pc16[mask]
 ds20_z254 = {
     'logL': loglya[snr > 1],
     'Phi': ModLF[snr > 1],
@@ -312,7 +318,9 @@ ds20_z254 = {
 fnam = '/home/alberto/almacen/literature_LF_data/LF_data_SpinosoEtAl2020/20200518_J0515_SNR5_LFdata.txt'
 loglya, ModLF, ModLF_pc16, ModLF_pc84 = np.genfromtxt(fnam, skip_header=3, usecols=(0,6,7,8), unpack=True)
 dLogL = loglya[1] - loglya[0]
-snr = ModLF / ModLF_pc16
+mask = ModLF_pc16 > 0
+snr = np.zeros_like(ModLF)
+snr[mask] = ModLF[mask] / ModLF_pc16[mask]
 ds20_z324 = {
     'logL': loglya[snr > 1],
     'Phi': ModLF[snr > 1],
@@ -327,7 +335,7 @@ ds20_z324 = {
 }
 
 # Zhang 2021 (z=2.0-3.5)
-df = pd.read_csv('csv/Zhang2021_LF.csv')
+df = pd.read_csv('/home/alberto/cosmos/LAEs/csv/Zhang2021_LF.csv')
 z21 = {
     'logL': df['Llya'],
     'Phi': df['Phi'],
@@ -342,7 +350,7 @@ z21 = {
 }
 
 # Liu 2022 (z=1.88-3.53)
-df = pd.read_csv('csv/Liu_LF.csv')
+df = pd.read_csv('/home/alberto/cosmos/LAEs/csv/Liu_LF.csv')
 l22 = {
     'logL': df['logLya'],
     'Phi': df['Phi'],
@@ -363,7 +371,7 @@ LF_ref_list = [b11, g07, k16, m17a, m17b, u08, s16, s17, s18a,
 for i, lf_dict in enumerate(LF_ref_list):
     lf_dict['color'] = f'C{i}'
 
-# Conver to my cosmology
+# Convert to my cosmology
 for lf_dict in LF_ref_list:
     args = (lf_dict['logL'], lf_dict['z'], lf_dict['H0'],
             lf_dict['Om0'], lf_dict['Ode0'])
