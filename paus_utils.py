@@ -7,6 +7,12 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 16})
 
+from astropy.cosmology import Planck18 as cosmo
+import astropy.units as u
+
+from scipy.integrate import simpson
+
+
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
 w_central = np.array(data_tab['w_eff'])
@@ -135,3 +141,52 @@ def lya_redshift(w_obs):
     Returns the Ly alpha redshift of an observed wavelength
     '''
     return w_obs / w_lya - 1
+
+
+def z_volume(z_min, z_max, area):
+    '''
+    Returns the comoving volume for an observation area between a range of redshifts
+    '''
+    z_x = np.linspace(z_min, z_max, 1000)
+    dV = cosmo.differential_comoving_volume(z_x).to(u.Mpc**3 / u.sr).value
+    area_rad = area * (2 * np.pi / 360) ** 2
+    theta = np.arccos(1 - area_rad / (2 * np.pi))
+    Omega = 2 * np.pi * (1 - np.cos(theta))
+    vol = simpson(dV, z_x) * Omega
+
+    return vol
+
+
+def Lya_effective_volume(nb_min, nb_max, survey_name=1):
+    '''
+    Due to NB overlap, specially when considering single filters, the volume probed by one
+    NB has to be corrected because some sources could be detected in that NB or in either
+    of the adjacent ones.
+    '''
+
+    match survey_name:
+        case 'foo':
+            # This is a reference for the QSO mock, for testing purposes
+            area = 400
+        case _:
+            # If the survey name is not known, try to use the given value as area
+            try:
+                area = float(survey_name)
+            except:
+                raise ValueError('Survey name not known or invalid area value')
+
+    z_min_overlap = (w_central[nb_min] - fwhm_Arr[nb_min] * 0.5) / w_lya - 1
+    z_max_overlap = (w_central[nb_max] + fwhm_Arr[nb_max] * 0.5) / w_lya - 1
+
+    z_min_abs = (w_central[nb_min - 1] +
+                 fwhm_Arr[nb_min - 1] * 0.5) / w_lya - 1
+    z_max_abs = (w_central[nb_max + 1] -
+                 fwhm_Arr[nb_min + 1] * 0.5) / w_lya - 1
+
+    volume_abs = z_volume(z_min_abs, z_max_abs, area)
+    volume_overlap = (
+        z_volume(z_min_overlap, z_min_abs, area)
+        + z_volume(z_max_abs, z_max_overlap, area)
+    )
+
+    return volume_abs + volume_overlap * 0.5
