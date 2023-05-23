@@ -10,6 +10,7 @@ from jpasLAEs.utils import mag_to_flux, hms_since_t0
 
 from paus_utils import *
 from LAE_selection_method import select_LAEs
+from PAUS_Lya_LF_corrections import L_lya_bias_apply
 
 
 def puricomp2d_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
@@ -134,6 +135,9 @@ def main(nb_min, nb_max, field_name):
         cat['flx'] = cat['flx_0'] + cat['err'] * np.random.normal(size=cat['flx_0'].shape)
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
+
+    # Apply the bias correction and compute L statistical errors
+    cat = L_lya_bias_apply(cat)
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
