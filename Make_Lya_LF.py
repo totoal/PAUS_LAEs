@@ -3,10 +3,11 @@ from load_paus_mocks import load_qso_mock ## Provisional
 import numpy as np
  
 import time
+import os
 
 from scipy.stats import binned_statistic_2d
 
-from jpasLAEs.utils import mag_to_flux, hms_since_t0
+from jpasLAEs.utils import mag_to_flux, hms_since_t0, flux_to_mag
 
 from paus_utils import *
 from LAE_selection_method import select_LAEs
@@ -99,15 +100,16 @@ def Lya_LF_matrix(cat, L_bins, field_name, LF_savedir,
 
         # The array of weights w
         w = np.random.rand(len(puri_k))
-        include_mask = (w < puri_k)
+        # Mask very low completeness and randomly according to purity
+        include_mask = (w < puri_k) & (comp_k > 0.05)
         w[:] = 1.
         w[~include_mask] = 0.
         w[include_mask] = 1. / comp_k[include_mask]
-        w[comp_k < 0.05] = 0. # Mask very low completeness
         w[np.isnan(w) | np.isinf(w)] = 0.
 
         # Store the realization of the LF in the hist matrix
-        hist_i_mat[k], _ = np.histogram(L_perturbed[nice_lya], bins=L_bins, weights=w)
+        hist_i_mat[k], _ = np.histogram(L_perturbed[nice_lya],
+                                        bins=L_bins, weights=w[nice_lya])
         
         # Store purity of this realization
         puri_list.append(puri_k)
@@ -124,7 +126,8 @@ def main(nb_min, nb_max, field_name):
     # First load the PAUS catalog of the desired field
 
     # TODO: Load the actual catalogs. For now, we test with the QSO mock
-    print(f'\nLoading {field_name}')
+    print(f'\nField: {field_name}')
+    print('----------------------')
     if field_name == 'foo':
         source_cats_dir = '/home/alberto/almacen/Source_cats'
         mock_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
@@ -133,17 +136,18 @@ def main(nb_min, nb_max, field_name):
         nominal_errs = mag_to_flux(23, w_central) / 3
         cat['err'] = np.ones_like(cat['flx_0']) * nominal_errs.reshape(-1, 1)
         cat['flx'] = cat['flx_0'] + cat['err'] * np.random.normal(size=cat['flx_0'].shape)
+        cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
-
-    # Apply the bias correction and compute L statistical errors
-    cat = L_lya_bias_apply(cat)
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
     cat = select_LAEs(cat, nb_min, nb_max,
                       ew0min_lya=30, ewmin_other=100)
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
+
+    # Apply the bias correction and compute L statistical errors
+    cat = L_lya_bias_apply(cat)
 
 
     #######################
@@ -158,6 +162,7 @@ def main(nb_min, nb_max, field_name):
     # Dir to save the LFs and subproducts
     LF_name = f'Lya_LF_nb{nb_min}-{nb_max}_{field_name}'
     LF_savedir = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
+    os.makedirs(LF_savedir, exist_ok=True)
 
     print('Making the LF')
     Lya_LF_matrix(cat, L_bins, field_name, LF_savedir)
@@ -177,4 +182,4 @@ if __name__ == '__main__':
         print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t0)))
 
     
-    print('Everything done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))
+    print('\nEverything done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))
