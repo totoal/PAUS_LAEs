@@ -157,23 +157,29 @@ def z_volume(z_min, z_max, area):
     return vol
 
 
-def Lya_effective_volume(nb_min, nb_max, survey_name=1):
+def Lya_effective_volume(nb_min, nb_max, region_name=1):
     '''
     Due to NB overlap, specially when considering single filters, the volume probed by one
     NB has to be corrected because some sources could be detected in that NB or in either
     of the adjacent ones.
     '''
+    area_dict = {
+        'SFG': 400,
+        'QSO_cont': 200,
+        'QSO_LAEs_loL': 400,
+        'QSO_LAEs_hiL': 4000,
+        'GAL': 59.97 * 0.3
+    }
 
-    match survey_name:
-        case 'foo':
-            # This is a reference for the QSO mock, for testing purposes
-            area = 400
-        case _:
-            # If the survey name is not known, try to use the given value as area
-            try:
-                area = float(survey_name)
-            except:
-                raise ValueError('Survey name not known or invalid area value')
+        
+    try:
+        area = area_dict[region_name]
+    except:
+        # If the survey name is not known, try to use the given value as area
+        try:
+            area = float(region_name)
+        except:
+            raise ValueError('Survey name not known or invalid area value')
 
     z_min_overlap = (w_central[nb_min] - fwhm_Arr[nb_min] * 0.5) / w_lya - 1
     z_max_overlap = (w_central[nb_max] + fwhm_Arr[nb_max] * 0.5) / w_lya - 1

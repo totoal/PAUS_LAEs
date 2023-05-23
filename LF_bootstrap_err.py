@@ -5,7 +5,8 @@ from paus_utils import Lya_effective_volume
 import os
 
 # List of subregions
-region_list_0 = np.array(['foo'])
+region_list_0 = np.array(['SFG', 'QSO_cont', 'QSO_LAEs_loL',
+                          'QSO_LAEs_hiL', 'GAL'])
 
 def bootstrapped_LFs(nb1, nb2, region_list_indices):
     '''

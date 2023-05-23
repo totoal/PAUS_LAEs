@@ -77,7 +77,8 @@ def load_gal_mock(path_to_mock, cat_fraction):
 
     # Precompute r and mask by r. Otherwise the mock is too large
     r_mag = flux_to_mag(cat['flx_0'][-4], w_central[-4])
-    mag_mask = np.array(r_mag < 24.5)
+    i_mag = flux_to_mag(cat['flx_0'][-3], w_central[-3])
+    mag_mask = np.array(r_mag < 24.3) & np.array(i_mag < 23.3)
     cat['flx_0'] = cat['flx_0'][:, mag_mask]
 
     cat['zspec'] = np.array(tab[:, 4])[sel][mag_mask]

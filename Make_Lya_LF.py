@@ -1,4 +1,4 @@
-from load_paus_mocks import load_qso_mock ## Provisional
+from load_paus_mocks import load_mocks_dict ## Provisional
 
 import numpy as np
  
@@ -128,14 +128,26 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # TODO: Load the actual catalogs. For now, we test with the QSO mock
     print(f'\nField: {field_name}')
     print('----------------------')
-    if field_name == 'foo':
+    mock_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
+                   'GAL']
+    if field_name in mock_list:
+        print('Loading catalog (mock)')
         source_cats_dir = '/home/alberto/almacen/Source_cats'
-        mock_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
-        cat = load_qso_mock(mock_path)
+        mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
+        mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
+        mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
+        mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
+        mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
+        mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
+                                    mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
+                                    mock_GAL_path, gal_fraction=0.3)
+
+        cat = mocks_dict[field_name]
         ## PROVISIONAL ERRORS FOR TESTING
         nominal_errs = mag_to_flux(23, w_central) / 3
         cat['err'] = np.ones_like(cat['flx_0']) * nominal_errs.reshape(-1, 1)
         cat['flx'] = cat['flx_0'] + cat['err'] * np.random.normal(size=cat['flx_0'].shape)
+
         cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
@@ -176,7 +188,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 if __name__ == '__main__':
     print('Computing the Lya LF')
 
-    field_list = ['foo']
+    field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
+                   'GAL']
 
     t00 = time.time()
 
