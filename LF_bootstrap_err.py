@@ -43,6 +43,8 @@ def bootstrapped_LFs(nb1, nb2, region_list_indices):
 
 
 if __name__ == '__main__':
+    print('Bootstrapping sky regions')
+
     nbs_list = [[1, 10]]
 
     for [nb1, nb2] in nbs_list:

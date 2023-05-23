@@ -275,6 +275,8 @@ def main(nb_min, nb_max, r_min, r_max):
     return
 
 if __name__ == '__main__':
+    print('Computing Lya LF corrections')
+
     t00 = time.time()
 
     # args = (nb_min, nb_max, r_min, r_max)

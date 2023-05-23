@@ -174,6 +174,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
 
 if __name__ == '__main__':
+    print('Computing the Lya LF')
+
     field_list = ['foo']
 
     t00 = time.time()
