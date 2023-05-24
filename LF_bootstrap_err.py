@@ -52,7 +52,7 @@ if __name__ == '__main__':
         print(f'NBs = {nb1}, {nb2}')
         hist_mat = None
         
-        N_realizations = 100
+        N_realizations = 1000
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 

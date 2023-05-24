@@ -225,7 +225,7 @@ def compute_LF_corrections(mocks_dict, field_name,
     r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
     puri2d, comp2d = puricomp_corrections(mocks_dict, L_bins, r_bins,
-                                            nb_min, nb_max, ew0_min=30)
+                                          nb_min, nb_max, ew0_min=30)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
     np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
@@ -242,7 +242,7 @@ def compute_LF_corrections(mocks_dict, field_name,
 
 def main(nb_min, nb_max, r_min, r_max):
     # Load only a fraction of the GAL mock because it's too heavy
-    gal_fraction = 0.1
+    gal_fraction = 1.
     # Load the mocks
     source_cats_dir = '/home/alberto/almacen/Source_cats'
     mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
