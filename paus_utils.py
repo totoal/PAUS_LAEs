@@ -107,28 +107,35 @@ def z_NB(cont_line_pos, w0_line=1215.67):
     Line_z_Arr[mask_nondetection] = -1
 
     if len(w) > 1:
-        return z_Arr
+        return Line_z_Arr
     else:
-        return z_Arr[0]
+        return Line_z_Arr[0]
 
-def NB_z(z):
+def NB_z(z, line_w0='Lya'):
     '''
     Takes a redshift as an argument and returns the corresponding NB to that redshift.
     Returns -1 if the Lya redshift is out of boundaries.
     '''
     z = np.atleast_1d(z)
     w_central_NB = w_central[:40]
-    w_lya_obs = (z + 1) * 1215.67
+    
+    if line_w0 == 'Lya':
+        w_obs = (z + 1) * w_lya
+    else:
+        w_obs = (z + 1) * line_w0
 
     n_NB = np.zeros(len(z)).astype(int)
-    for i, w in enumerate(w_lya_obs):
-        n_NB[i] = int(np.argmin(np.abs(w_central_NB - w)))
+    for i, w in enumerate(w_obs):
+        w_diff = np.abs(w_central_NB - w)
+        w_diff_argmin = np.argmin(w_diff)
 
-
+        if w_diff[w_diff_argmin] > fwhm_Arr[w_diff_argmin] * 0.5:
+            n_NB[i] = -1
+        else:
+            n_NB[i] = int(w_diff_argmin)
 
     # 39 It's too much, so let's assign also -1
-    # 2.7 is the minimum redshift we can measure
-    n_NB[(n_NB < 0) | (n_NB > 39) | (z < 2.7)] = -1
+    n_NB[(n_NB < 0) | (n_NB > 39)] = -1
 
     # If only one value passed, return as a number instead of numpy array
     if len(n_NB) == 1:
