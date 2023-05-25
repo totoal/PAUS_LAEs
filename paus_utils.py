@@ -74,7 +74,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
     return ax
     
 
-def z_NB(cont_line_pos):
+def z_NB(cont_line_pos, w0_line=1215.67):
     '''
     Computes the Lyman-alpha redshift (z) for a given continuum narrowband (NB) index.
 
@@ -103,13 +103,13 @@ def z_NB(cont_line_pos):
 
     w = (w2 - w1) * cont_line_pos % 1 + w1
 
-    Lya_z_Arr = w / w_lya - 1
-    Lya_z_Arr[mask_nondetection] = -1
+    Line_z_Arr = w / w0_line - 1
+    Line_z_Arr[mask_nondetection] = -1
 
     if len(w) > 1:
-        return Lya_z_Arr
+        return z_Arr
     else:
-        return Lya_z_Arr[0]
+        return z_Arr[0]
 
 def NB_z(z):
     '''
