@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
-from paus_utils import w_central
+import pickle
+from paus_utils import w_central, fwhm_Arr, NB_z
 from jpasLAEs.utils import flux_to_mag, mag_to_flux
 import numpy as np
 from astropy.table import Table
@@ -57,12 +58,14 @@ def load_sfg_mock(path_to_mock):
 
     return cat
 
-def load_gal_mock(path_to_mock, cat_fraction):
+def load_gal_mock(path_to_mock, cat_fraction=0.01):
     tab = Table.read(path_to_mock).to_pandas().to_numpy()
     mock_size = len(tab)
 
     np.random.seed(1312)
-    sel = np.random.randint(0, mock_size, size=int(mock_size * cat_fraction))
+    sel = np.random.choice(np.arange(mock_size),
+                           int(mock_size * cat_fraction),
+                           replace=False)
     
     cat = {}
 
@@ -86,6 +89,41 @@ def load_gal_mock(path_to_mock, cat_fraction):
     # L_lya and EW0_lya are zero for all these objects.
     cat['L_lya_spec'] = np.zeros_like(cat['zspec'])
     cat['EW0_lya_spec'] = np.zeros_like(cat['zspec'])
+
+    # Let's correct the line fluxes according to the correction factors
+    # that we have computed in test_GAL_mock.ipynb
+    corr_path = '/home/alberto/almacen/PAUS_data/catalogs/Lightcone_line_corr.pkl'
+    with open(corr_path, 'rb') as f:
+        line_corr_dict = pickle.load(f)
+
+    line_dict = {'halpha': 6564.61,
+                 'hbeta': 4862.68,
+                 'oii3727': 3727.10,
+                 'oiii4959': 4960.30,
+                 'oiii5007': 5008.24}
+
+    for line_name, line_w0 in line_dict.items():
+        # The line fluxes
+        Fl = tab[f'l_tot_{line_name}_ext'][sel][mag_mask]
+        zspec = cat['zspec']
+
+        line_NB_Arr = NB_z(zspec, line_w0)
+
+        where_lines = (line_NB_Arr[line_NB_Arr >= 0],
+                       np.arange(len(zspec))[line_NB_Arr >= 0])
+        
+        # To which z bin does each source belong to
+        z_bins = line_corr_dict['z_bins']
+        z_bin_i_Arr = np.ones_like(zspec) * -1
+        for z_bin_i in range(len(z_bins) - 1):
+            z_min, z_max = z_bins[z_bin_i], z_bins[z_bin_i + 1]
+            z_bin_i_Arr[(zspec >= z_min) & (zspec < z_max)] = z_bin_i
+
+        # alpha is the correction factor
+        alpha = np.array(line_corr_dict[f'{line_name}_corr_factor'])[z_bin_i_Arr.astype(int)]
+        flx_0_diff = - Fl / fwhm_Arr[line_NB_Arr] * (1 - alpha)
+
+        cat['flx_0'][*where_lines] += flx_0_diff[line_NB_Arr >= 0]
 
     return cat
 
@@ -125,3 +163,9 @@ def add_errors(flx_0, field_name):
     Returns the matrix of perturbed fluxes and errors: flx, err
     '''
     return
+
+
+if __name__ == '__main__':
+    ## Debugging
+    mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
+    load_gal_mock(mock_GAL_path)
