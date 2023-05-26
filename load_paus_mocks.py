@@ -104,7 +104,7 @@ def load_gal_mock(path_to_mock, cat_fraction=0.01):
 
     for line_name, line_w0 in line_dict.items():
         # The line fluxes
-        Fl = tab[f'l_tot_{line_name}_ext'][sel][mag_mask]
+        Fl = Table.read(path_to_mock)[f'l_tot_{line_name}_ext'][sel][mag_mask]
         zspec = cat['zspec']
 
         line_NB_Arr = NB_z(zspec, line_w0)
