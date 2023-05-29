@@ -207,6 +207,7 @@ if __name__ == '__main__':
         ]
         
         for args in args_list:
+            print(f'NB: {args[0]}-{args[1]}')
             main(*args)
 
         print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t0)))

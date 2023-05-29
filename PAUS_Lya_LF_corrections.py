@@ -212,7 +212,6 @@ def compute_LF_corrections(mocks_dict, field_name,
         mock = select_LAEs(mock, nb_min, nb_max, r_min, r_max,
                            ew0min_lya=30, ewmin_other=100,
                            check_nice_z=True)
-        print(f'N nice_lya = {sum(mock["nice_lya"])}')
 
     # L_lya bias correction with the QSO LAEs catalog as reference
     L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'])
@@ -291,8 +290,8 @@ if __name__ == '__main__':
         (12, 15, r_min, r_max),
     ]
 
-    args = (1, 5, r_min, r_max)
 
-    main(*args)
+    for args in args_list:
+        main(*args)
 
     print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))

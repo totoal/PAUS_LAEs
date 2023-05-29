@@ -155,8 +155,6 @@ def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
         elif i == 4:
             mocks_dict[mock_name] = load_gal_mock(mock_path, gal_fraction)
 
-    print(f'Mock len: {len(mocks_dict["SFG"]["zspec"])}')
-    
     return mocks_dict
 
 
