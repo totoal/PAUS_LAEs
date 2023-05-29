@@ -74,7 +74,7 @@ def load_gal_mock(path_to_mock, cat_fraction=0.01):
 
     # Add BBs
     cat['flx_0'] = np.vstack([cat['flx_0'],
-                             mag_to_flux(tab[sel, -5:].T,
+                             mag_to_flux(tab[sel, 11 + 40 : 11 + 40 + 5].T,
                                          w_central[-6:-1].reshape(-1,1)),
                              np.zeros(len(sel))])
 
@@ -92,6 +92,7 @@ def load_gal_mock(path_to_mock, cat_fraction=0.01):
 
     # Let's correct the line fluxes according to the correction factors
     # that we have computed in test_GAL_mock.ipynb
+    '''
     corr_path = '/home/alberto/almacen/PAUS_data/catalogs/Lightcone_line_corr.pkl'
     with open(corr_path, 'rb') as f:
         line_corr_dict = pickle.load(f)
@@ -121,9 +122,12 @@ def load_gal_mock(path_to_mock, cat_fraction=0.01):
 
         # alpha is the correction factor
         alpha = np.array(line_corr_dict[f'{line_name}_corr_factor'])[z_bin_i_Arr.astype(int)]
-        flx_0_diff = - Fl / fwhm_Arr[line_NB_Arr] * (1 - alpha)
+        alpha[z_bin_i_Arr < 0] = 1.
+
+        flx_0_diff = - Fl / fwhm_Arr[line_NB_Arr] * (1 - alpha) * 0.625
 
         cat['flx_0'][*where_lines] += flx_0_diff[line_NB_Arr >= 0]
+    '''
 
     return cat
 
