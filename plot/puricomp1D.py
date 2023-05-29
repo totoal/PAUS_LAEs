@@ -7,6 +7,9 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 16})
 
+import sys
+sys.path.insert(0, '..')
+
 from jpasLAEs.utils import bin_centers
 from paus_utils import NB_z
 
