@@ -196,7 +196,18 @@ if __name__ == '__main__':
     for field_name in field_list:
         t0 = time.time()
 
-        main(1, 10, 17, 24, field_name)
+        args_list = [
+            (0, 3, 17, 24, field_name),
+            (2, 5, 17, 24, field_name),
+            (4, 7, 17, 24, field_name),
+            (6, 9, 17, 24, field_name),
+            (8, 11, 17, 24, field_name),
+            (10, 13, 17, 24, field_name),
+            (12, 15, 17, 24, field_name),
+        ]
+        
+        for args in args_list:
+            main(*args)
 
         print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t0)))
 

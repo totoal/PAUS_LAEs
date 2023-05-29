@@ -280,7 +280,18 @@ if __name__ == '__main__':
     t00 = time.time()
 
     # args = (nb_min, nb_max, r_min, r_max)
-    args = (1, 5, 17, 24)
+    r_min, r_max = 17, 24
+    args_list = [
+        (0, 3, r_min, r_max),
+        (2, 5, r_min, r_max),
+        (4, 7, r_min, r_max),
+        (6, 9, r_min, r_max),
+        (8, 11, r_min, r_max),
+        (10, 13, r_min, r_max),
+        (12, 15, r_min, r_max),
+    ]
+
+    args = (1, 5, r_min, r_max)
 
     main(*args)
 
