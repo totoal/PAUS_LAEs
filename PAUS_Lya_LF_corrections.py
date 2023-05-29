@@ -193,8 +193,6 @@ def compute_LF_corrections(mocks_dict, field_name,
                            nb_min, nb_max, r_min, r_max):
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mocks_dict.items():
-        print(mock_name)
-
         ## PROVISIONAL ERRORS FOR TESTING
         nominal_errs = mag_to_flux(23, w_central) / 3
         mock['err'] = np.ones_like(mock['flx_0']) * nominal_errs.reshape(-1, 1)
@@ -292,6 +290,7 @@ if __name__ == '__main__':
 
 
     for args in args_list:
+        print(f'NB: {args[0]}-{args[1]}')
         main(*args)
 
     print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))
