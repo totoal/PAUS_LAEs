@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '..')
+
 from paus_utils import lya_redshift
 
 import pickle
@@ -125,7 +128,7 @@ def main():
            ylabel='Response [A. U.]',
            facecolor='darkgrey')
 
-    plt.savefig('figures/filter_transmission_curves.pdf',
+    plt.savefig('../figures/filter_transmission_curves.pdf',
                 bbox_inches='tight', pad_inches=0.1, facecolor='w')
 
 
