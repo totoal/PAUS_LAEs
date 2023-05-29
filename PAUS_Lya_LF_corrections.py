@@ -228,8 +228,8 @@ def compute_LF_corrections(mocks_dict, field_name,
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
     np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
-    np.save(f'{savedir}/puri2D_{field_name}.npy', puri2d)
-    np.save(f'{savedir}/comp2D_{field_name}.npy', comp2d)
+    np.save(f'{savedir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy', puri2d)
+    np.save(f'{savedir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy', comp2d)
 
     # Finally, let's save the full mocks in the final state to later compute
     # 1D purity, completeness and other stuff.

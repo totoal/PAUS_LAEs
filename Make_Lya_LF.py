@@ -63,7 +63,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 
-def Lya_LF_matrix(cat, L_bins, field_name, LF_savedir,
+def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
                   N_iter=500):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
@@ -71,8 +71,8 @@ def Lya_LF_matrix(cat, L_bins, field_name, LF_savedir,
     '''
     # Load the field correction matrices
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
-    puri2d = np.load(f'{corr_dir}/puri2D_foo.npy')
-    comp2d = np.load(f'{corr_dir}/comp2D_foo.npy')
+    puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy')
+    comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy')
     puricomp2d_L_bins = np.load(f'{corr_dir}/puricomp2D_L_bins.npy')
     puricomp2d_r_bins = np.load(f'{corr_dir}/puricomp2D_r_bins.npy')
 
@@ -181,7 +181,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
 
     print('Making the LF')
-    Lya_LF_matrix(cat, L_bins, field_name, LF_savedir)
+    Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir)
 
 
 
