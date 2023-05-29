@@ -70,9 +70,10 @@ def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
     with its bin error.
     '''
     # Load the field correction matrices
+    # TODO: !!!!! Change 'foo' with '{field_name}'
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
-    puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy')
-    comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy')
+    puri2d = np.load(f'{corr_dir}/puri2D_foo_nb{nb_min}-{nb_max}.npy')
+    comp2d = np.load(f'{corr_dir}/comp2D_foo_nb{nb_min}-{nb_max}.npy')
     puricomp2d_L_bins = np.load(f'{corr_dir}/puricomp2D_L_bins.npy')
     puricomp2d_r_bins = np.load(f'{corr_dir}/puricomp2D_r_bins.npy')
 
@@ -197,13 +198,14 @@ if __name__ == '__main__':
         t0 = time.time()
 
         args_list = [
-            (0, 3, 17, 24, field_name),
-            (2, 5, 17, 24, field_name),
-            (4, 7, 17, 24, field_name),
-            (6, 9, 17, 24, field_name),
-            (8, 11, 17, 24, field_name),
-            (10, 13, 17, 24, field_name),
-            (12, 15, 17, 24, field_name),
+            (0, 2, 17, 24, field_name),
+            (2, 4, 17, 24, field_name),
+            (4, 6, 17, 24, field_name),
+            (6, 8, 17, 24, field_name),
+            (8, 10, 17, 24, field_name),
+            (10, 12, 17, 24, field_name),
+            (12, 14, 17, 24, field_name),
+            (14, 16, 17, 24, field_name),
         ]
         
         for args in args_list:
