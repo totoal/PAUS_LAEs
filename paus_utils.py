@@ -96,7 +96,8 @@ def z_NB(cont_line_pos, w0_line='Lya'):
     if w0_line == 'Lya':
         w0_line = w_lya
     else:
-        assert isinstance(w0_line, (int, float)), 'w0_line must be int or float'
+        if not isinstance(w0_line, (int, float)):
+            raise TypeError('w0_line must be int or float')
 
     # Store a mask with the -1 values for the NB
     mask_nondetection = (cont_line_pos == -1)
@@ -116,7 +117,7 @@ def z_NB(cont_line_pos, w0_line='Lya'):
     else:
         return Line_z_Arr[0]
 
-def NB_z(z, line_w0='Lya'):
+def NB_z(z, w0_line='Lya'):
     '''
     Takes a redshift as an argument and returns the corresponding NB to that redshift.
     Returns -1 if the Lya redshift is out of boundaries.
@@ -124,11 +125,12 @@ def NB_z(z, line_w0='Lya'):
     z = np.atleast_1d(z)
     w_central_NB = w_central[:40]
     
-    if line_w0 == 'Lya':
+    if w0_line == 'Lya':
         w_obs = (z + 1) * w_lya
     else:
-        assert isinstance(line_w0, (int, float)), 'line_w0 must be int or float'
-        w_obs = (z + 1) * line_w0
+        if not isinstance(w0_line, (int, float)):
+            raise TypeError('w0_line must be int or float')
+        w_obs = (z + 1) * w0_line
 
     n_NB = np.zeros(len(z)).astype(int)
     for i, w in enumerate(w_obs):
