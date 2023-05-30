@@ -74,7 +74,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
     return ax
     
 
-def z_NB(cont_line_pos, w0_line=1215.67):
+def z_NB(cont_line_pos, w0_line='Lya'):
     '''
     Computes the Lyman-alpha redshift (z) for a given continuum narrowband (NB) index.
 
@@ -93,6 +93,11 @@ def z_NB(cont_line_pos, w0_line=1215.67):
     This function assumes that the input continuum narrowband indices correspond to adjacent
     narrowbands centered at wavelengths increasing from the blue to the red end of the spectrum.
     '''
+    if w0_line == 'Lya':
+        w0_line = w_lya
+    else:
+        assert isinstance(w0_line, (int, float)), 'w0_line must be int or float'
+
     # Store a mask with the -1 values for the NB
     mask_nondetection = (cont_line_pos == -1)
 
@@ -122,6 +127,7 @@ def NB_z(z, line_w0='Lya'):
     if line_w0 == 'Lya':
         w_obs = (z + 1) * w_lya
     else:
+        assert isinstance(line_w0, (int, float)), 'line_w0 must be int or float'
         w_obs = (z + 1) * line_w0
 
     n_NB = np.zeros(len(z)).astype(int)
