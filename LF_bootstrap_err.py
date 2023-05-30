@@ -50,7 +50,11 @@ if __name__ == '__main__':
                 [8, 10], [10, 12], [12, 14], [14, 16]]
 
     for [nb1, nb2] in nbs_list:
-        print(f'NBs = {nb1}, {nb2}')
+        if nb1 == nb2:
+            print(f'NB: {nb1}')
+        else:
+            print(f'NB: {nb1}-{nb2}')
+
         hist_mat = None
         
         N_realizations = 1000
