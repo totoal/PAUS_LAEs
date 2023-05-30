@@ -1,3 +1,5 @@
+#!/home/alberto/miniconda3/bin/python3
+
 from load_paus_mocks import load_mocks_dict ## Provisional
 
 import numpy as np
@@ -200,7 +202,7 @@ if __name__ == '__main__':
 
         r_min, r_max = 17, 24
 
-        nb_min, nb_max = sys.argv[1:3]
+        [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
 
         args = (nb_min, nb_max, r_min, r_max, field_name)
 

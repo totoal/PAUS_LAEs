@@ -1,3 +1,5 @@
+#!/home/alberto/miniconda3/bin/python3
+
 import numpy as np
 
 from paus_utils import Lya_effective_volume
@@ -47,10 +49,7 @@ def bootstrapped_LFs(nb1, nb2, region_list_indices):
 if __name__ == '__main__':
     print('Bootstrapping sky regions')
 
-    nbs_list = [[0, 2], [2, 4], [4, 6], [6, 8],
-                [8, 10], [10, 12], [12, 14], [14, 16]]
-
-    nb1, nb2 = sys.argv[1:3]
+    [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
 
     if nb1 == nb2:
         print(f'NB: {nb1}')

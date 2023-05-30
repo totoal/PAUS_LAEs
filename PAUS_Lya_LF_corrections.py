@@ -1,3 +1,5 @@
+#!/home/alberto/miniconda3/bin/python3
+
 from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux, hms_since_t0
 
 from load_paus_mocks import load_mocks_dict, add_errors
@@ -279,9 +281,9 @@ if __name__ == '__main__':
 
     r_min, r_max = 17, 24
 
-    nb_min, nb_max = sys.argv[1:3]
+    [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
 
-    args = (0, 2, r_min, r_max)
+    args = (nb_min, nb_max, r_min, r_max)
 
     if args[0] == args[1]:
         print(f'NB: {args[0]}')
