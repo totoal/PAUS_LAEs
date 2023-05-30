@@ -231,7 +231,7 @@ def compute_LF_corrections(mocks_dict, field_name,
 
     # Finally, let's save the full mocks in the final state to later compute
     # 1D purity, completeness and other stuff.
-    with open(f'{savedir}/mock_dict_{field_name}.pkl', 'wb') as f:
+    with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
         pickle.dump(mocks_dict, f)
 
 
