@@ -4,6 +4,7 @@ import numpy as np
  
 import time
 import os
+import sys
 
 from scipy.stats import binned_statistic_2d
 
@@ -197,24 +198,18 @@ if __name__ == '__main__':
     for field_name in field_list:
         t0 = time.time()
 
-        args_list = [
-            (0, 2, 17, 24, field_name),
-            (2, 4, 17, 24, field_name),
-            (4, 6, 17, 24, field_name),
-            (6, 8, 17, 24, field_name),
-            (8, 10, 17, 24, field_name),
-            (10, 12, 17, 24, field_name),
-            (12, 14, 17, 24, field_name),
-            (14, 16, 17, 24, field_name),
-        ]
-        
-        for args in args_list:
-            if args[0] == args[1]:
-                print(f'NB: {args[0]}')
-            else:
-                print(f'NB: {args[0]}-{args[1]}')
+        r_min, r_max = 17, 24
 
-            main(*args)
+        nb_min, nb_max = sys.argv[1:3]
+
+        args = (nb_min, nb_max, r_min, r_max, field_name)
+
+        if args[0] == args[1]:
+            print(f'NB: {args[0]}')
+        else:
+            print(f'NB: {args[0]}-{args[1]}')
+
+        main(*args)
 
         print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t0)))
 

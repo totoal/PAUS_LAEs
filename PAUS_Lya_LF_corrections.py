@@ -8,6 +8,7 @@ from scipy.stats import binned_statistic
 
 import pickle
 import time
+import sys
 
 import numpy as np
 
@@ -276,26 +277,17 @@ if __name__ == '__main__':
 
     t00 = time.time()
 
-    # args = (nb_min, nb_max, r_min, r_max)
     r_min, r_max = 17, 24
-    args_list = [
-        (0, 2, r_min, r_max),
-        (2, 4, r_min, r_max),
-        (4, 6, r_min, r_max),
-        (6, 8, r_min, r_max),
-        (8, 10, r_min, r_max),
-        (10, 12, r_min, r_max),
-        (12, 14, r_min, r_max),
-        (14, 16, r_min, r_max),
-    ]
 
+    nb_min, nb_max = sys.argv[1:3]
 
-    for args in args_list:
-        if args[0] == args[1]:
-            print(f'NB: {args[0]}')
-        else:
-            print(f'NB: {args[0]}-{args[1]}')
+    args = (0, 2, r_min, r_max)
 
-        main(*args)
+    if args[0] == args[1]:
+        print(f'NB: {args[0]}')
+    else:
+        print(f'NB: {args[0]}-{args[1]}')
+
+    main(*args)
 
     print('Done in {0}h {1}m {2}s'.format(*hms_since_t0(t00)))
