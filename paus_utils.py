@@ -198,8 +198,11 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
     z_min_overlap = (w_central[nb_min] - fwhm_Arr[nb_min] * 0.5) / w_lya - 1
     z_max_overlap = (w_central[nb_max] + fwhm_Arr[nb_max] * 0.5) / w_lya - 1
 
-    z_min_abs = (w_central[nb_min - 1] +
-                 fwhm_Arr[nb_min - 1] * 0.5) / w_lya - 1
+    if nb_min == 0:
+        z_min_abs = z_min_overlap
+    else:
+        z_min_abs = (w_central[nb_min - 1] +
+                    fwhm_Arr[nb_min - 1] * 0.5) / w_lya - 1
     z_max_abs = (w_central[nb_max + 1] -
                  fwhm_Arr[nb_min + 1] * 0.5) / w_lya - 1
 
