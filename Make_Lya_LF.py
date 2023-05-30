@@ -144,7 +144,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
         mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
                                     mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
-                                    mock_GAL_path, gal_fraction=0.3)
+                                    mock_GAL_path, gal_fraction=1.)
 
         cat = mocks_dict[field_name]
         ## PROVISIONAL ERRORS FOR TESTING
