@@ -47,7 +47,7 @@ def main(field_name, nb1, nb2):
     with open(f'{path_to_mock_dict}/mock_dict_{field_name}_nb{nb1}-{nb2}.pkl', 'rb') as f:
         mock_dict = pickle.load(f)
 
-    w_obs_bins = np.linspace(1000, 7000, 100)
+    w_obs_bins = np.linspace(1000, 7000, 99)
     w_obs_bins_c = bin_centers(w_obs_bins)
 
     h_dict = {
@@ -61,7 +61,6 @@ def main(field_name, nb1, nb2):
         h = np.histogram(to_hist, w_obs_bins)[0]
 
         if mock_name[:3] == 'QSO':
-            print('qso')
             h_dict['QSO'] += h / mock['area']
         else:
             h_dict[mock_name] = h / mock['area']
@@ -96,7 +95,7 @@ def main(field_name, nb1, nb2):
            xlabel=r'$\lambda_\mathrm{obs}$ (\AA)',
            ylabel=r'deg$^{-2}$')
 
-    fig.savefig('../figures/contaminants_hist.pdf', bbox_inches='tight',
+    fig.savefig(f'../figures/contaminants_hist_nb{nb1}-{nb2}.pdf', bbox_inches='tight',
                 pad_inches=0.1, facecolor='w')
 
 
@@ -104,5 +103,8 @@ def main(field_name, nb1, nb2):
 
 if __name__ == '__main__':
     field_name = 'foo' # Test data
-    nb1, nb2 = 0, 2
-    main(field_name, nb1, nb2)
+    nbs_list = [[0, 2], [2, 4], [4, 6], [6, 8],
+                [8, 10], [10, 12], [12, 14], [14, 16]]
+
+    for [nb1, nb2] in nbs_list:
+        main(field_name, nb1, nb2)
