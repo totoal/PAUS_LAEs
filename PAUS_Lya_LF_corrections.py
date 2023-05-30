@@ -279,13 +279,14 @@ if __name__ == '__main__':
     # args = (nb_min, nb_max, r_min, r_max)
     r_min, r_max = 17, 24
     args_list = [
-        (0, 3, r_min, r_max),
-        (2, 5, r_min, r_max),
-        (4, 7, r_min, r_max),
-        (6, 9, r_min, r_max),
-        (8, 11, r_min, r_max),
-        (10, 13, r_min, r_max),
-        (12, 15, r_min, r_max),
+        (0, 2, r_min, r_max),
+        (2, 4, r_min, r_max),
+        (4, 6, r_min, r_max),
+        (6, 8, r_min, r_max),
+        (8, 10, r_min, r_max),
+        (10, 12, r_min, r_max),
+        (12, 14, r_min, r_max),
+        (14, 16, r_min, r_max),
     ]
 
 
