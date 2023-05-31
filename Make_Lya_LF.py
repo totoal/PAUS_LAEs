@@ -93,7 +93,7 @@ def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
 
     for k in range(N_iter):
         if (k + 1) % 50 == 0:
-            print(f'Realization: {k + 1} / {N_iter}', end='\r')
+            print(f'Progress: {k + 1} / {N_iter}', end='\r')
 
         randN = np.random.randn(len(L_Arr))
         L_perturbed = np.empty_like(L_Arr)
