@@ -113,7 +113,8 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
             if (k + 1) % 50:
-                print(f'{mock_name} correction matrices: {k + 1} / {N_iter}', end='\r')
+                print(f'{mock_name} correction matrices: {k + 1} / {N_iter}',
+                      end=('\r' if k + 1 < N_iter else ''))
             # Generate random numbers
             randN = np.random.randn(N_sources)
             L_perturbed = np.empty(N_sources)
@@ -273,6 +274,7 @@ def main(nb_min, nb_max, r_min, r_max):
     field_list = ['foo']
     for field_name in field_list:
         print(f'Field: {field_name}')
+        print('----------------------')
         compute_LF_corrections(mocks_dict, field_name,
                                nb_min, nb_max, r_min, r_max)
 
@@ -290,9 +292,9 @@ if __name__ == '__main__':
     args = (nb_min, nb_max, r_min, r_max)
 
     if args[0] == args[1]:
-        print(f'NB: {args[0]}')
+        print(f'NB: {args[0]}\n')
     else:
-        print(f'NB: {args[0]}-{args[1]}')
+        print(f'NB: {args[0]}-{args[1]}\n')
 
     main(*args)
 
