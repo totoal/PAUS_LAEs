@@ -112,7 +112,7 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
 
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
-            if (k + 1) % 50:
+            if (k + 1) % 50 == 0:
                 print(f'{mock_name} correction matrices: {k + 1} / {N_iter}',
                       end=('\r' if k + 1 < N_iter else ''))
             # Generate random numbers
