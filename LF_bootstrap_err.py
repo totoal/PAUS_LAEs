@@ -28,7 +28,7 @@ def bootstrapped_LFs(nb1, nb2, region_list_indices):
     for jj, region in enumerate(region_list):
         LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region}'
         pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-        filename_hist = f'{pathname}/hist_i_mat_{region}.npy'
+        filename_hist = f'{pathname}/hist_i_mat.npy'
         hist_i_mat = np.load(filename_hist)
 
         L_bins = np.load(f'{pathname}/LF_L_bins.npy')
