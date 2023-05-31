@@ -200,9 +200,8 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    # field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
-    #                'GAL']
-    field_list =['GAL']
+    field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
+                   'GAL']
 
     t00 = time.time()
 
