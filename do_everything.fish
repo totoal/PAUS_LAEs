@@ -3,7 +3,7 @@
 function check_py_exception
     # Check the exit code of the Python script
     if test $status -ne 0
-        echo "Python exception occurred. Exiting..."
+        echo $stderr
         exit 1
     end
 end
