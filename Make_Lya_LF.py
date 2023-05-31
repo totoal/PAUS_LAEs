@@ -66,7 +66,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 
-def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
+def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
                   N_iter=500):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
@@ -125,9 +125,9 @@ def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
         puri_list.append(puri_k)
 
     # Save hist_i_mat
-    np.save(f'{LF_savedir}/hist_i_mat_{field_name}.npy', hist_i_mat)
+    np.save(f'{LF_savedir}/hist_i_mat.npy', hist_i_mat)
     # Save the purity
-    np.save(f'{LF_savedir}/estimated_purity_field_{field_name}',
+    np.save(f'{LF_savedir}/estimated_purity_field',
             np.array(puri_list))
         
 
@@ -191,7 +191,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
 
     print('Making the LF')
-    Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir)
+    Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir)
 
 
 
