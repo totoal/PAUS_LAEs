@@ -98,9 +98,11 @@ def Lya_LF_matrix(cat, L_bins, field_name, nb_min, nb_max, LF_savedir,
         L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
         L_perturbed[np.isnan(L_perturbed)] = 0.
 
-        puri_k, comp_k = Lya_LF_weights(cat['r_mag'], L_perturbed,
-                                        puri2d, comp2d,
-                                        puricomp2d_L_bins, puricomp2d_r_bins)
+        puri_k, comp_k = np.zeros_like(nice_lya) # Initialize puricomp arrays
+        puri_k[nice_lya], comp_k[nice_lya] =\
+            Lya_LF_weights(cat['r_mag'][nice_lya], L_perturbed[nice_lya],
+                           puri2d, comp2d,
+                           puricomp2d_L_bins, puricomp2d_r_bins)
 
         # The array of weights w
         w = np.random.rand(len(puri_k))
@@ -193,8 +195,9 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
-                   'GAL']
+    # field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
+    #                'GAL']
+    field_list =['GAL']
 
     t00 = time.time()
 
