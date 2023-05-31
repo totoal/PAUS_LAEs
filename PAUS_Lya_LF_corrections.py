@@ -112,6 +112,8 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
 
         N_sources = len(mock['zspec'])
         for k in range(N_iter):
+            if (k + 1) % 50:
+                print(f'{mock_name} correction matrices: {k + 1} / {N_iter}', end='\r')
             # Generate random numbers
             randN = np.random.randn(N_sources)
             L_perturbed = np.empty(N_sources)
@@ -210,6 +212,7 @@ def compute_LF_corrections(mocks_dict, field_name,
         ## each mock
 
         ## First select LAEs and estimate L_lya etc.
+        print(f'{mock_name}: Selecting candidates')
         mock = select_LAEs(mock, nb_min, nb_max, r_min, r_max,
                            ew0min_lya=30, ewmin_other=100,
                            check_nice_z=True)
@@ -269,6 +272,7 @@ def main(nb_min, nb_max, r_min, r_max):
     # List of PAUS fields
     field_list = ['foo']
     for field_name in field_list:
+        print(f'Field: {field_name}')
         compute_LF_corrections(mocks_dict, field_name,
                                nb_min, nb_max, r_min, r_max)
 
