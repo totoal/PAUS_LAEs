@@ -42,7 +42,7 @@ def compute_L_Lbin_err(cat, L_binning):
 
     return L_Lbin_err_plus, L_Lbin_err_minus, median
 
-def L_lya_bias_estimation(cat):
+def L_lya_bias_estimation(cat, field_name, nb_min, nb_max):
     '''
     Compute and save L corrections and errors
     '''
@@ -53,21 +53,23 @@ def L_lya_bias_estimation(cat):
 
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
     os.makedirs(corr_dir, exist_ok=True)
-    np.save(f'{corr_dir}/L_nb_err_plus.npy', L_Lbin_err_plus)
-    np.save(f'{corr_dir}/L_nb_err_minus.npy', L_Lbin_err_minus)
-    np.save(f'{corr_dir}/L_bias.npy', L_median)
+    surname = f'{field_name}_nb{nb_min}-{nb_max}'
+    np.save(f'{corr_dir}/L_nb_err_plus_{surname}.npy', L_Lbin_err_plus)
+    np.save(f'{corr_dir}/L_nb_err_minus_{surname}.npy', L_Lbin_err_minus)
+    np.save(f'{corr_dir}/L_bias_{surname}.npy', L_median)
     np.save(f'/{corr_dir}/L_nb_err_binning.npy', L_binning)
 
 
-def L_lya_bias_apply(cat):
+def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     '''
     Applies the bias sustraction and estimates errors based in the
     computations made by L_lya_bias_estimation.
     '''
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
-    L_Lbin_err_plus = np.load(f'{corr_dir}/L_nb_err_plus.npy')
-    L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus.npy')
-    L_median = np.load(f'{corr_dir}/L_bias.npy')
+    surname = f'{field_name}_nb{nb_min}-{nb_max}'
+    L_Lbin_err_plus = np.load(f'{corr_dir}/L_nb_err_plus_{surname}.npy')
+    L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus_{surname}.npy')
+    L_median = np.load(f'{corr_dir}/L_bias_{surname}.npy')
     L_binning = np.load(f'/{corr_dir}/L_nb_err_binning.npy')
     L_bin_c = [L_binning[i: i + 2].sum() * 0.5 for i in range(len(L_binning) - 1)]
 
@@ -221,11 +223,12 @@ def compute_LF_corrections(mocks_dict, field_name,
                            check_nice_z=True)
 
     # L_lya bias correction with the QSO LAEs catalog as reference
-    L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'])
+    L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'], field_name,
+                          nb_min, nb_max)
 
     # Now apply the bias correction and compute L statistical errors
     for _, mock in mocks_dict.items():
-        mock = L_lya_bias_apply(mock)
+        mock = L_lya_bias_apply(mock, field_name, nb_min, nb_max)
 
     # Now compute the correction matrices
     r_bins = np.linspace(r_min, r_max, 200 + 1)
