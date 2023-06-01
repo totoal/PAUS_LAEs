@@ -113,10 +113,9 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         w = np.random.rand(len(puri_k))
         # Mask very low completeness and randomly according to purity
         include_mask = (w < puri_k) & (comp_k > 0.01)
-        w[:] = 1.
         w[~include_mask] = 0.
         w[include_mask] = 1. / comp_k[include_mask]
-        w[np.isnan(w) | np.isinf(w)] = 0.
+        w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
 
         # Store the realization of the LF in the hist matrix
         hist_i_mat[k], _ = np.histogram(L_perturbed[nice_lya],
@@ -190,10 +189,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # Save the bins
     np.save(f'{LF_savedir}/LF_L_bins.npy', L_bins)
 
-
     print('Making the LF')
     Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir)
-
 
 
 if __name__ == '__main__':
@@ -201,7 +198,7 @@ if __name__ == '__main__':
     print('Computing the Lya LF')
 
     field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
-                   'GAL']
+                  'GAL']
 
     t00 = time.time()
 
