@@ -169,7 +169,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
 
     # Apply the bias correction and compute L statistical errors
-    cat = L_lya_bias_apply(cat)
+    # TODO: Change `foo` with field name
+    cat = L_lya_bias_apply(cat, 'foo', nb_min, nb_max)
 
 
     #######################
