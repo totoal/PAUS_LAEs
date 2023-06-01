@@ -53,7 +53,8 @@ def L_lya_bias_estimation(cat, field_name, nb_min, nb_max):
 
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
     os.makedirs(corr_dir, exist_ok=True)
-    surname = f'{field_name}_nb{nb_min}-{nb_max}'
+    # TODO: change `foo` with {field_name}
+    surname = f'foo_nb{nb_min}-{nb_max}'
     np.save(f'{corr_dir}/L_nb_err_plus_{surname}.npy', L_Lbin_err_plus)
     np.save(f'{corr_dir}/L_nb_err_minus_{surname}.npy', L_Lbin_err_minus)
     np.save(f'{corr_dir}/L_bias_{surname}.npy', L_median)
@@ -66,7 +67,9 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     computations made by L_lya_bias_estimation.
     '''
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
-    surname = f'{field_name}_nb{nb_min}-{nb_max}'
+
+    # TODO: change `foo` with {field_name}
+    surname = f'foo_nb{nb_min}-{nb_max}'
     L_Lbin_err_plus = np.load(f'{corr_dir}/L_nb_err_plus_{surname}.npy')
     L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus_{surname}.npy')
     L_median = np.load(f'{corr_dir}/L_bias_{surname}.npy')
