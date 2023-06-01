@@ -11,6 +11,7 @@ from scipy.stats import binned_statistic
 import pickle
 import time
 import sys
+import os
 
 import numpy as np
 
@@ -51,6 +52,7 @@ def L_lya_bias_estimation(cat):
         compute_L_Lbin_err(cat, L_binning)
 
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
+    os.makedirs(corr_dir, exist_ok=True)
     np.save(f'{corr_dir}/L_nb_err_plus.npy', L_Lbin_err_plus)
     np.save(f'{corr_dir}/L_nb_err_minus.npy', L_Lbin_err_minus)
     np.save(f'{corr_dir}/L_bias.npy', L_median)
@@ -231,6 +233,7 @@ def compute_LF_corrections(mocks_dict, field_name,
     puri2d, comp2d = puricomp_corrections(mocks_dict, L_bins, r_bins,
                                           nb_min, nb_max, ew0_min=30)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
+    os.makedirs(savedir, exist_ok=True)
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
     np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
     np.save(f'{savedir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy', puri2d)
@@ -240,8 +243,6 @@ def compute_LF_corrections(mocks_dict, field_name,
     # 1D purity, completeness and other stuff.
     with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
         pickle.dump(mocks_dict, f)
-
-
 
 
 def main(nb_min, nb_max, r_min, r_max):
