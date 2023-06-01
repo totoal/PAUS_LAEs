@@ -102,8 +102,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
         L_perturbed[np.isnan(L_perturbed)] = 0.
 
-        puri_k = np.zeros_like(nice_lya) # Initialize puricomp arrays
-        comp_k = np.zeros_like(nice_lya) # Initialize puricomp arrays
+        puri_k = np.zeros_like(nice_lya).astype(float) # Initialize puricomp arrays
+        comp_k = np.zeros_like(nice_lya).astype(float) # Initialize puricomp arrays
         puri_k[nice_lya], comp_k[nice_lya] =\
             Lya_LF_weights(cat['r_mag'][nice_lya], L_perturbed[nice_lya],
                            puri2d, comp2d,

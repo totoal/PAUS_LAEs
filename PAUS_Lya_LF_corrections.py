@@ -291,7 +291,8 @@ if __name__ == '__main__':
 
     r_min, r_max = 17, 24
 
-    [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
+    # [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
+    nb_min, nb_max = 0, 2
 
     args = (nb_min, nb_max, r_min, r_max)
 

@@ -58,7 +58,7 @@ def load_sfg_mock(path_to_mock):
 
     return cat
 
-def load_gal_mock(path_to_mock, cat_fraction=0.01):
+def load_gal_mock(path_to_mock, cat_fraction=1.):
     tab = Table.read(path_to_mock).to_pandas().to_numpy()
     mock_size = len(tab)
 
@@ -133,7 +133,7 @@ def load_gal_mock(path_to_mock, cat_fraction=0.01):
 
 
 def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
-                    mock_QSO_LAEs_hiL_path, mock_GAL_path, gal_fraction=0.1):
+                    mock_QSO_LAEs_hiL_path, mock_GAL_path, gal_fraction=1.):
     '''
     Loads all the mocks needed to compute the Lya LF corrections, and returns
     a dictionary of mocks.
