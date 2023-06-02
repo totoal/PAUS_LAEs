@@ -247,8 +247,17 @@ def compute_LF_corrections(mocks_dict, field_name,
 
     # Finally, let's save the full mocks in the final state to later compute
     # 1D purity, completeness and other stuff.
+    # BUT, let's save a reduced version of the mock, without the fluxes
+    reduced_mock_dict = {}
+    keys_to_save = ['nice_lya', 'zspec', 'r_mag', 'lya_NB',
+                    'EW0_lya_spec', 'L_lya_spec', 'EW0_lya',
+                    'L_lya']
+    for mock_name in mocks_dict.keys():
+        reduced_mock_dict[mock_name] = {}
+    for key in keys_to_save:
+        reduced_mock_dict[mock_name][key] = mocks_dict[mock_name][key]
     with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
-        pickle.dump(mocks_dict, f)
+        pickle.dump(reduced_mock_dict, f)
 
 
 def main(nb_min, nb_max, r_min, r_max):
