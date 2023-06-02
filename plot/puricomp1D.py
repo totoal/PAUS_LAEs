@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, '..')
 
 from jpasLAEs.utils import bin_centers
-from paus_utils import NB_z
+from paus_utils import NB_z, z_NB
 
 def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
@@ -26,12 +26,16 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
     h_parent = np.zeros_like(L_bins_c)
 
     for _, mock in mocks_dict.items():
+        # Define nice_z
+        nice_z = np.abs(mock['zspec'] - z_NB(mock['lya_NB'])) < 0.6
+
         mask_r = (mock['r_mag'] >= r_min) & (mock['r_mag'] <= r_max)
         mask_sel = (mock['nice_lya']
                     & (mock['lya_NB'] >= nb_min)
                     & (mock['lya_NB'] <= nb_max)
                     & mask_r)
-        mask_nice = (mock['nice_lya'] & mock['nice_z']
+        mask_nice = ((mock['EW0_lya_spec'] > 30)
+                     & mock['nice_lya'] & nice_z
                      & (mock['lya_NB'] >= nb_min)
                      & (mock['lya_NB'] <= nb_max)
                      & mask_r)
