@@ -1,6 +1,6 @@
 import pandas as pd
 import glob
-import pickle
+# import pickle
 from paus_utils import w_central, fwhm_Arr, NB_z
 from jpasLAEs.utils import flux_to_mag, mag_to_flux
 import numpy as np
@@ -132,7 +132,7 @@ def load_gal_mock(path_to_mock, cat_fraction=1.):
     return cat
 
 
-def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
+def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
                     mock_QSO_LAEs_hiL_path, mock_GAL_path, gal_fraction=1.):
     '''
     Loads all the mocks needed to compute the Lya LF corrections, and returns
@@ -146,16 +146,16 @@ def load_mocks_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
     mock_name_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
 
-    mocks_dict = {}
+    mock_dict = {}
     for i, (mock_path, mock_name) in enumerate(zip(mock_path_list, mock_name_list)):
         if i == 0:
-            mocks_dict[mock_name] = load_sfg_mock(mock_path)
+            mock_dict[mock_name] = load_sfg_mock(mock_path)
         elif i > 0 and i < 4:
-            mocks_dict[mock_name] = load_qso_mock(mock_path)
+            mock_dict[mock_name] = load_qso_mock(mock_path)
         elif i == 4:
-            mocks_dict[mock_name] = load_gal_mock(mock_path, gal_fraction)
+            mock_dict[mock_name] = load_gal_mock(mock_path, gal_fraction)
 
-    return mocks_dict
+    return mock_dict
 
 
 ################################################
