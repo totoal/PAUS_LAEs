@@ -2,7 +2,7 @@
 
 from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux, hms_since_t0
 
-from load_paus_mocks import load_mocks_dict, add_errors
+from load_paus_mocks import load_mock_dict, add_errors
 from paus_utils import *
 from LAE_selection_method import *
 
@@ -202,10 +202,10 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
     return puri2d, comp2d
 
 
-def compute_LF_corrections(mocks_dict, field_name,
+def compute_LF_corrections(mock_dict, field_name,
                            nb_min, nb_max, r_min, r_max):
     # Modify the mocks adding errors according to the corresponding field
-    for mock_name, mock in mocks_dict.items():
+    for mock_name, mock in mock_dict.items():
         ## PROVISIONAL ERRORS FOR TESTING
         nominal_errs = mag_to_flux(23, w_central) / 3
         mock['err'] = np.ones_like(mock['flx_0']) * nominal_errs.reshape(-1, 1)
@@ -226,17 +226,17 @@ def compute_LF_corrections(mocks_dict, field_name,
                            check_nice_z=True)
 
     # L_lya bias correction with the QSO LAEs catalog as reference
-    L_lya_bias_estimation(mocks_dict['QSO_LAEs_loL'], field_name,
+    L_lya_bias_estimation(mock_dict['QSO_LAEs_loL'], field_name,
                           nb_min, nb_max)
 
     # Now apply the bias correction and compute L statistical errors
-    for _, mock in mocks_dict.items():
+    for _, mock in mock_dict.items():
         mock = L_lya_bias_apply(mock, field_name, nb_min, nb_max)
 
     # Now compute the correction matrices
     r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
-    puri2d, comp2d = puricomp_corrections(mocks_dict, L_bins, r_bins,
+    puri2d, comp2d = puricomp_corrections(mock_dict, L_bins, r_bins,
                                           nb_min, nb_max, ew0_min=30)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     os.makedirs(savedir, exist_ok=True)
@@ -252,10 +252,10 @@ def compute_LF_corrections(mocks_dict, field_name,
     keys_to_save = ['nice_lya', 'zspec', 'r_mag', 'lya_NB',
                     'EW0_lya_spec', 'L_lya_spec', 'EW0_lya',
                     'L_lya']
-    for mock_name in mocks_dict.keys():
+    for mock_name in mock_dict.keys():
         reduced_mock_dict[mock_name] = {}
     for key in keys_to_save:
-        reduced_mock_dict[mock_name][key] = mocks_dict[mock_name][key]
+        reduced_mock_dict[mock_name][key] = mock_dict[mock_name][key]
     with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
         pickle.dump(reduced_mock_dict, f)
 
@@ -270,7 +270,7 @@ def main(nb_min, nb_max, r_min, r_max):
     mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
     mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
     mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
-    mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
+    mock_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_path, gal_fraction=gal_fraction)
 
@@ -284,14 +284,14 @@ def main(nb_min, nb_max, r_min, r_max):
     }
 
     for mock_name, area in area_dict.items():
-        mocks_dict[mock_name]['area'] = area
+        mock_dict[mock_name]['area'] = area
 
     # List of PAUS fields
     field_list = ['foo']
     for field_name in field_list:
         print(f'Field: {field_name}')
         print('----------------------')
-        compute_LF_corrections(mocks_dict, field_name,
+        compute_LF_corrections(mock_dict, field_name,
                                nb_min, nb_max, r_min, r_max)
 
     return
