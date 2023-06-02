@@ -351,7 +351,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
         cat['other_lines_NBs'] = other_lines
 
         if check_nice_z:
-            nice_z = np.abs(z_Arr - cat['zspec']) < 0.16
+            nice_z = np.abs(z_Arr - cat['zspec']) < 0.115
             cat['nice_z'] = nice_z
         
         # Estimate L_lya, F_lya and EW0_lya
