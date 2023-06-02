@@ -34,15 +34,12 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
                     & (mock['lya_NB'] >= nb_min)
                     & (mock['lya_NB'] <= nb_max)
                     & mask_r)
-        mask_nice = ((mock['EW0_lya_spec'] > 30)
-                     & mock['nice_lya'] & nice_z
-                     & (mock['lya_NB'] >= nb_min)
-                     & (mock['lya_NB'] <= nb_max)
-                     & mask_r)
         mask_parent = ((mock['EW0_lya_spec'] > 30)
                        & (NB_z(mock['zspec']) >= nb_min)
                        & (NB_z(mock['zspec']) <= nb_max)
                        & mask_r)
+        mask_nice = (mask_parent
+                     & mock['nice_lya'] & nice_z)
 
         area_obs = mock['area']
 
