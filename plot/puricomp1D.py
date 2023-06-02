@@ -13,9 +13,9 @@ sys.path.insert(0, '..')
 from jpasLAEs.utils import bin_centers
 from paus_utils import NB_z
 
-def main(field_name, nb_min, nb_max, r_min, r_max):
+def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
-    with open(f'{corr_dir}/mock_dict_{field_name}.pkl', 'rb') as f:
+    with open(f'{corr_dir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'rb') as f:
         mocks_dict = pickle.load(f)
 
     L_bins = np.linspace(42, 46, 20)
@@ -60,7 +60,8 @@ def main(field_name, nb_min, nb_max, r_min, r_max):
         h_nice[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
 
     # Plot the puri/comp 1D
-    fig, ax = plt.subplots(figsize=(6, 4))
+    if ax is None:
+        ax = plt.gca()
 
     ax.plot(L_bins_c, puri1d, ls='-', marker='s',
             label='Purity')
@@ -70,10 +71,10 @@ def main(field_name, nb_min, nb_max, r_min, r_max):
     ax.set(xlabel=r'$L_{\mathrm{Ly}\alpha}$',
            ylim=(0, 1))
 
-    ax.legend()
+    return ax
 
-    plt.show()
 
+main = plot_puricomp1d
 
 if __name__ == '__main__':
     main('foo', 0, 10, 17, 24)
