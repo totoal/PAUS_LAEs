@@ -64,15 +64,13 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
     if ax is None:
         ax = plt.gca()
 
-    ax.plot(L_bins_c, puri1d, ls='-', marker='s',
-            label='Purity')
-    ax.plot(L_bins_c, comp1d, ls='-', marker='s',
-            label='Completeness')
+    ax.plot(L_bins_c, puri1d, ls='-', label='Purity')
+    ax.plot(L_bins_c, comp1d, ls='-', label='Completeness')
 
     ax.set(xlabel=r'$L_{\mathrm{Ly}\alpha}$',
            ylim=(0, 1))
 
-    return ax
+    return ax, puri1d, comp1d, L_bins_c
 
 
 main = plot_puricomp1d
