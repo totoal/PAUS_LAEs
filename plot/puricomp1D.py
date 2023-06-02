@@ -13,12 +13,14 @@ sys.path.insert(0, '..')
 from jpasLAEs.utils import bin_centers
 from paus_utils import NB_z, z_NB
 
-def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max, ax=None):
+def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
+                    ax=None, L_bins=None):
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     with open(f'{corr_dir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'rb') as f:
         mocks_dict = pickle.load(f)
 
-    L_bins = np.linspace(42, 46, 20)
+    if L_bins is None:
+        L_bins = np.linspace(42, 46, 20)
     L_bins_c = bin_centers(L_bins)
 
     h_sel = np.zeros_like(L_bins_c)
