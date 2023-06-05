@@ -1,6 +1,6 @@
 #!/home/alberto/miniconda3/bin/python3
 
-from load_paus_mocks import load_mocks_dict ## Provisional
+from load_paus_mocks import load_mock_dict ## Provisional
 
 import numpy as np
  
@@ -148,7 +148,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
         mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
         mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
-        mocks_dict = load_mocks_dict(mock_SFG_path, mock_QSO_cont_path,
+        mocks_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
                                     mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                     mock_GAL_path, gal_fraction=1.)
 
