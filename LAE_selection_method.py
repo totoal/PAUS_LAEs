@@ -140,7 +140,7 @@ def is_there_line(pm_flx, pm_err, cont_est, cont_err, ew0min,
     return line
 
 # TODO: improve a litte. For example, select the highest flux in other lines.
-def identify_lines(line_mat, flux_mat, continuum_flux=None,
+def identify_lines(line_mat, flux_mat, continuum_flux,
                        mult_lines=False):
     '''
     Returns a list of positions with the maximum flux for each source.
@@ -154,10 +154,7 @@ def identify_lines(line_mat, flux_mat, continuum_flux=None,
     A list of length N_sources. If mult_lines is True, each element is a list containing the positions of all detections for the corresponding source. Otherwise, each element is the position of the maximum flux for the corresponding source.
     '''
     
-    if not mult_lines and continuum_flux is None:
-        raise ValueError('If mult_lines is set to False, continuum_flux matrix must be provided')
-
-    if not mult_lines and (line_mat.shape != continuum_flux.shape):
+    if (line_mat.shape != continuum_flux.shape):
         raise ValueError('All input matrices must have the same dimensions.')
 
     if (line_mat.shape != flux_mat.shape):
@@ -166,8 +163,7 @@ def identify_lines(line_mat, flux_mat, continuum_flux=None,
     N_filters, N_src = line_mat.shape
     line_positions = []
 
-    if not mult_lines:
-        flux_diff_mat = flux_mat - continuum_flux
+    flux_diff_mat = flux_mat - continuum_flux
 
     for src in range(N_src):
         this_src_detections = line_mat[:, src]
@@ -184,8 +180,13 @@ def identify_lines(line_mat, flux_mat, continuum_flux=None,
                 else:
                     if is_contiguous:
                         is_contiguous = False
-                        end_pos = pos - 1
-                        line_pos_list.append(int((start_pos + end_pos) / 2))
+                        end_pos = pos
+
+                        pos_Arr = np.arange(start_pos, end_pos)
+                        this_flux_diff = [flux_diff_mat[:, src][i] for i in pos_Arr]
+                        line_pos = pos_Arr[np.argmax(this_flux_diff)]
+                        
+                        line_pos_list.append(line_pos)
 
             line_positions.append(line_pos_list)
         else:
@@ -386,8 +387,8 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
                                       cont_err_other, ew0min=ewmin_other)
         lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
                                    cont_est, mult_lines=False)
-        other_lines = identify_lines(is_line_other, cat['flx'],
-                                     mult_lines=True)
+        other_lines = identify_lines(is_line_other, cat['flx'][:40],
+                                     cont_est_other, mult_lines=True)
 
         # Estimate redshift (z_Arr)
         z_Arr = z_NB(lya_lines)
