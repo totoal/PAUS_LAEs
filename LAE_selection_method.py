@@ -139,81 +139,143 @@ def is_there_line(pm_flx, pm_err, cont_est, cont_err, ew0min,
     )
     return line
 
-
-def identify_lines(line_Arr, qso_flx, cont_flx, nb_min=0, first=False):
+# TODO: improve a litte. For example, select the highest flux in other lines.
+def identify_lines(line_mat, flux_mat, continuum_flux=None,
+                       mult_lines=False):
     '''
-    Returns a list of N lists with the index positions of the lines.
+    Returns a list of positions with the maximum flux for each source.
 
-    Input: 
-    line_Arr: Bool array of 3sigma detections in sources. Dim N_filters x N_sources
-    qso_flx:  Flambda data
-    nb_min
+    Input:
+    line_mat: Bool matrix of shape (N_filters, N_sources) indicating detections
+    flux_mat: Matrix of shape (N_filters, N_sources) containing flux values
+    mult_lines: Boolean flag indicating whether to return positions of all detections or just the maximum flux position
+
+    Output:
+    A list of length N_sources. If mult_lines is True, each element is a list containing the positions of all detections for the corresponding source. Otherwise, each element is the position of the maximum flux for the corresponding source.
     '''
-    N_fil, N_src = line_Arr.shape
-    line_list = []
-    line_len_list = []
-    line_cont_list = []
+    
+    if not mult_lines and continuum_flux is None:
+        raise ValueError('If mult_lines is set to False, continuum_flux matrix must be provided')
+
+    if not mult_lines and (line_mat.shape != continuum_flux.shape):
+        raise ValueError('All input matrices must have the same dimensions.')
+
+    if (line_mat.shape != flux_mat.shape):
+        raise ValueError('All input matrices must have the same dimensions.')
+
+    N_filters, N_src = line_mat.shape
+    line_positions = []
+
+    if not mult_lines:
+        flux_diff_mat = flux_mat - continuum_flux
 
     for src in range(N_src):
-        fil = 0
-        this_src_lines = []  # The list of lines
-        this_cont_lines = []  # The list of continuum indices of lines
-        this_src_line_flx = []  # The list of lengths of this src lines
+        this_src_detections = line_mat[:, src]
 
-        while fil < N_fil:
-            this_line = []  # The list of contiguous indices of this line
-            while ~line_Arr[fil, src]:
-                fil += 1
-                if fil == N_fil - 1:
-                    break
-            if fil == N_fil - 1:
-                break
-            while line_Arr[fil, src]:
-                this_line.append(fil)
-                fil += 1
-                if fil == N_fil - 1:
-                    break
-            if fil == N_fil - 1:
-                break
+        if mult_lines:
+            line_pos_list = []
+            is_contiguous = False
 
-            aux = -len(this_line) + nb_min + fil
+            for pos in range(N_filters):
+                if this_src_detections[pos]:
+                    if not is_contiguous:
+                        is_contiguous = True
+                        start_pos = pos
+                else:
+                    if is_contiguous:
+                        is_contiguous = False
+                        end_pos = pos - 1
+                        line_pos_list.append(int((start_pos + end_pos) / 2))
 
-            if first:  # If first=True, append continuum index to list
-                this_cont_lines.append(
-                    np.average(
-                        np.array(this_line),
-                        weights=qso_flx[np.array(this_line), src] ** 2
-                    )
-                )
-            # Append index of the max flux of this line to the list
-            this_src_lines.append(
-                np.argmax(qso_flx[np.array(this_line) + nb_min, src]) + aux
-            )
-            this_src_line_flx.append(
-                qso_flx[np.array(this_line) + nb_min, src].sum())
+            line_positions.append(line_pos_list)
+        else:
+            if not np.any(this_src_detections):
+                line_positions.append(-1)
+                continue
 
-        if first:
-            try:
-                idx = np.argmax(
-                    np.array(this_src_line_flx)
-                    - cont_flx[np.array(this_src_lines), src]
-                )
+            where_detection = np.where(this_src_detections)[0]
+            line_pos = where_detection[np.argmax(flux_diff_mat[:, src][where_detection])]
+            line_positions.append(line_pos)
 
-                line_list.append(this_src_lines[idx])
-                line_len_list.append(this_src_lines)
-                line_cont_list.append(this_cont_lines[idx])
-            except:
-                line_list.append(-1)
-                line_len_list.append([-1])
-                line_cont_list.append(-1)
+    if not mult_lines:
+        line_positions = np.array(line_positions)
 
-        if not first:
-            line_list.append(this_src_lines)
+    return line_positions
 
-    if first:
-        return np.array(line_list)
-    else:
-        return line_list
+# def identify_lines(line_Arr, qso_flx, cont_flx, nb_min=0, first=False):
+#     '''
+#     Returns a list of N lists with the index positions of the lines.
+
+#     Input: 
+#     line_Arr: Bool array of 3sigma detections in sources. Dim N_filters x N_sources
+#     qso_flx:  Flambda data
+#     nb_min
+#     '''
+#     N_fil, N_src = line_Arr.shape
+#     line_list = []
+#     line_len_list = []
+#     line_cont_list = []
+
+#     for src in range(N_src):
+#         fil = 0
+#         this_src_lines = []  # The list of lines
+#         this_cont_lines = []  # The list of continuum indices of lines
+#         this_src_line_flx = []  # The list of lengths of this src lines
+
+#         while fil < N_fil:
+#             this_line = []  # The list of contiguous indices of this line
+#             while ~line_Arr[fil, src]:
+#                 fil += 1
+#                 if fil == N_fil - 1:
+#                     break
+#             if fil == N_fil - 1:
+#                 break
+#             while line_Arr[fil, src]:
+#                 this_line.append(fil)
+#                 fil += 1
+#                 if fil == N_fil - 1:
+#                     break
+#             if fil == N_fil - 1:
+#                 break
+
+#             aux = -len(this_line) + nb_min + fil
+
+#             if first:  # If first=True, append continuum index to list
+#                 this_cont_lines.append(
+#                     np.average(
+#                         np.array(this_line),
+#                         weights=qso_flx[np.array(this_line), src] ** 2
+#                     )
+#                 )
+#             # Append index of the max flux of this line to the list
+#             this_src_lines.append(
+#                 np.argmax(qso_flx[np.array(this_line) + nb_min, src]) + aux
+#             )
+#             this_src_line_flx.append(
+#                 qso_flx[np.array(this_line) + nb_min, src].sum())
+
+#         if first:
+#             try:
+#                 idx = np.argmax(
+#                     np.array(this_src_line_flx)
+#                     - cont_flx[np.array(this_src_lines), src]
+#                 )
+
+#                 line_list.append(this_src_lines[idx])
+#                 line_len_list.append(this_src_lines)
+#                 line_cont_list.append(this_cont_lines[idx])
+#             except:
+#                 line_list.append(-1)
+#                 line_len_list.append([-1])
+#                 line_cont_list.append(-1)
+
+#         if not first:
+#             line_list.append(this_src_lines)
+
+#     if first:
+#         return np.array(line_list)
+#     else:
+#         return line_list
 
 
 def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
@@ -269,7 +331,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
 
         for l in other_lines[src]:
             # Ignore very red and very blue NBs
-            if (l > 50) | (l < 1):
+            if (l > 40) | (l < 0):
                 continue
 
             w_obs_l = w_central[l]
@@ -322,10 +384,10 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
                                     ew0min=ew0min_lya)
         is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
                                       cont_err_other, ew0min=ewmin_other)
-        lya_lines = identify_lines(is_line_lya, cat['flx'],
-                                   cont_est, first=True)
+        lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
+                                   cont_est, mult_lines=False)
         other_lines = identify_lines(is_line_other, cat['flx'],
-                                     cont_est_other, first=False)
+                                     mult_lines=True)
 
         # Estimate redshift (z_Arr)
         z_Arr = z_NB(lya_lines)
