@@ -24,7 +24,7 @@ def IGM_TRANSMISSION(w_Arr, A=-0.001845, B=3.924):
     return np.exp(A * (w_Arr / w_lya) ** B)
 
 def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
-                       only_right=False, N_nb_min=0, N_nb_max=30):
+                       only_right=False, N_nb_min=0, N_nb_max=40):
     '''
     Returns a matrix with the continuum estimate at any NB in all sources.
     '''
@@ -375,7 +375,8 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
         N_sources = cat['flx'].shape[1]
         # Estimate continuum
         cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
-                                                IGM_T_correct=True, N_nb=6)
+                                                IGM_T_correct=True, N_nb=6,
+                                                N_nb_max=nb_max)
         cont_est_other, cont_err_other = estimate_continuum(cat['flx'], cat['err'],
                                                             IGM_T_correct=False,
                                                             N_nb=6)
