@@ -72,7 +72,7 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus_{surname}.npy')
     L_median = np.load(f'{corr_dir}/L_bias_{surname}.npy')
     L_binning = np.load(f'/{corr_dir}/L_nb_err_binning.npy')
-    L_bin_c = [L_binning[i: i + 2].sum() * 0.5 for i in range(len(L_binning) - 1)]
+    L_bin_c = bin_centers(L_binning)
 
     # Correct L_Arr with the median
     mask_median_L = (L_median < 10)
