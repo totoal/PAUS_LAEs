@@ -22,6 +22,7 @@ def IGM_TRANSMISSION(w_Arr, A=-0.001845, B=3.924):
     '''
     return np.exp(A * (w_Arr / w_lya) ** B)
 
+
 def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
                        only_right=False, N_nb_min=0, N_nb_max=39):
     '''
@@ -56,7 +57,7 @@ def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
                     NB_err[nb_idx + 2: nb_idx + N_nb + 1]
                 ))
 
-        if (N_nb <= nb_idx) & (nb_idx < (NB_flx.shape[0] - N_nb)) and not only_right:
+        elif (N_nb <= nb_idx) & (nb_idx < (NB_flx.shape[0] - N_nb)) and not only_right:
             if IGM_T_correct:
                 IGM_T = IGM_TRANSMISSION(
                     np.array(w_central[nb_idx - N_nb: nb_idx - 1])
@@ -72,7 +73,7 @@ def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
                 NB_err[nb_idx + 2: nb_idx + N_nb + 1]
             ))
 
-        if nb_idx >= (NB_flx.shape[0] - N_nb):
+        elif nb_idx >= (NB_flx.shape[0] - N_nb):
             if IGM_T_correct:
                 IGM_T = IGM_TRANSMISSION(
                     np.array(w_central[nb_idx - N_nb: nb_idx - 1])
@@ -92,7 +93,7 @@ def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
         w = NBs_errs ** -2
 
         cont_est[nb_idx] = np.average(NBs_to_avg, weights=w, axis=0)
-        cont_err[nb_idx] = np.sum(NBs_errs ** -2, axis=0) ** -0.5
+        cont_err[nb_idx] = np.sum(w, axis=0) ** -0.5
 
     return cont_est, cont_err
 
