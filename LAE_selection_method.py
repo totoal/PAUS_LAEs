@@ -348,11 +348,26 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
 
         return cat
 
+
+def LumDist(z):
+    '''
+    Computes the luminosity distance for a given redshift.
+
+    Parameters:
+        z (float or array-like): Redshift value(s) for which to compute the luminosity distance.
+
+    Returns:
+        float or array-like: Luminosity distance(s) in centimeters.
+    '''
+    return cosmo.luminosity_distance(z).to(u.cm).value
+
+
 def Lya_L_estimation(cat, cont_est, cont_est_err):
     '''
     Returns a catalog including L_lya and EW0_lya estimations
     '''
     mask_selected_NB = (cat['lya_NB'], np.arange(len(cat['lya_NB'])))
+    nice_lya = cat['nice_lya']
 
     Flambda_lya = (
         cat['flx'][mask_selected_NB] - cont_est[mask_selected_NB]
@@ -362,22 +377,18 @@ def Lya_L_estimation(cat, cont_est, cont_est_err):
     ) ** 0.5 * fwhm_Arr[cat['lya_NB']]
 
     # Flambda to zero if no selection
-    nice_lya = cat['nice_lya']
     Flambda_lya[~nice_lya] = 0.
     Flambda_lya_err[~nice_lya] = 0.
 
-    # Luminosity distance
-    def LumDist(z): return cosmo.luminosity_distance(z).to(u.cm).value
-    def Redshift(w): return w / w_lya - 1
     dL = LumDist(cat['z_NB'])
     dL_err = (
-        LumDist(Redshift(w_central[cat['lya_NB']]
+        LumDist(lya_redshift(w_central[cat['lya_NB']]
                          + 0.5 * fwhm_Arr[cat['lya_NB']]))
-        - LumDist(Redshift(w_central[cat['lya_NB']]))
+        - LumDist(lya_redshift(w_central[cat['lya_NB']]))
     )
 
-    z_NB_err = (Redshift(w_central[cat['lya_NB']]) + 0.5 * fwhm_Arr[cat['lya_NB']]
-                - Redshift(w_central[cat['lya_NB']]) - 0.5 * fwhm_Arr[cat['lya_NB']]) * 0.5
+    z_NB_err = (lya_redshift(w_central[cat['lya_NB']]) + 0.5 * fwhm_Arr[cat['lya_NB']]
+                - lya_redshift(w_central[cat['lya_NB']]) - 0.5 * fwhm_Arr[cat['lya_NB']]) * 0.5
 
     # L_lya to 99. if no selection
     L_lya = np.ones_like(Flambda_lya) * 99
