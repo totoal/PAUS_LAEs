@@ -10,7 +10,6 @@ import astropy.units as u
 # Line rest-frame wavelengths (Angstroms)
 w_lya = 1215.67
 w_lyb = 1025.7220
-w_lya = 1215.67
 w_SiIV = 1397.61
 w_CIV = 1549.48
 w_CIII = 1908.73
@@ -368,7 +367,7 @@ def Lya_L_estimation(cat, cont_est, cont_est_err):
 
     # Luminosity distance
     def LumDist(z): return cosmo.luminosity_distance(z).to(u.cm).value
-    def Redshift(w): return w / 1215.67 - 1
+    def Redshift(w): return w / w_lya - 1
     dL = LumDist(cat['z_NB'])
     dL_err = (
         LumDist(Redshift(w_central[cat['lya_NB']]
