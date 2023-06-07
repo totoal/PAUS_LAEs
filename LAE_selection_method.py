@@ -24,7 +24,7 @@ def IGM_TRANSMISSION(w_Arr, A=-0.001845, B=3.924):
     return np.exp(A * (w_Arr / w_lya) ** B)
 
 def estimate_continuum(NB_flx, NB_err, N_nb=7, IGM_T_correct=True,
-                       only_right=False, N_nb_min=0, N_nb_max=40):
+                       only_right=False, N_nb_min=0, N_nb_max=39):
     '''
     Returns a matrix with the continuum estimate at any NB in all sources.
     '''
