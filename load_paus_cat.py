@@ -35,7 +35,6 @@ def load_paus_cat(path_to_cat):
                 this_bb_mag_err = np.array(tab[f'magerr_{filter_name.lower()}'])
                 this_bb_flx = mag_to_flux(this_bb_mag, data_tab['w_eff'][jj])
                 this_bb_flx_err = this_bb_flx * this_bb_mag_err # magerr is approx. flx_relerr
-                print(this_bb_flx)
             else:
                 this_bb_flx = np.ones(len(tab)).astype(float) * 1e-99
                 this_bb_flx_err = np.ones(len(tab)).astype(float) * 1e-99
