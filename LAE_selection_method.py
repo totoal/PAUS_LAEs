@@ -297,56 +297,56 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
 
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
                 ewmin_other=100, check_nice_z=False):
-        N_sources = cat['flx'].shape[1]
-        # Estimate continuum
-        cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
-                                                IGM_T_correct=True, N_nb=6,
-                                                N_nb_max=nb_max)
-        cont_est_other, cont_err_other = estimate_continuum(cat['flx'], cat['err'],
-                                                            IGM_T_correct=False,
-                                                            N_nb=6)
+    N_sources = cat['flx'].shape[1]
+    # Estimate continuum
+    cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
+                                            IGM_T_correct=True, N_nb=6,
+                                            N_nb_max=nb_max)
+    cont_est_other, cont_err_other = estimate_continuum(cat['flx'], cat['err'],
+                                                        IGM_T_correct=False,
+                                                        N_nb=6)
 
-        # Identify NB excess
-        is_line_lya = is_there_line(cat['flx'], cat['err'], cont_est, cont_err,
-                                    ew0min=ew0min_lya)
-        is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
-                                      cont_err_other, ew0min=ewmin_other)
-        lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
-                                   cont_est, mult_lines=False)
-        other_lines = identify_lines(is_line_other, cat['flx'][:40],
-                                     cont_est_other, mult_lines=True)
+    # Identify NB excess
+    is_line_lya = is_there_line(cat['flx'], cat['err'], cont_est, cont_err,
+                                ew0min=ew0min_lya)
+    is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
+                                    cont_err_other, ew0min=ewmin_other)
+    lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
+                                cont_est, mult_lines=False)
+    other_lines = identify_lines(is_line_other, cat['flx'][:40],
+                                    cont_est_other, mult_lines=True)
 
-        # Estimate redshift (z_Arr)
-        z_Arr = z_NB(lya_lines)
+    # Estimate redshift (z_Arr)
+    z_Arr = z_NB(lya_lines)
 
-        snr = np.empty(N_sources)
-        for src in range(N_sources):
-            l = lya_lines[src]
-            snr[src] = cat['flx'][l, src] / cat['err'][l, src]
+    snr = np.empty(N_sources)
+    for src in range(N_sources):
+        l = lya_lines[src]
+        snr[src] = cat['flx'][l, src] / cat['err'][l, src]
 
-        nb_mask = (lya_lines >= nb_min) & (lya_lines <= nb_max)
-        snr_mask = (snr >= 6)
+    nb_mask = (lya_lines >= nb_min) & (lya_lines <= nb_max)
+    snr_mask = (snr >= 6)
 
-        nice_lya_mask = snr_mask & nb_mask\
-            & (cat['r_mag'] >= r_min) & (cat['r_mag'] <= r_max)
+    nice_lya_mask = snr_mask & nb_mask\
+        & (cat['r_mag'] >= r_min) & (cat['r_mag'] <= r_max)
 
-        nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
-                                        z_Arr, mask=nice_lya_mask)
+    nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
+                                    z_Arr, mask=nice_lya_mask)
 
-        # Add columns to cat
-        cat['nice_lya'] = nice_lya
-        cat['z_NB'] = z_Arr
-        cat['lya_NB'] = lya_lines
-        cat['other_lines_NBs'] = other_lines
+    # Add columns to cat
+    cat['nice_lya'] = nice_lya
+    cat['z_NB'] = z_Arr
+    cat['lya_NB'] = lya_lines
+    cat['other_lines_NBs'] = other_lines
 
-        if check_nice_z:
-            nice_z = np.abs(z_Arr - cat['zspec']) < 0.115
-            cat['nice_z'] = nice_z
-        
-        # Estimate L_lya, F_lya and EW0_lya
-        cat = Lya_L_estimation(cat, cont_est, cont_err)
+    if check_nice_z:
+        nice_z = np.abs(z_Arr - cat['zspec']) < 0.115
+        cat['nice_z'] = nice_z
+    
+    # Estimate L_lya, F_lya and EW0_lya
+    cat = Lya_L_estimation(cat, cont_est, cont_err)
 
-        return cat
+    return cat
 
 
 def LumDist(z):
