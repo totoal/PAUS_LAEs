@@ -207,7 +207,7 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    field_list = ['W1']
+    field_list = ['W3']
 
     t00 = time.time()
 

@@ -282,7 +282,7 @@ def main(nb_min, nb_max, r_min, r_max):
         mock_dict[mock_name]['area'] = area
 
     # List of PAUS fields
-    field_list = ['W1']
+    field_list = ['W3']
     for field_name in field_list:
         print(f'Field: {field_name}')
         print('----------------------')
