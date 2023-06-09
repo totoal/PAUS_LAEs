@@ -170,8 +170,12 @@ def add_errors(flx_0, field_name, add_errors=False):
     path_to_fit = '/home/alberto/almacen/PAUS_data/catalogs/error_distribution'
     fit_params = np.load(f'{path_to_fit}/fit_params_{field_name}.npy')
 
-    log_flx_0 = np.log10(flx_0)
+    mask_bad_flx = (flx_0 >= 0)
+
+    log_flx_0 = np.ones_like(flx_0) * -99.
     flx_err_mat = np.empty_like(flx_0)
+
+    log_flx_0[mask_bad_flx] = np.log10(flx_0[mask_bad_flx])
 
     for filter_i in range(46):
         params_i = fit_params[filter_i]
@@ -181,7 +185,7 @@ def add_errors(flx_0, field_name, add_errors=False):
         relerr_y = expfit(log_flx_x, *params_i)
         sigma5_flux = 10 ** log_flx_x[np.argmin(np.abs(relerr_y - 0.2))]
         
-        mask_5sigma = (log_flx_0[filter_i] > sigma5_flux)
+        mask_5sigma = (flx_0[filter_i] > sigma5_flux)
 
         this_flx_err = np.empty(flx_0.shape[1])
         this_flx_err[mask_5sigma] =\
