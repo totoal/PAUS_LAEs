@@ -139,9 +139,8 @@ def is_there_line(pm_flx, pm_err, cont_est, cont_err, ew0min,
     )
     return line
 
-# TODO: improve a litte. For example, select the highest flux in other lines.
 def identify_lines(line_mat, flux_mat, continuum_flux,
-                       mult_lines=False):
+                   mult_lines=False):
     '''
     Returns a list of positions with the maximum flux for each source.
 
@@ -309,7 +308,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
     is_line_lya = is_there_line(cat['flx'], cat['err'], cont_est, cont_err,
                                 ew0min=ew0min_lya)
     is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
-                                  cont_err_other, ew0min=ewmin_other)
+                                  cont_err_other, ew0min=ewmin_other, obs=True)
     lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
                                cont_est, mult_lines=False)
     other_lines = identify_lines(is_line_other, cat['flx'][:40],
