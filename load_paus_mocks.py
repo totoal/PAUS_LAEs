@@ -159,12 +159,44 @@ def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
 
 
 ################################################
+def expfit(x, a, b, c):
+    return a * np.exp(b * x + c)
 
-def add_errors(flx_0, field_name):
+def add_errors(flx_0, field_name, add_errors=False):
     '''
     Returns the matrix of perturbed fluxes and errors: flx, err
     '''
-    return
+    # Load the fit parameters
+    path_to_fit = '/home/alberto/almacen/PAUS_data/catalogs/error_distribution'
+    fit_params = np.load(f'{path_to_fit}/fit_params_{field_name}.npy')
+
+    log_flx_0 = np.log10(flx_0)
+    flx_err_mat = np.empty_like(flx_0)
+
+    for filter_i in range(46):
+        params_i = fit_params[filter_i]
+
+        # First compute the 5 sigma level (relerr=0.2)
+        log_flx_x = np.linspace(-21, -16, 10000)
+        relerr_y = expfit(log_flx_x, *params_i)
+        sigma5_flux = 10 ** log_flx_x[np.argmin(np.abs(relerr_y - 0.2))]
+        
+        mask_5sigma = (log_flx_0[filter_i] > sigma5_flux)
+
+        this_flx_err = np.empty(flx_0.shape[1])
+        this_flx_err[mask_5sigma] =\
+            expfit(log_flx_0[filter_i, mask_5sigma], *params_i)\
+                * flx_0[filter_i, mask_5sigma]
+        this_flx_err[~mask_5sigma] = sigma5_flux * 0.2
+
+        flx_err_mat[filter_i] = this_flx_err
+
+        if add_errors:
+            flx_with_err = flx_0 + np.random.normal(size=flx_0.shape) * flx_err_mat
+        else:
+            flx_with_err = flx_0
+
+    return flx_with_err, flx_err_mat
 
 
 if __name__ == '__main__':
