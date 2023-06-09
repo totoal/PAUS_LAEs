@@ -66,6 +66,8 @@ def load_paus_cat(path_to_cat):
     cat['NB_mask'] = measured_mask
     cat['NB_number'] = measured_NBs
     # TODO: add morphology index
+    # TODO: areas!
+    cat['area'] = 16.1 # This is provisionally the area of W3
 
     return cat
 
