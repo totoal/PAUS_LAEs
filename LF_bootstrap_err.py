@@ -8,8 +8,7 @@ import os
 import sys
 
 # List of subregions
-region_list_0 = np.array(['SFG', 'QSO_cont', 'QSO_LAEs_loL',
-                          'QSO_LAEs_hiL', 'GAL'])
+region_list_0 = np.array(['W3'])
 
 def bootstrapped_LFs(nb1, nb2, region_list_indices):
     '''
@@ -65,7 +64,7 @@ if __name__ == '__main__':
 
         # boots = np.random.choice(np.arange(5), 5, replace=True)
         # TODO: by now we only have the 5 mocks
-        boots = np.array([2, 2, 2, 2, 2])
+        boots = np.array([0, 0, 0, 0, 0])
 
         this_hist_mat = bootstrapped_LFs(nb1, nb2, boots)
 
