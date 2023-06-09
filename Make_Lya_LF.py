@@ -166,6 +166,15 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
 
+    # TEMPORARILY limit the catalog to objs with all the NBs
+    mask_NB_number = (cat['NB_numer'] > 39)
+    cat['flx'] = cat['flx'][:, mask_NB_number]
+    cat['err'] = cat['err'][:, mask_NB_number]
+    for key in cat.keys():
+        if key == 'flx' or key == 'err':
+            continue
+        cat[key] = cat[key][mask_NB_number]
+
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
     cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max,
