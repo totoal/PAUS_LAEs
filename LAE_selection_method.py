@@ -236,10 +236,13 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     g = flux_to_mag(pm_flx[-5], w_central[-5])
     gr = g - r
     ri = r - i
-    # For z > 3
-    color_aux1 = (ri < 0.6) & (gr < 1.5)
-    # For z < 3
-    color_aux2 = (ri < 0.6) & (gr < 0.6)
+    # # For z > 3
+    # color_aux1 = (ri < 0.6) & (gr < 1.5)
+    # # For z < 3
+    # color_aux2 = (ri < 0.6) & (gr < 0.6)
+    # TODO: Provisionally not use color masks
+    color_aux1 = np.ones_like(gr).astpye(bool)
+    color_aux2 = np.ones_like(gr).astpye(bool)
 
     color_mask = np.ones_like(color_aux2).astype(bool)
     mlines_mask = np.ones_like(color_aux2).astype(bool)

@@ -7,7 +7,10 @@ import pickle
 from scipy.integrate import dblquad
 from scipy.interpolate import RectBivariateSpline
 
-from my_utilities import *
+from astropy.cosmology import Planck18 as cosmo
+import astropy.units as u
+
+from jpasLAEs.utils import mag_to_flux
 
 
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
