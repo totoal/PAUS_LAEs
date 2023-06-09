@@ -73,10 +73,9 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     with its bin error.
     '''
     # Load the field correction matrices
-    # TODO: !!!!! Change 'foo' with '{field_name}'
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
-    puri2d = np.load(f'{corr_dir}/puri2D_foo_nb{nb_min}-{nb_max}.npy')
-    comp2d = np.load(f'{corr_dir}/comp2D_foo_nb{nb_min}-{nb_max}.npy')
+    puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy')
+    comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy')
     puricomp2d_L_bins = np.load(f'{corr_dir}/puricomp2D_L_bins.npy')
     puricomp2d_r_bins = np.load(f'{corr_dir}/puricomp2D_r_bins.npy')
 
@@ -169,8 +168,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
 
     # Apply the bias correction and compute L statistical errors
-    # TODO: Change `foo` with field name
-    cat = L_lya_bias_apply(cat, 'foo', nb_min, nb_max)
+    cat = L_lya_bias_apply(cat, field_name, nb_min, nb_max)
 
 
     #######################

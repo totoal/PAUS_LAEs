@@ -43,7 +43,6 @@ def load_paus_cat(path_to_cat):
             flx_err_mat = np.vstack([flx_err_mat, this_bb_flx_err])
 
 
-
     # Convert fluxes from PAUS units to erg/s/cm/A
     flx_mat = paus_flux_units(flx_mat, w_central.reshape(-1, 1))
     flx_err_mat = paus_flux_units(flx_err_mat, w_central.reshape(-1, 1))
@@ -55,6 +54,7 @@ def load_paus_cat(path_to_cat):
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat
     cat['ref_id'] = np.array(tab['ref_id'])
+    cat['r_mag'] = np.array(tab['mag_r'])
     # TODO: add morphology index
 
     return cat
