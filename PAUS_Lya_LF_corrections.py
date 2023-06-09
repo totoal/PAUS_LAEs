@@ -204,12 +204,9 @@ def compute_LF_corrections(mock_dict, field_name,
                            nb_min, nb_max, r_min, r_max):
     # Modify the mocks adding errors according to the corresponding field
     for mock_name, mock in mock_dict.items():
-        ## PROVISIONAL ERRORS FOR TESTING
-        nominal_errs = mag_to_flux(23, w_central) / 3
-        mock['err'] = np.ones_like(mock['flx_0']) * nominal_errs.reshape(-1, 1)
-        mock['flx'] = mock['flx_0'] + mock['err'] * np.random.normal(size=mock['flx_0'].shape)
-        # TODO: add_errors function
-        # mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name)
+        # Add errors
+        mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name,
+                                              add_errors=True)
 
         # Compute r_mag
         mock['r_mag'] = flux_to_mag(mock['flx'][-4], w_central[-4])
@@ -285,7 +282,7 @@ def main(nb_min, nb_max, r_min, r_max):
         mock_dict[mock_name]['area'] = area
 
     # List of PAUS fields
-    field_list = ['foo']
+    field_list = ['W3']
     for field_name in field_list:
         print(f'Field: {field_name}')
         print('----------------------')
