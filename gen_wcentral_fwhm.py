@@ -166,6 +166,8 @@ data = {
 }
 
 path_to_paus_data = '/home/alberto/almacen/PAUS_data'
-pd.DataFrame(data).to_csv(f'{path_to_paus_data}/Filter_properties.csv')
+data_df = pd.DataFrame(data)
+print(data_df)
+data_df.to_csv(f'{path_to_paus_data}/Filter_properties.csv')
 with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'wb') as f:
     pickle.dump(tcurves, f)
