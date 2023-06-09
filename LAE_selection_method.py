@@ -300,8 +300,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
     N_sources = cat['flx'].shape[1]
     # Estimate continuum
     cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
-                                            IGM_T_correct=True, N_nb=6,
-                                            N_nb_max=nb_max)
+                                            IGM_T_correct=True, N_nb=6)
     cont_est_other, cont_err_other = estimate_continuum(cat['flx'], cat['err'],
                                                         IGM_T_correct=False,
                                                         N_nb=6)
@@ -310,11 +309,11 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
     is_line_lya = is_there_line(cat['flx'], cat['err'], cont_est, cont_err,
                                 ew0min=ew0min_lya)
     is_line_other = is_there_line(cat['flx'], cat['err'], cont_est_other,
-                                    cont_err_other, ew0min=ewmin_other)
+                                  cont_err_other, ew0min=ewmin_other)
     lya_lines = identify_lines(is_line_lya, cat['flx'][:40],
-                                cont_est, mult_lines=False)
+                               cont_est, mult_lines=False)
     other_lines = identify_lines(is_line_other, cat['flx'][:40],
-                                    cont_est_other, mult_lines=True)
+                                 cont_est_other, mult_lines=True)
 
     # Estimate redshift (z_Arr)
     z_Arr = z_NB(lya_lines)
@@ -331,7 +330,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
         & (cat['r_mag'] >= r_min) & (cat['r_mag'] <= r_max)
 
     nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
-                                    z_Arr, mask=nice_lya_mask)
+                                     z_Arr, mask=nice_lya_mask)
 
     # Add columns to cat
     cat['nice_lya'] = nice_lya
