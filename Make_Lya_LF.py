@@ -1,6 +1,7 @@
 #!/home/alberto/miniconda3/bin/python3
 
-from load_paus_mocks import load_mock_dict ## Provisional
+from load_paus_mocks import add_errors
+from load_paus_cat import load_paus_cat
 
 import numpy as np
  
@@ -134,28 +135,18 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 def main(nb_min, nb_max, r_min, r_max, field_name):
     # First load the PAUS catalog of the desired field
 
-    # TODO: Load the actual catalogs. For now, we test with the QSO mock
     print(f'\nField: {field_name}')
     print('----------------------')
     mock_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
     if field_name in mock_list:
-        print('Loading catalog (mock)')
-        source_cats_dir = '/home/alberto/almacen/Source_cats'
-        mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
-        mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
-        mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
-        mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
-        mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
-        mocks_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
-                                    mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
-                                    mock_GAL_path, gal_fraction=1.)
+        cats_dir = '/home/alberto/almacen/PAUS_data/catalogs'
+        path_to_cat = f'{cats_dir}/PAUS_{field_name}.csv'
+        cat = load_paus_cat(path_to_cat)
 
-        cat = mocks_dict[field_name]
-        ## PROVISIONAL ERRORS FOR TESTING
-        nominal_errs = mag_to_flux(23, w_central) / 3
-        cat['err'] = np.ones_like(cat['flx_0']) * nominal_errs.reshape(-1, 1)
-        cat['flx'] = cat['flx_0'] + cat['err'] * np.random.normal(size=cat['flx_0'].shape)
+        # Add errors
+        cat['flx'], cat['err'] = add_errors(cat['flx_0'], field_name,
+                                              add_errors=True)
 
         cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
     else:
@@ -196,8 +187,7 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    field_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
-                  'GAL']
+    field_list = ['W3']
 
     t00 = time.time()
 
