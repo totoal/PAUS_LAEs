@@ -51,10 +51,17 @@ def load_paus_cat(path_to_cat):
     # Define the catalog dictionary
     cat = {} # Initialize catlalog dict
 
+    # Mask where the flux is measured
+    measured_mask = np.isfinite(flx_mat)
+    # Number of available NBs
+    measured_NBs = np.sum(measured_mask[:40], axis=0)
+
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat
     cat['ref_id'] = np.array(tab['ref_id'])
     cat['r_mag'] = np.array(tab['mag_r'])
+    cat['NB_mask'] = measured_mask
+    cat['NB_number'] = measured_NBs
     # TODO: add morphology index
 
     return cat
