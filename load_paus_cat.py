@@ -17,7 +17,7 @@ def paus_flux_units(paus_flx, w):
 
 
 def load_paus_cat(path_to_cat):
-    tab = pd.read_csv(path_to_cat)
+    tab = pd.read_csv(path_to_cat, on_bad_lines='warn')
 
     # Stack the NBs and BBs
     flx_mat = np.array([]).reshape(0, len(tab))
