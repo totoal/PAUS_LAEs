@@ -160,14 +160,10 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
 
-    # Add errors
-    cat['flx'], cat['err'] = add_errors(cat['flx_0'], field_name,
-                                            add_errors=True)
-
     cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
 
     # TEMPORARILY limit the catalog to objs with all the NBs
-    mask_NB_number = (cat['NB_numer'] > 39)
+    mask_NB_number = (cat['NB_number'] > 39)
     cat['flx'] = cat['flx'][:, mask_NB_number]
     cat['err'] = cat['err'][:, mask_NB_number]
     for key in cat.keys():
