@@ -1,6 +1,6 @@
 #!/home/alberto/miniconda3/bin/python3
 
-from load_paus_mocks import add_errors
+from load_paus_mocks import add_errors, load_mock_dict
 from load_paus_cat import load_paus_cat
 
 import numpy as np
@@ -139,18 +139,32 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print('----------------------')
     mock_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
+    PAUS_field_names = ['W1', 'W3']
+
     if field_name in mock_list:
+        print('Loading catalog (mock)')
+        source_cats_dir = '/home/alberto/almacen/Source_cats'
+        mock_SFG_path = f'{source_cats_dir}/LAE_12.5deg_z2.55-5_PAUS_0'
+        mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
+        mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
+        mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
+        mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
+        mocks_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
+                                    mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
+                                    mock_GAL_path, gal_fraction=1.)
+        cat = mocks_dict[field_name]
+    elif field_name in PAUS_field_names:
         cats_dir = '/home/alberto/almacen/PAUS_data/catalogs'
         path_to_cat = f'{cats_dir}/PAUS_{field_name}.csv'
         cat = load_paus_cat(path_to_cat)
-
-        # Add errors
-        cat['flx'], cat['err'] = add_errors(cat['flx_0'], field_name,
-                                              add_errors=True)
-
-        cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
+
+    # Add errors
+    cat['flx'], cat['err'] = add_errors(cat['flx_0'], field_name,
+                                            add_errors=True)
+
+    cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
