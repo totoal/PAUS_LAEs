@@ -35,6 +35,7 @@ def load_paus_cat(path_to_cat):
                 this_bb_mag_err = np.array(tab[f'magerr_{filter_name.lower()}'])
                 this_bb_flx = mag_to_flux(this_bb_mag, data_tab['w_eff'][jj])
                 this_bb_flx_err = this_bb_flx * this_bb_mag_err # magerr is approx. flx_relerr
+                print(this_bb_flx)
             else:
                 this_bb_flx = np.ones(len(tab)).astype(float) * 1e-99
                 this_bb_flx_err = np.ones(len(tab)).astype(float) * 1e-99
@@ -43,9 +44,11 @@ def load_paus_cat(path_to_cat):
             flx_err_mat = np.vstack([flx_err_mat, this_bb_flx_err])
 
 
-    # Convert fluxes from PAUS units to erg/s/cm/A
-    flx_mat = paus_flux_units(flx_mat, w_central.reshape(-1, 1))
-    flx_err_mat = paus_flux_units(flx_err_mat, w_central.reshape(-1, 1))
+    # Convert fluxes from PAUS units to erg/s/cm/A (only NBs)
+    flx_mat[:40] = paus_flux_units(flx_mat[:40],
+                                   w_central[:40].reshape(-1, 1))
+    flx_err_mat[:40] = paus_flux_units(flx_err_mat[:40],
+                                       w_central[:40].reshape(-1, 1))
 
 
     # Define the catalog dictionary
@@ -68,5 +71,5 @@ def load_paus_cat(path_to_cat):
 
 
 if __name__ == '__main__':
-    path = '/home/alberto/almacen/PAUS_data/catalogs/PAUS_W3.csv'
+    path = '/home/alberto/almacen/PAUS_data/catalogs/PAUS_W1.csv'
     load_paus_cat(path)
