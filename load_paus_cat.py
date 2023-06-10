@@ -64,6 +64,8 @@ def load_paus_cat(path_to_cat):
     cat['r_mag'] = np.array(tab['mag_r'])
     cat['NB_mask'] = measured_mask
     cat['NB_number'] = measured_NBs
+    cat['RA'] = np.array(tab['alpha_j2000'])
+    cat['DEC'] = np.array(tab['delta_j2000'])
     # TODO: add morphology index
     # TODO: areas!
     cat['area'] = 16.1 # This is provisionally the area of W3
