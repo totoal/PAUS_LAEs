@@ -241,11 +241,12 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # # For z < 3
     # color_aux2 = (ri < 0.6) & (gr < 0.6)
     # TODO: Provisionally not use color masks
-    color_aux1 = np.ones_like(gr).astpye(bool)
-    color_aux2 = np.ones_like(gr).astpye(bool)
+    N_sources = pm_flx.shape[1]
+    color_aux1 = np.ones(N_sources).astype(bool)
+    color_aux2 = np.ones(N_sources).astype(bool)
 
-    color_mask = np.ones_like(color_aux2).astype(bool)
-    mlines_mask = np.ones_like(color_aux2).astype(bool)
+    color_mask = np.ones(N_sources).astype(bool)
+    mlines_mask = np.ones(N_sources).astype(bool)
 
     for src in np.where(np.array(lya_lines) != -1)[0]:
         z_src = z_Arr[src]
