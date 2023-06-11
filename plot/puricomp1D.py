@@ -78,4 +78,4 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 main = plot_puricomp1d
 
 if __name__ == '__main__':
-    main('foo', 0, 10, 17, 24)
+    main('foo', 0, 2, 17, 24)

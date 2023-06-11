@@ -249,8 +249,8 @@ def compute_LF_corrections(mock_dict, field_name,
                     'L_lya']
     for mock_name in mock_dict.keys():
         reduced_mock_dict[mock_name] = {}
-    for key in keys_to_save:
-        reduced_mock_dict[mock_name][key] = mock_dict[mock_name][key]
+        for key in keys_to_save:
+            reduced_mock_dict[mock_name][key] = mock_dict[mock_name][key]
     with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
         pickle.dump(reduced_mock_dict, f)
 
