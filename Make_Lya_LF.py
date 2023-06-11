@@ -8,6 +8,7 @@ import numpy as np
 import time
 import os
 import sys
+import pickle
 
 from scipy.stats import binned_statistic_2d
 
@@ -201,6 +202,15 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     print('Making the LF')
     Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir)
+
+    # Save a dictionary with useful data about the selection
+    reduced_cat = {}
+    keys_to_save = ['r_mag', 'lya_NB',
+                    'EW0_lya', 'L_lya']
+    for key in keys_to_save:
+        reduced_cat[key] = cat[key][cat['nice_lya']]
+    with open(f'{LF_savedir}/selection.pkl', 'wb') as f:
+        pickle.dump(reduced_cat, f)
 
 
 if __name__ == '__main__':
