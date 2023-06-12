@@ -12,7 +12,7 @@ import pickle
 
 from scipy.stats import binned_statistic_2d
 
-from jpasLAEs.utils import mag_to_flux, hms_since_t0, flux_to_mag
+from jpasLAEs.utils import hms_since_t0, flux_to_mag
 
 from paus_utils import *
 from LAE_selection_method import select_LAEs
@@ -113,7 +113,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         # The array of weights w
         w = np.random.rand(len(puri_k))
         # Mask very low completeness and randomly according to purity
-        include_mask = (w < puri_k) & (comp_k > 0.01)
+        include_mask = (w < puri_k) & (comp_k > 0.1)
         w[~include_mask] = 0.
         w[include_mask] = 1. / comp_k[include_mask]
         w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
@@ -164,14 +164,14 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
 
     # TEMPORARILY limit the catalog to objs with all the NBs
-    # mask_NB_number = (cat['NB_number'] > 39)
-    # cat['flx'] = cat['flx'][:, mask_NB_number]
-    # cat['err'] = cat['err'][:, mask_NB_number]
-    # cat['NB_mask'] = cat['NB_mask'][:, mask_NB_number]
-    # for key in cat.keys():
-    #     if key in ['flx', 'err', 'NB_mask', 'area']:
-    #         continue
-    #     cat[key] = cat[key][mask_NB_number]
+    mask_NB_number = (cat['NB_number'] > 39)
+    cat['flx'] = cat['flx'][:, mask_NB_number]
+    cat['err'] = cat['err'][:, mask_NB_number]
+    cat['NB_mask'] = cat['NB_mask'][:, mask_NB_number]
+    for key in cat.keys():
+        if key in ['flx', 'err', 'NB_mask', 'area']:
+            continue
+        cat[key] = cat[key][mask_NB_number]
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
@@ -205,8 +205,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     # Save a dictionary with useful data about the selection
     reduced_cat = {}
-    keys_to_save = ['r_mag', 'lya_NB',
-                    'EW0_lya', 'L_lya']
+    keys_to_save = ['r_mag', 'lya_NB', 'EW0_lya', 'L_lya']
     for key in keys_to_save:
         reduced_cat[key] = cat[key][cat['nice_lya']]
     with open(f'{LF_savedir}/selection.pkl', 'wb') as f:
