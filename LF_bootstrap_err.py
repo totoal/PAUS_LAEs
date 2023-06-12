@@ -83,7 +83,7 @@ if __name__ == '__main__':
         np.save(f'{pathname}/LF_err_minus_combi', LF_err_minus)
         np.save(f'{pathname}/median_LF_combi', L_LF_err_percentiles[1])
 
-        exit()
+        sys.exit(0)
 
     print('\n##########################')
     print('\nBootstrapping sky regions')
