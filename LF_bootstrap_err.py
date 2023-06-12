@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
         hist_mat = None
         
-        N_realizations = 100
+        N_realizations = 1000
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         # TODO: by now we only have the 5 mocks
         boots = np.array([0, 0, 0, 0, 0])
 
-        this_hist_mat = bootstrapped_LFs(nb1, nb2, boots)
+        this_hist_mat = bootstrapped_LFs([[nb1, nb2]], boots)
 
         if hist_mat is None:
             hist_mat = this_hist_mat

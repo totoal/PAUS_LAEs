@@ -89,7 +89,7 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
                   L_Lbin_err_plus[L_binning_position]]
 
     cat['L_lya_corr'] = L_Arr_corr
-    cat['L_lya_corr_err'] = L_e_Arr_pm
+    cat['L_lya_corr_err'] = np.array(L_e_Arr_pm)
 
     return cat
 
