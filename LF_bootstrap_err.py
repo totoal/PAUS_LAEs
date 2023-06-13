@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
         hist_mat = None
         
-        N_realizations = 1000
+        N_realizations = 100
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     hist_mat = None
     
-    N_realizations = 1000
+    N_realizations = 100
     for iter_i in range(N_realizations):
         print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
