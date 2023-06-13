@@ -176,8 +176,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
-    cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max,
-                      ew0min_lya=30, ewmin_other=100)
+    cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max)
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
 
     # Apply the bias correction and compute L statistical errors

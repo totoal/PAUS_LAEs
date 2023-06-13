@@ -217,7 +217,6 @@ def compute_LF_corrections(mock_dict, field_name,
         ## First select LAEs and estimate L_lya etc.
         print(f'{mock_name}: Selecting candidates')
         mock = select_LAEs(mock, nb_min, nb_max, r_min, r_max,
-                           ew0min_lya=30, ewmin_other=100,
                            check_nice_z=True)
 
     # L_lya bias correction with the QSO LAEs catalog as reference

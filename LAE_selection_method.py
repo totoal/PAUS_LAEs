@@ -298,7 +298,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
 
     return nice_lya, color_mask, mlines_mask
 
-def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
+def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
                 ewmin_other=100, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
     # Estimate continuum
