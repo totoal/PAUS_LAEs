@@ -252,11 +252,11 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         z_src = z_Arr[src]
 
         w_obs_lya = (1 + z_src) * w_lya
-        w_obs_lyb = (1 + z_src) * w_lyb
-        w_obs_SiIV = (1 + z_src) * w_SiIV
+        # w_obs_lyb = (1 + z_src) * w_lyb
+        # w_obs_SiIV = (1 + z_src) * w_SiIV
         w_obs_CIV = (1 + z_src) * w_CIV
         w_obs_CIII = (1 + z_src) * w_CIII
-        w_obs_MgII = (1 + z_src) * w_MgII
+        # w_obs_MgII = (1 + z_src) * w_MgII
 
         for l in other_lines[src]:
             # Ignore very red and very blue NBs
@@ -267,14 +267,21 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
             fwhm = fwhm_Arr[l]
 
             good_l = (
-                (np.abs(w_obs_l - w_obs_lya) < fwhm * 2.)
-                | (np.abs(w_obs_l - w_obs_lyb) < fwhm * 2.)
-                | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 2.)
-                | (np.abs(w_obs_l - w_obs_CIV) < fwhm * 2.)
-                | (np.abs(w_obs_l - w_obs_CIII) < fwhm * 2.)
-                | (np.abs(w_obs_l - w_obs_MgII) < fwhm * 2.)
-                | (w_obs_l > w_obs_MgII + fwhm)
+                (np.abs(w_obs_l - w_obs_lya) < fwhm * 1.)
+                | ((w_obs_CIV - w_obs_l) < 326.)
+                | ((w_obs_l - w_obs_CIV) < 71.)
+                | ((w_obs_CIII - w_obs_l) < 399.)
+                | ((w_obs_l - w_obs_CIII) < 125.)
             )
+            # good_l = (
+            #     (np.abs(w_obs_l - w_obs_lya) < fwhm * 1.)
+            #     | (np.abs(w_obs_l - w_obs_lyb) < fwhm * 1.)
+            #     | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 1.)
+            #     | (np.abs(w_obs_l - w_obs_CIV) < fwhm * 1.)
+            #     | (np.abs(w_obs_l - w_obs_CIII) < fwhm * 1.)
+            #     | (np.abs(w_obs_l - w_obs_MgII) < fwhm * 1.)
+            #     | (w_obs_l > w_obs_MgII + fwhm)
+            # )
 
             if ~good_l:
                 mlines_mask[src] = False
