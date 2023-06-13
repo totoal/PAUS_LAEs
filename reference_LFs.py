@@ -9,6 +9,10 @@ from astropy.cosmology import Planck18 as my_cosmo
 
 import pandas as pd
 
+import pickle
+
+from jpasLAEs.utils import z_NB as z_NB_jpas
+
 
 # First a couple of functions to convert the cosmology of each LF to Planck18
 
@@ -363,6 +367,32 @@ l22 = {
     'Om0': 0.3,
     'Ode0': 0.7
 }
+
+# miniJPAS
+nbs_list = [[1, 5], [4, 8], [7, 11], [10, 14], [13, 17], [16, 20]]
+tt23_z2025 = {}
+tt23_z2328 = {}
+tt23_z2630 = {}
+tt23_z2833 = {}
+tt23_z3135 = {}
+tt23_z3338 = {}
+miniJPAS_LF_list = [tt23_z2025, tt23_z2328, tt23_z2630,
+                    tt23_z2833, tt23_z3135, tt23_z3338]
+LF_save_dirname = '/home/alberto/almacen/literature_LF_data/miniJPAS'
+for jj, [nb1, nb2] in enumerate(nbs_list):
+    LF_name = f'LF_r17-24_nb{nb1}-{nb2}_ew30_ewoth100.pkl'
+    with open(f'{LF_save_dirname}/{LF_name}', 'rb') as f:
+        this_mjj_LF = pickle.load(f)
+    
+    miniJPAS_LF_list[jj]['logL'] = this_mjj_LF['LF_bins']
+    miniJPAS_LF_list[jj]['Phi'] = this_mjj_LF['LF_total']
+    miniJPAS_LF_list[jj]['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
+    miniJPAS_LF_list[jj]['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
+    miniJPAS_LF_list[jj]['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
+    miniJPAS_LF_list[jj]['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
+    miniJPAS_LF_list[jj]['fmt'] = 's'
+    miniJPAS_LF_list[jj]['color'] = 'r'
+
 
 # Assign colors
 LF_ref_list = [b11, g07, k16, m17a, m17b, u08, s16, s17, s18a,
