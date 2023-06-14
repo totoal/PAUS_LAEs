@@ -170,7 +170,7 @@ def add_errors(flx_0, field_name, add_errors=False):
     path_to_fit = '/home/alberto/almacen/PAUS_data/catalogs/error_distribution'
     fit_params = np.load(f'{path_to_fit}/fit_params_{field_name}.npy')
 
-    mask_bad_flx = (flx_0 >= 0)
+    mask_bad_flx = (flx_0 > 0)
 
     log_flx_0 = np.ones_like(flx_0) * -99.
     flx_err_mat = np.empty_like(flx_0)
