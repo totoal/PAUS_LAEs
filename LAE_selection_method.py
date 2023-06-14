@@ -266,7 +266,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
                 (np.abs(w_obs_l - w_obs_lyb) < fwhm * 1.)
                 | (np.abs(w_obs_l - w_obs_lya) < fwhm * 1.)
                 | ((w_obs_CIV - w_obs_l) < 326.)
-                | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 1.)
+                | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 2.)
                 | ((w_obs_l - w_obs_CIV) < 71.)
                 | ((w_obs_CIII - w_obs_l) < 399.)
                 | ((w_obs_l - w_obs_CIII) < 125.)
