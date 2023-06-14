@@ -22,7 +22,7 @@ area_dict = {
 }
 
 def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
-                    ax=None, L_bins=None):
+                    L_bins=None):
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     with open(f'{corr_dir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'rb') as f:
         mocks_dict = pickle.load(f)
@@ -70,17 +70,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
     comp1d[mask_nonzero_parent] =\
         h_nice[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
 
-    # Plot the puri/comp 1D
-    if ax is None:
-        ax = plt.gca()
-
-    ax.plot(L_bins_c, puri1d, ls='-', label='Purity')
-    ax.plot(L_bins_c, comp1d, ls='-', label='Completeness')
-
-    ax.set(xlabel=r'$L_{\mathrm{Ly}\alpha}$',
-           ylim=(0, 1))
-
-    return ax, puri1d, comp1d, L_bins_c
+    return puri1d, comp1d, L_bins_c
 
 
 main = plot_puricomp1d
