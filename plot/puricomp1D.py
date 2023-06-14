@@ -33,6 +33,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
     h_sel = np.zeros_like(L_bins_c)
     h_nice = np.zeros_like(L_bins_c)
+    h_nice_spec = np.zeros_like(L_bins_c)
     h_parent = np.zeros_like(L_bins_c)
 
     for mock_name, mock in mocks_dict.items():
@@ -53,10 +54,12 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
         area_obs = area_dict[mock_name]
 
-        h_sel += np.histogram(mock['L_lya_spec'][mask_sel],
+        h_sel += np.histogram(mock['L_lya'][mask_sel],
                               L_bins)[0] / area_obs
-        h_nice += np.histogram(mock['L_lya_spec'][mask_nice],
-                               L_bins)[0] / area_obs
+        h_nice += np.histogram(mock['L_lya'][mask_nice],
+                                    L_bins)[0] / area_obs
+        h_nice_spec += np.histogram(mock['L_lya_spec'][mask_nice],
+                                    L_bins)[0] / area_obs
         h_parent += np.histogram(mock['L_lya_spec'][mask_parent],
                                   L_bins)[0] / area_obs
 
@@ -68,7 +71,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
     puri1d[mask_nonzero_sel] =\
         h_nice[mask_nonzero_sel] / h_sel[mask_nonzero_sel]
     comp1d[mask_nonzero_parent] =\
-        h_nice[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
+        h_nice_spec[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
 
     return puri1d, comp1d
 
