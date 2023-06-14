@@ -95,7 +95,7 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
 
 
 def puricomp_corrections(mock_dict, L_bins, r_bins,
-                         nb_min, nb_max, ew0_min=30):
+                         nb_min, nb_max, ew0_min=0):
     # Perturb L
     N_iter = 500
 
@@ -231,7 +231,7 @@ def compute_LF_corrections(mock_dict, field_name,
     r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
     puri2d, comp2d = puricomp_corrections(mock_dict, L_bins, r_bins,
-                                          nb_min, nb_max, ew0_min=30)
+                                          nb_min, nb_max)
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     os.makedirs(savedir, exist_ok=True)
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)

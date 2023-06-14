@@ -237,7 +237,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # gr = g - r
     ri = r - i
     # # For z > 3
-    color_aux1 = (ri < 0.5)
+    color_aux1 = (ri < 0.5) & (r > 0) & (i > 0) & (r < 26) & (i < 26)
 
     N_sources = pm_flx.shape[1]
 
@@ -252,7 +252,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         w_obs_SiIV = (1 + z_src) * w_SiIV
         w_obs_CIV = (1 + z_src) * w_CIV
         w_obs_CIII = (1 + z_src) * w_CIII
-        w_obs_MgII = (1 + z_src) * w_MgII
+        # w_obs_MgII = (1 + z_src) * w_MgII
 
         for l in other_lines[src]:
             # Ignore very red and very blue NBs
@@ -290,7 +290,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
 
     return nice_lya, color_mask, mlines_mask
 
-def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=30,
+def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
                 ewmin_other=100, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
     # Estimate continuum
