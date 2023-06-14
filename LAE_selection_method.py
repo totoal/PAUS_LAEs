@@ -233,17 +233,13 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # TODO: Check colors of PAUS. Extend to all BBs
     i = flux_to_mag(pm_flx[-3], w_central[-3])
     r = flux_to_mag(pm_flx[-4], w_central[-4])
-    g = flux_to_mag(pm_flx[-5], w_central[-5])
-    gr = g - r
+    # g = flux_to_mag(pm_flx[-5], w_central[-5])
+    # gr = g - r
     ri = r - i
     # # For z > 3
-    # color_aux1 = (ri < 0.6) & (gr < 1.5)
-    # # For z < 3
-    # color_aux2 = (ri < 0.6) & (gr < 0.6)
-    # TODO: Provisionally not use color masks
+    color_aux1 = (ri < 0.5)
+
     N_sources = pm_flx.shape[1]
-    color_aux1 = np.ones(N_sources).astype(bool)
-    color_aux2 = np.ones(N_sources).astype(bool)
 
     color_mask = np.ones(N_sources).astype(bool)
     mlines_mask = np.ones(N_sources).astype(bool)
@@ -275,16 +271,6 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
                 | ((w_obs_CIII - w_obs_l) < 399.)
                 | ((w_obs_l - w_obs_CIII) < 125.)
             )
-            # good_l = (
-            #     (np.abs(w_obs_l - w_obs_lya) < fwhm * 1.)
-            #     | (np.abs(w_obs_l - w_obs_lyb) < fwhm * 1.)
-            #     | (np.abs(w_obs_l - w_obs_CIV) < fwhm * 1.)
-                # | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 1.)
-            #     | (np.abs(w_obs_l - w_obs_CIII) < fwhm * 1.)
-            #     | (np.abs(w_obs_l - w_obs_MgII) < fwhm * 1.)
-            #     | (w_obs_l > w_obs_MgII + fwhm)
-            # )
-
             if ~good_l:
                 mlines_mask[src] = False
                 break
@@ -292,10 +278,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         if len(other_lines[src]) > 1:
             pass
         else:
-            if z_src > 3.:
-                good_colors = color_aux2[src]
-            else:
-                good_colors = color_aux1[src]
+            good_colors = color_aux1[src]
 
             if ~good_colors:
                 color_mask[src] = False
