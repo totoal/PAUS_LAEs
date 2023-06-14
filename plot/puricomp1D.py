@@ -70,10 +70,8 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
     comp1d[mask_nonzero_parent] =\
         h_nice[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
 
-    return puri1d, comp1d, L_bins_c
+    return puri1d, comp1d
 
-
-main = plot_puricomp1d
 
 if __name__ == '__main__':
-    main('foo', 0, 2, 17, 24)
+    plot_puricomp1d('foo', 0, 2, 17, 24)
