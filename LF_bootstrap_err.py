@@ -4,13 +4,15 @@ import numpy as np
 
 from paus_utils import Lya_effective_volume
 
+from jpasLAEs.utils import bin_centers
+
 import os
 import sys
 
 # List of subregions
 region_list_0 = np.array(['W3'])
 
-def bootstrapped_LFs(nb_list, region_list_indices):
+def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
     '''
     Returns a matrix of N iterations of the LF using the fields given by
     region_list_indices.
@@ -19,30 +21,48 @@ def bootstrapped_LFs(nb_list, region_list_indices):
     volume_list = []
 
     this_hist = None
-    for jj, region in enumerate(region_list):
+    masked_volume = None
+    for region_name in region_list:
         for [nb1, nb2] in nb_list:
-            volume_list.append(Lya_effective_volume(nb1, nb2, region))
-
-            LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region}'
+            LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region_name}'
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
             filename_hist = f'{pathname}/hist_i_mat.npy'
-            hist_i_mat = np.load(filename_hist)
 
             L_bins = np.load(f'{pathname}/LF_L_bins.npy')
-            bin_width = [L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)]
+            L_bins_c = bin_centers(L_bins)
 
-            this_field_LF = hist_i_mat / volume_list[jj] / bin_width
+            hist_i_mat = np.load(filename_hist)
+
+            if combined_LF:
+                this_volume = Lya_effective_volume(nb1, nb2, 'W3')
+                vol_Arr = this_volume * np.ones_like(L_bins_c)
+                N_median_hist = np.nanmedian(hist_i_mat, axis=0)
+                vol_Arr[N_median_hist <= 0] = 0
+                hist_i_mat[:, N_median_hist <= 0] = 0
+
+                if masked_volume is None:
+                    masked_volume = vol_Arr
+                else:
+                    masked_volume += vol_Arr
 
             if this_hist is None:
                 this_hist = hist_i_mat
-                field_LF_mat = this_field_LF
             else:
                 this_hist += hist_i_mat
-                field_LF_mat = np.vstack([field_LF_mat, this_field_LF])
 
-    total_volume = np.sum(volume_list)
 
-    return this_hist / bin_width / total_volume
+    if combined_LF:
+        eff_vol = masked_volume
+    else:
+        for [nb1, nb2] in nb_list:
+            eff_vol += Lya_effective_volume(nb1, nb2, 'W3') # TODO: Change the area with region_name
+
+    bin_width = [L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)]
+
+    lum_func = np.zeros_like(this_hist).astype(float)
+    lum_func[eff_vol > 0] = this_hist[eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
+
+    return lum_func
 
 
 if __name__ == '__main__':
@@ -63,7 +83,7 @@ if __name__ == '__main__':
             # TODO: by now we only have the 5 mocks
             boots = np.array([0, 0, 0, 0, 0])
 
-            this_hist_mat = bootstrapped_LFs(nb_list, boots)
+            this_hist_mat = bootstrapped_LFs(nb_list, boots, combined_LF=True)
 
             if hist_mat is None:
                 hist_mat = this_hist_mat

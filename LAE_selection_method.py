@@ -265,11 +265,12 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
             good_l = (
                 (np.abs(w_obs_l - w_obs_lyb) < fwhm * 1.)
                 | (np.abs(w_obs_l - w_obs_lya) < fwhm * 1.)
-                | ((w_obs_CIV - w_obs_l) < 326.)
+                # | (((w_obs_CIV - w_obs_l) < 326.) & ((w_obs_CIV - w_obs_l) > 0))
+                | (((w_obs_CIV - w_obs_l) < 260.) & ((w_obs_CIV - w_obs_l) > 0))
                 | (np.abs(w_obs_l - w_obs_SiIV) < fwhm * 2.)
-                | ((w_obs_l - w_obs_CIV) < 71.)
-                | ((w_obs_CIII - w_obs_l) < 399.)
-                | ((w_obs_l - w_obs_CIII) < 125.)
+                | (((w_obs_l - w_obs_CIV) < 71.) & ((w_obs_l - w_obs_CIV) > 0))
+                | (((w_obs_CIII - w_obs_l) < 399.) & ((w_obs_CIII - w_obs_l) > 0))
+                | (((w_obs_l - w_obs_CIII) < 125.) & ((w_obs_l - w_obs_CIII) > 0))
             )
             if ~good_l:
                 mlines_mask[src] = False
@@ -324,11 +325,14 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     nice_lya_mask = snr_mask & nb_mask\
         & (cat['r_mag'] >= r_min) & (cat['r_mag'] <= r_max)
 
-    nice_lya, _, _ = nice_lya_select(lya_lines, other_lines, cat['flx'],
-                                     z_Arr, mask=nice_lya_mask)
+    nice_lya, color_mask, ml_mask =\
+        nice_lya_select(lya_lines, other_lines, cat['flx'],
+                        z_Arr, mask=nice_lya_mask)
 
     # Add columns to cat
     cat['nice_lya'] = nice_lya
+    cat['nice_color'] = color_mask
+    cat['nice_ml'] = ml_mask
     cat['z_NB'] = z_Arr
     cat['lya_NB'] = lya_lines
     cat['other_lines_NBs'] = other_lines
