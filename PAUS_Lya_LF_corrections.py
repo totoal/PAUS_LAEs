@@ -176,9 +176,9 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
     r_bins_c = bin_centers(r_bins)
     L_bins_c = bin_centers(L_bins)
 
-    h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, 0.15, 0.3)
-    h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, 0.15, 0.3)
-    h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, 0.15, 0.3)
+    h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, 0.2, 0.5)
+    h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, 0.2, 0.5)
+    h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, 0.2, 0.5)
 
     # np.save(f'{dirname}/h2d_nice_smooth_{survey_name}', h2d_nice_smooth)
     # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)

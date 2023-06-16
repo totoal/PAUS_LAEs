@@ -54,8 +54,9 @@ def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
     if combined_LF:
         eff_vol = masked_volume
     else:
+        eff_vol = 0
         for [nb1, nb2] in nb_list:
-            eff_vol += Lya_effective_volume(nb1, nb2, 'W3') # TODO: Change the area with region_name
+            eff_vol += Lya_effective_volume(nb1, nb2, 'W3') * np.ones_like(bin_width).astype(float) # TODO: Change the area with region_name
 
     bin_width = [L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)]
 

@@ -162,7 +162,15 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
 
-    cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
+    # cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
+    ################################################
+    #### Testing with a synthetic BB ####
+    stack_nb_ids = np.arange(12, 16 + 1)
+    synth_BB_flx = np.average(cat['flx'][stack_nb_ids],
+                              weights=cat['err'][stack_nb_ids] ** -2,
+                              axis=0)
+    cat['r_mag'] = flux_to_mag(synth_BB_flx, w_central[-4])
+    ################################################
 
     # TEMPORARILY limit the catalog to objs with all the NBs
     mask_NB_number = (cat['NB_number'] > 39)

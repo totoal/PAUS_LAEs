@@ -52,7 +52,14 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
             if sdss_range_mode is True:
                 if i == 0 or i == 5:
                     continue
-            ax.errorbar(w_central[i - 6], flx[i - 6], yerr=err[i - 6],
+            bb_flx = flx[i - 6]
+            bb_err = err[i - 6]
+
+            # Check if bb is well measured
+            if bb_err < 0:
+                continue
+
+            ax.errorbar(w_central[i - 6], bb_flx, yerr=bb_err,
                         markeredgecolor='dimgray',
                         fmt='^', markerfacecolor=cmap[i - 6], markersize=13,
                         ecolor='dimgray', capsize=4, capthick=1, alpha=0.8)
