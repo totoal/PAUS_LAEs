@@ -393,6 +393,23 @@ for jj, [nb1, nb2] in enumerate(nbs_list):
     miniJPAS_LF_list[jj]['fmt'] = 's'
     miniJPAS_LF_list[jj]['color'] = 'r'
 
+# miniJPAS Full Range
+LF_name = f'LF_r17-24_combi_ew30_ewoth100.pkl'
+with open(f'{LF_save_dirname}/{LF_name}', 'rb') as f:
+    this_mjj_LF = pickle.load(f)
+
+tt23_z2038 = {}
+tt23_z2038['logL'] = this_mjj_LF['LF_bins']
+tt23_z2038['Phi'] = this_mjj_LF['LF_total']
+tt23_z2038['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
+tt23_z2038['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
+tt23_z2038['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
+tt23_z2038['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
+tt23_z2038['fmt'] = 's'
+tt23_z2038['color'] = 'r'
+
+
+###########################################################3
 
 # Assign colors
 LF_ref_list = [b11, g07, k16, m17a, m17b, u08, s16, s17, s18a,
