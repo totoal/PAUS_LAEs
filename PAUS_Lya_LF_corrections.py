@@ -88,9 +88,7 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     L_e_Arr_pm = [L_Lbin_err_minus[L_binning_position],
                   L_Lbin_err_plus[L_binning_position]]
 
-    # TODO: PROVISIONAL 
-    # cat['L_lya_corr'] = L_Arr_corr
-    cat['L_lya_corr'] = cat['L_lya'] + 0.2
+    cat['L_lya_corr'] = L_Arr_corr
     cat['L_lya_corr_err'] = np.array(L_e_Arr_pm)
 
     return cat
