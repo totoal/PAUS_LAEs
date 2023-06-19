@@ -18,7 +18,6 @@ def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
     region_list_indices.
     '''
     region_list = region_list_0[region_list_indices]
-    volume_list = []
 
     this_hist = None
     masked_volume = None
@@ -51,17 +50,19 @@ def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
                 this_hist += hist_i_mat
 
 
+    bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
+
     if combined_LF:
         eff_vol = masked_volume
     else:
         eff_vol = 0
-        for [nb1, nb2] in nb_list:
-            eff_vol += Lya_effective_volume(nb1, nb2, 'W3') * np.ones_like(bin_width).astype(float) # TODO: Change the area with region_name
-
-    bin_width = [L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)]
+        for region_name in region_list:
+            for [nb1, nb2] in nb_list:
+                this_vol = Lya_effective_volume(nb1, nb2, region_name)
+                eff_vol += this_vol * np.ones_like(bin_width).astype(float)
 
     lum_func = np.zeros_like(this_hist).astype(float)
-    lum_func[eff_vol > 0] = this_hist[eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
+    lum_func[:, eff_vol > 0] = this_hist[:, eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
 
     return lum_func
 

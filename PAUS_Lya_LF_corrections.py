@@ -88,7 +88,9 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     L_e_Arr_pm = [L_Lbin_err_minus[L_binning_position],
                   L_Lbin_err_plus[L_binning_position]]
 
-    cat['L_lya_corr'] = L_Arr_corr
+    # TODO: PROVISIONAL 
+    # cat['L_lya_corr'] = L_Arr_corr
+    cat['L_lya_corr'] = cat['L_lya'] + 0.2
     cat['L_lya_corr_err'] = np.array(L_e_Arr_pm)
 
     return cat
@@ -208,8 +210,15 @@ def compute_LF_corrections(mock_dict, field_name,
         mock['flx'], mock['err'] = add_errors(mock['flx_0'], field_name,
                                               add_errors=True)
 
-        # Compute r_mag
-        mock['r_mag'] = flux_to_mag(mock['flx'][-4], w_central[-4])
+        # # Compute r_mag
+        # mock['r_mag'] = flux_to_mag(mock['flx'][-4], w_central[-4])
+        #### Testing with a synthetic BB ####
+        stack_nb_ids = np.arange(12, 16 + 1)
+        synth_BB_flx = np.average(mock['flx'][stack_nb_ids],
+                                weights=mock['err'][stack_nb_ids] ** -2,
+                                axis=0)
+        mock['r_mag'] = flux_to_mag(synth_BB_flx, w_central[-4])
+        ################################################
 
         ## Now we have the mock with the errors, do everything else for
         ## each mock

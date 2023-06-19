@@ -19,3 +19,5 @@ for nb in $nb_list
     check_py_exception
 
 end
+
+py LF_bootstrap_err.py "combi"
