@@ -237,7 +237,8 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # gr = g - r
     ri = r - i
     # # For z > 3
-    color_aux1 = (ri < 0.5) & (r > 0) & (i > 0) & (r < 26) & (i < 26)
+    # color_aux1 = (ri < 0.5) & (r > 0) & (i > 0) & (r < 26) & (i < 26)
+    color_aux1 = np.ones_like(ri).astype(bool)
 
     N_sources = pm_flx.shape[1]
 
