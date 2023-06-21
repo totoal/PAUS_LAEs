@@ -113,7 +113,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         # The array of weights w
         w = np.random.rand(len(puri_k))
         # Mask very low completeness and randomly according to purity
-        include_mask = (w < puri_k) & (comp_k > 0.)
+        include_mask = (w <= puri_k) & (comp_k > 0.)
         w[~include_mask] = 0.
         w[include_mask] = 1. / comp_k[include_mask]
         w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
