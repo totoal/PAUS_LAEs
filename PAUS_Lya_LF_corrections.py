@@ -110,6 +110,8 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
         # If mock is `QSO_LAEs_loL` add extra mask to cut out high L_lya sources
         if mock_name == 'QSO_LAEs_loL':
             mask_hiL = mock['L_lya_spec'] < 44
+        elif mock_name == 'QSO_LAEs_hiL':
+            mask_hiL = mock['L_lya_spec'] >= 44
         else:
             mask_hiL = np.ones_like(mock['L_lya_spec']).astype(bool)
 
@@ -147,11 +149,11 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
         hist_dict[f'{mock_name}_nice'] /= area_obs
         hist_dict[f'{mock_name}_sel'] /= area_obs
         
-        # Take the median
-        hist_dict[f'{mock_name}_nice'] = np.median(hist_dict[f'{mock_name}_nice'],
+        # Take the average
+        hist_dict[f'{mock_name}_nice'] = np.average(hist_dict[f'{mock_name}_nice'],
+                                                    axis=2)
+        hist_dict[f'{mock_name}_sel'] = np.average(hist_dict[f'{mock_name}_sel'],
                                                    axis=2)
-        hist_dict[f'{mock_name}_sel'] = np.median(hist_dict[f'{mock_name}_sel'],
-                                                  axis=2)
 
         # Compute parent histograms
         parent_mask = ((NB_z(mock['zspec']) >= nb_min)
@@ -184,8 +186,8 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
     # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)
     # np.save(f'{dirname}/h2d_parent_smooth_{survey_name}', h2d_parent_smooth)
 
-    puri2d = np.empty_like(h2d_nice_smooth)
-    comp2d = np.empty_like(h2d_nice_smooth)
+    puri2d = np.empty_like(h2d_nice_smooth).astype(float)
+    comp2d = np.empty_like(h2d_nice_smooth).astype(float)
 
     mask_nonzero_nice = (h2d_nice_smooth > 0)
     mask_nonzero_parent = (h2d_parent_smooth > 0)

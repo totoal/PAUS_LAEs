@@ -69,7 +69,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
-                  N_iter=500):
+                  N_iter=100, N_boots=5):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
@@ -83,53 +83,63 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
     N_bins = len(L_bins) - 1
 
-    L_Arr = cat['L_lya_corr']
+    L_Arr = cat['L_lya']
     L_e_Arr = cat['L_lya_corr_err']
-    nice_lya = cat['nice_lya']
+    
+    # This is the global nice_lya array. We the selection in N_boots subsamples.
+    total_nice_lya = cat['nice_lya']
 
     hist_i_mat = np.zeros((N_iter, N_bins))
 
-    # Initialize array to save the purity of each LF realization
-    puri_list = []
+    N_sources = len(total_nice_lya)
+    randomize_ids = np.random.permutation(np.arange(N_sources)).astype(int)
+    subregion_size = int(N_sources // N_boots)
 
-    for k in range(N_iter):
-        if (k + 1) % 50 == 0:
-            print(f'Progress: {k + 1} / {N_iter}',
-                      end=('\r' if k + 1 < N_iter else '\n'))
+    for boot_i in range(N_boots + 1):
+        print(f'Subregion: {boot_i}')
+        if boot_i == 0:
+            # First compute the LF with all the sources
+            boot_nice_lya = total_nice_lya
+        else:
+            # When boot_i > 0, compute the LF for random sub-regions
+            subregion_ids = randomize_ids[(boot_i - 1) * subregion_size:
+                                          boot_i * subregion_size]
 
-        randN = np.random.randn(len(L_Arr))
-        L_perturbed = np.empty_like(L_Arr)
-        L_perturbed[randN <= 0] = (L_Arr + L_e_Arr[0] * randN)[randN <= 0]
-        L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
-        L_perturbed[np.isnan(L_perturbed)] = 0.
+            boot_nice_lya = np.zeros_like(total_nice_lya).astype(bool)
+            boot_nice_lya[subregion_ids] = total_nice_lya[subregion_ids]
 
-        puri_k = np.zeros_like(nice_lya).astype(float) # Initialize puricomp arrays
-        comp_k = np.zeros_like(nice_lya).astype(float) # Initialize puricomp arrays
-        puri_k[nice_lya], comp_k[nice_lya] =\
-            Lya_LF_weights(cat['r_mag'][nice_lya], L_perturbed[nice_lya],
-                           puri2d, comp2d,
-                           puricomp2d_L_bins, puricomp2d_r_bins)
+        for k in range(N_iter):
+            if (k + 1) % 50 == 0:
+                print(f'Progress: {k + 1} / {N_iter}',
+                        end=('\r' if k + 1 < N_iter else '\n'))
 
-        # The array of weights w
-        w = np.random.rand(len(puri_k))
-        # Mask very low completeness and randomly according to purity
-        include_mask = (w <= puri_k) & (comp_k > 0.)
-        w[~include_mask] = 0.
-        w[include_mask] = 1. / comp_k[include_mask]
-        w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
+            randN = np.random.randn(len(L_Arr))
+            L_perturbed = np.empty_like(L_Arr)
+            L_perturbed[randN <= 0] = (L_Arr + L_e_Arr[0] * randN)[randN <= 0]
+            L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
+            L_perturbed[np.isnan(L_perturbed)] = 0.
 
-        # Store the realization of the LF in the hist matrix
-        hist_i_mat[k], _ = np.histogram(L_perturbed[nice_lya],
-                                        bins=L_bins, weights=w[nice_lya])
-        
-        # Store purity of this realization
-        puri_list.append(puri_k)
+            puri_k = np.zeros_like(boot_nice_lya).astype(float) # Initialize puricomp arrays
+            comp_k = np.zeros_like(boot_nice_lya).astype(float) # Initialize puricomp arrays
+            puri_k[boot_nice_lya], comp_k[boot_nice_lya] =\
+                Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
+                            puri2d, comp2d,
+                            puricomp2d_L_bins, puricomp2d_r_bins)
 
-    # Save hist_i_mat
-    np.save(f'{LF_savedir}/hist_i_mat.npy', hist_i_mat)
-    # Save the purity
-    np.save(f'{LF_savedir}/estimated_purity_field',
-            np.array(puri_list))
+            # The array of weights w
+            w = np.random.rand(len(puri_k))
+            # Mask very low completeness and randomly according to purity
+            include_mask = (w <= puri_k) & (comp_k > 0.)
+            w[~include_mask] = 0.
+            w[include_mask] = 1. / comp_k[include_mask]
+            w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
+
+            # Store the realization of the LF in the hist matrix
+            hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
+                                            bins=L_bins, weights=w[boot_nice_lya])
+            
+        # Save hist_i_mat
+        np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)
         
 
 
@@ -156,7 +166,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         cat = mocks_dict[field_name]
     elif field_name in PAUS_field_names:
         cats_dir = '/home/alberto/almacen/PAUS_data/catalogs'
-        path_to_cat_list = [f'{cats_dir}/PAUS_3arcsec_{field_name}.csv',]
+        path_to_cat_list = [f'{cats_dir}/PAUS_3arcsec_{field_name}.csv']
         cat = load_paus_cat(path_to_cat_list)
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
@@ -196,7 +206,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     # Define the LF L binning
     L_min, L_max = 40, 47
-    N_bins = 30
+    N_bins = 50
     L_bins = np.linspace(L_min, L_max, N_bins + 1)
 
     # Dir to save the LFs and subproducts

@@ -9,23 +9,19 @@ from jpasLAEs.utils import bin_centers
 import os
 import sys
 
-# List of subregions
-region_list_0 = np.array(['W3'])
-
-def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
+def bootstrapped_LFs(nb_list, region_list, boot_i,
+                     combined_LF=False):
     '''
     Returns a matrix of N iterations of the LF using the fields given by
     region_list_indices.
     '''
-    region_list = region_list_0[region_list_indices]
-
     this_hist = None
     masked_volume = None
     for region_name in region_list:
         for [nb1, nb2] in nb_list:
             LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region_name}'
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-            filename_hist = f'{pathname}/hist_i_mat.npy'
+            filename_hist = f'{pathname}/hist_i_mat_{boot_i}.npy'
 
             L_bins = np.load(f'{pathname}/LF_L_bins.npy')
             L_bins_c = bin_centers(L_bins)
@@ -67,6 +63,17 @@ def bootstrapped_LFs(nb_list, region_list_indices, combined_LF=False):
     return lum_func
 
 
+def count_N_boots(directory):
+    count = 0
+    for filename in os.listdir(directory):
+        if filename[-5] == '0':
+            continue
+        if filename.startswith('hist_i_mat') and os.path.isfile(os.path.join(directory, filename)):
+            count += 1
+    return count
+
+
+
 if __name__ == '__main__':
     if sys.argv[1] == 'combi':
         print('\n##########################')
@@ -81,11 +88,17 @@ if __name__ == '__main__':
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
-            # boots = np.random.choice(np.arange(5), 5, replace=True)
-            # TODO: by now we only have the 5 mocks
-            boots = np.array([0, 0, 0, 0, 0])
+            LF_name = f'Lya_LF_nb0-2_W3'
+            pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
+            N_boots = count_N_boots(pathname)
+            boots_ids = np.random.choice(np.arange(N_boots), N_boots,
+                                        replace=True) + 1
+            region_list = ['W3']
 
-            this_hist_mat = bootstrapped_LFs(nb_list, boots, combined_LF=True)
+            this_hist_mat = 0.
+            for boot_i in boots_ids:
+                this_hist_mat += bootstrapped_LFs(nb_list, region_list,
+                                                boot_i, combined_LF=True)
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -123,11 +136,17 @@ if __name__ == '__main__':
     for iter_i in range(N_realizations):
         print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
-        # boots = np.random.choice(np.arange(5), 5, replace=True)
-        # TODO: by now we only have the 5 mocks
-        boots = np.array([0, 0, 0, 0, 0])
+        LF_name = f'Lya_LF_nb{nb1}-{nb2}_W3'
+        pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
+        N_boots = count_N_boots(pathname)
+        boots_ids = np.random.choice(np.arange(N_boots), N_boots,
+                                     replace=True) + 1
+        region_list = ['W3']
 
-        this_hist_mat = bootstrapped_LFs([[nb1, nb2]], boots)
+        this_hist_mat = 0.
+        for boot_i in boots_ids:
+            this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
+                                              boot_i, combined_LF=False)
 
         if hist_mat is None:
             hist_mat = this_hist_mat
