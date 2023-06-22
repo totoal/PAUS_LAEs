@@ -368,6 +368,63 @@ l22 = {
     'Ode0': 0.7
 }
 
+df = pd.read_csv('/home/alberto/almacen/literature_LF_data/Liu2022_z225.csv')
+l22_z225 = {
+    'logL': df['logLya'],
+    'Phi': df['Phi'],
+    'yerr_plus': df['Phi_err_up'] - df['Phi'],
+    'yerr_minus': df['Phi'] - df['Phi_err_down'],
+    'z': 2.25,
+    'label': 'Liu 2022 ($z=2.25$)',
+    'fmt': 'v',
+    'H0': 70,
+    'Om0': 0.3,
+    'Ode0': 0.7
+}
+
+df = pd.read_csv('/home/alberto/almacen/literature_LF_data/Liu2022_z237.csv')
+l22_z237 = {
+    'logL': df['logLya'],
+    'Phi': df['Phi'],
+    'yerr_plus': df['Phi_err_up'] - df['Phi'],
+    'yerr_minus': df['Phi'] - df['Phi_err_down'],
+    'z': 2.37,
+    'label': 'Liu 2022 ($z=2.37$)',
+    'fmt': 'v',
+    'H0': 70,
+    'Om0': 0.3,
+    'Ode0': 0.7
+}
+
+df = pd.read_csv('/home/alberto/almacen/literature_LF_data/Liu2022_z254.csv')
+l22_z254 = {
+    'logL': df['logLya'],
+    'Phi': df['Phi'],
+    'yerr_plus': df['Phi_err_up'] - df['Phi'],
+    'yerr_minus': df['Phi'] - df['Phi_err_down'],
+    'z': 2.54,
+    'label': 'Liu 2022 ($z=2.54$)',
+    'fmt': 'v',
+    'H0': 70,
+    'Om0': 0.3,
+    'Ode0': 0.7
+}
+
+df = pd.read_csv('/home/alberto/almacen/literature_LF_data/Liu2022_z324.csv')
+l22_z324 = {
+    'logL': df['logLya'],
+    'Phi': df['Phi'],
+    'yerr_plus': df['Phi_err_up'] - df['Phi'],
+    'yerr_minus': df['Phi'] - df['Phi_err_down'],
+    'z': 3.24,
+    'label': 'Liu 2022 ($z=3.24$)',
+    'fmt': 'v',
+    'H0': 70,
+    'Om0': 0.3,
+    'Ode0': 0.7
+}
+
+
 # miniJPAS
 nbs_list = [[1, 5], [4, 8], [7, 11], [10, 14], [13, 17], [16, 20]]
 tt23_z2025 = {}
@@ -391,7 +448,7 @@ for jj, [nb1, nb2] in enumerate(nbs_list):
     miniJPAS_LF_list[jj]['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
     miniJPAS_LF_list[jj]['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
     miniJPAS_LF_list[jj]['fmt'] = 's'
-    miniJPAS_LF_list[jj]['color'] = 'r'
+    # miniJPAS_LF_list[jj]['color'] = 'r'
 
 # miniJPAS Full Range
 LF_name = f'LF_r17-24_combi_ew30_ewoth100.pkl'
@@ -406,7 +463,7 @@ tt23_z2038['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
 tt23_z2038['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
 tt23_z2038['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
 tt23_z2038['fmt'] = 's'
-tt23_z2038['color'] = 'r'
+# tt23_z2038['color'] = 'r'
 
 
 ###########################################################3
@@ -414,8 +471,10 @@ tt23_z2038['color'] = 'r'
 # Assign colors
 LF_ref_list = [b11, g07, k16, m17a, m17b, u08, s16, s17, s18a,
                s18b, s18c, s18d, s18e, s18f, ds20_z225, ds20_z237,
-               ds20_z254, ds20_z324, z21, l22]
-for i, lf_dict in enumerate(LF_ref_list):
+               ds20_z254, ds20_z324, z21, l22, l22_z225, l22_z237,
+               l22_z254, l22_z324]
+
+for i, lf_dict in enumerate(LF_ref_list + miniJPAS_LF_list + [tt23_z2038]):
     lf_dict['color'] = f'C{i}'
 
 # Convert to my cosmology
