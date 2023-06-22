@@ -83,7 +83,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
     N_bins = len(L_bins) - 1
 
-    L_Arr = cat['L_lya']
+    L_Arr = cat['L_lya_corr']
     L_e_Arr = cat['L_lya_corr_err']
     
     # This is the global nice_lya array. We the selection in N_boots subsamples.
