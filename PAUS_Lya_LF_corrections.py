@@ -1,6 +1,6 @@
 #!/home/alberto/miniconda3/bin/python3
 
-from jpasLAEs.utils import smooth_Image, bin_centers, mag_to_flux, hms_since_t0
+from jpasLAEs.utils import smooth_Image, bin_centers, hms_since_t0
 
 from load_paus_mocks import load_mock_dict, add_errors
 from paus_utils import *
