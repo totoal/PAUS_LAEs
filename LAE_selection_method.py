@@ -385,7 +385,8 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     # 2 for QSO_LAEs_loL
     # 3 for QSO_LAEs_hiL
     # 4 for GAL
-    class_mask = (prediction != 4)
+    class_mask = np.zeros_like(nice_lya).astype(bool)
+    class_mask[nice_lya] = (prediction != 4)
     nice_lya = nice_lya & class_mask
     
     # Update cat
