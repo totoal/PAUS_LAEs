@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 
 from paus_utils import *
@@ -292,6 +294,34 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
 
     return nice_lya, color_mask, mlines_mask
 
+
+def ML_LAE_class(cat):
+    # import the classifier
+    save_dir = '/home/alberto/almacen/PAUS_data/ML_classifier'
+    with open(f'{save_dir}/source_classifier.sav', 'rb') as file:
+        classifier = pickle.load(file)
+    with open(f'{save_dir}/source_pca.sav', 'rb') as file:
+        pca = pickle.load(file)
+    with open(f'{save_dir}/source_scaler.sav', 'rb') as file:
+        scaler = pickle.load(file)
+
+    # Pre-processing
+    selection = cat['nice_lya']
+    dataset = np.hstack([
+        cat['flx'][:40, selection].T * 1e17,
+        cat['err'][:40, selection].T / cat['flx'][:40, selection].T,
+        cat['lya_NB'][selection].reshape(-1, 1),
+    ])
+
+    # Apply caler and PCA
+    dataset = scaler.transform(dataset)
+    dataset = pca.transform(dataset)
+
+    prediction = classifier.predict(dataset)
+
+    return prediction
+
+
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
                 ewmin_other=100, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
@@ -330,10 +360,22 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
         nice_lya_select(lya_lines, other_lines, cat['flx'],
                         z_Arr, mask=nice_lya_mask)
 
+    # Machine learning classification
+    prediction = ML_LAE_class(cat)
+    # If classified as Galaxy, nice_lya = False
+    # 0 for SFG
+    # 1 for QSO_cont
+    # 2 for QSO_LAEs_loL
+    # 3 for QSO_LAEs_hiL
+    # 4 for GAL
+    class_mask = (prediction != 4)
+    nice_lya = nice_lya & class_mask
+
     # Add columns to cat
     cat['nice_lya'] = nice_lya
     cat['nice_color'] = color_mask
     cat['nice_ml'] = ml_mask
+    cat['class_pred'] = prediction
     cat['z_NB'] = z_Arr
     cat['lya_NB'] = lya_lines
     cat['other_lines_NBs'] = other_lines
