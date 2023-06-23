@@ -386,12 +386,15 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     # 3 for QSO_LAEs_hiL
     # 4 for GAL
     class_mask = np.zeros_like(nice_lya).astype(bool)
-    class_mask[nice_lya] = (prediction != 4)
+    class_pred = np.ones_like(nice_lya).astype(int) * -1
+    class_mask[nice_lya] = (prediction > 0) & (prediction < 3)
+    class_pred[nice_lya] = prediction
     nice_lya = nice_lya & class_mask
     
     # Update cat
+    cat['nice_lya_0'] = np.copy(cat['nice_lya'])
     cat['nice_lya'] = nice_lya
-    cat['class_pred'] = prediction
+    cat['class_pred'] = class_pred
 
     if check_nice_z:
         nice_z = np.abs(z_Arr - cat['zspec']) < 0.115

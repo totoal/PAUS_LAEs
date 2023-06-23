@@ -90,45 +90,6 @@ def load_gal_mock(path_to_mock, cat_fraction=1.):
     cat['L_lya_spec'] = np.zeros_like(cat['zspec'])
     cat['EW0_lya_spec'] = np.zeros_like(cat['zspec'])
 
-    # Let's correct the line fluxes according to the correction factors
-    # that we have computed in test_GAL_mock.ipynb
-    '''
-    corr_path = '/home/alberto/almacen/PAUS_data/catalogs/Lightcone_line_corr.pkl'
-    with open(corr_path, 'rb') as f:
-        line_corr_dict = pickle.load(f)
-
-    line_dict = {'halpha': 6564.61,
-                 'hbeta': 4862.68,
-                 'oii3727': 3727.10,
-                 'oiii4959': 4960.30,
-                 'oiii5007': 5008.24}
-
-    for line_name, line_w0 in line_dict.items():
-        # The line fluxes
-        Fl = Table.read(path_to_mock)[f'l_tot_{line_name}_ext'][sel][mag_mask]
-        zspec = cat['zspec']
-
-        line_NB_Arr = NB_z(zspec, line_w0)
-
-        where_lines = (line_NB_Arr[line_NB_Arr >= 0],
-                       np.arange(len(zspec))[line_NB_Arr >= 0])
-        
-        # To which z bin does each source belong to
-        z_bins = line_corr_dict['z_bins']
-        z_bin_i_Arr = np.ones_like(zspec) * -1
-        for z_bin_i in range(len(z_bins) - 1):
-            z_min, z_max = z_bins[z_bin_i], z_bins[z_bin_i + 1]
-            z_bin_i_Arr[(zspec >= z_min) & (zspec < z_max)] = z_bin_i
-
-        # alpha is the correction factor
-        alpha = np.array(line_corr_dict[f'{line_name}_corr_factor'])[z_bin_i_Arr.astype(int)]
-        alpha[z_bin_i_Arr < 0] = 1.
-
-        flx_0_diff = - Fl / fwhm_Arr[line_NB_Arr] * (1 - alpha) * 0.625
-
-        cat['flx_0'][*where_lines] += flx_0_diff[line_NB_Arr >= 0]
-    '''
-
     return cat
 
 

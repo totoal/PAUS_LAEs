@@ -102,8 +102,12 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             boot_nice_lya = total_nice_lya
         else:
             # When boot_i > 0, compute the LF for random sub-regions
-            subregion_ids = randomize_ids[(boot_i - 1) * subregion_size:
-                                          boot_i * subregion_size]
+            start_i = (boot_i - 1) * subregion_size
+            if boot_i < N_boots:
+                stop_i = boot_i * subregion_size
+            else:
+                stop_i = N_sources
+            subregion_ids = randomize_ids[start_i : stop_i]
 
             boot_nice_lya = np.zeros_like(total_nice_lya).astype(bool)
             boot_nice_lya[subregion_ids] = total_nice_lya[subregion_ids]
