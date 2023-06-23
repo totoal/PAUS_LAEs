@@ -373,7 +373,6 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     cat['nice_lya'] = nice_lya
     cat['nice_color'] = color_mask
     cat['nice_ml'] = ml_mask
-    cat['class_pred'] = prediction
     cat['z_NB'] = z_Arr
     cat['lya_NB'] = lya_lines
     cat['other_lines_NBs'] = other_lines
