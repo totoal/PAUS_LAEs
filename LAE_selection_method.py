@@ -318,13 +318,17 @@ def ML_LAE_class(cat):
     selection = cat['nice_lya']
     dataset = np.hstack([
         cat['flx'][:40, selection].T * 1e17,
-        cat['err'][:40, selection].T / cat['flx'][:40, selection].T,
+        # cat['err'][:40, selection].T / cat['flx'][:40, selection].T,
         cat['lya_NB'][selection].reshape(-1, 1),
+        cat['r_mag'][selection].reshape(-1, 1),
     ])
 
     # Apply caler and PCA
-    dataset = scaler.transform(dataset)
-    dataset = pca.transform(dataset)
+    # dataset = scaler.transform(dataset)
+    # dataset = pca.transform(dataset)
+    dataset[:, :40] /= np.sum(dataset[:, :40], axis=1).reshape(-1, 1)
+    dataset[:, 40] /= 16.
+    dataset[:, 41] /= 24.
 
     prediction = classifier.predict(dataset)
 
@@ -387,7 +391,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     # 4 for GAL
     class_mask = np.zeros_like(nice_lya).astype(bool)
     class_pred = np.ones_like(nice_lya).astype(int) * -1
-    class_mask[nice_lya] = (prediction > 0) & (prediction < 3)
+    class_mask[nice_lya] = (prediction >= 0) & (prediction < 3)
     class_pred[nice_lya] = prediction
     nice_lya = nice_lya & class_mask
     

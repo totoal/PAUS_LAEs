@@ -32,8 +32,8 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
                 this_volume = Lya_effective_volume(nb1, nb2, 'W3')
                 vol_Arr = this_volume * np.ones_like(L_bins_c)
                 N_median_hist = np.nanmedian(hist_i_mat, axis=0)
-                vol_Arr[N_median_hist <= 0] = 0
-                hist_i_mat[:, N_median_hist <= 0] = 0
+                vol_Arr[N_median_hist <= -1] = 0
+                hist_i_mat[:, N_median_hist <= -1] = 0
 
                 if masked_volume is None:
                     masked_volume = vol_Arr
@@ -92,13 +92,13 @@ if __name__ == '__main__':
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
             N_boots = count_N_boots(pathname)
             boots_ids = np.random.choice(np.arange(N_boots), N_boots,
-                                        replace=True) + 1
+                                         replace=True) + 1
             region_list = ['W3']
 
             this_hist_mat = 0.
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs(nb_list, region_list,
-                                                boot_i, combined_LF=True)
+                                                  boot_i, combined_LF=True)
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
