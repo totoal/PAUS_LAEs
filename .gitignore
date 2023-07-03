@@ -162,3 +162,5 @@ cython_debug/
 
 # Figures directory
 figures
+curve_fit/chains
+curve_fit/figures
