@@ -461,7 +461,7 @@ tt23_z2038['Phi'] = this_mjj_LF['LF_total']
 tt23_z2038['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
 tt23_z2038['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
 tt23_z2038['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
-tt23_z2038['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
+tt23_z2038['label'] = f'miniJPAS ($z=2.05-3.75$)'
 tt23_z2038['fmt'] = 's'
 # tt23_z2038['color'] = 'r'
 
