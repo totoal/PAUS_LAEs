@@ -1,8 +1,6 @@
 import sys
 sys.path.insert(0, '..')
 
-import pickle
-
 import numpy as np
 
 import matplotlib
@@ -11,13 +9,10 @@ matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 16})
 
-import emcee
 import corner
 
-import pandas as pd
 
 from scipy import linalg
-from scipy import stats
 
 from multiprocessing import Pool
 from autoemcee import ReactiveAffineInvariantSampler
@@ -186,4 +181,9 @@ def run_mcmc_fit(nb1, nb2, region_list):
 
 if __name__ == '__main__':
     region_list = ['W3']
-    run_mcmc_fit(0, 2, region_list)
+
+    nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
+               [8, 10], [10, 12], [12, 14], [14, 16]]
+
+    for [nb1, nb2] in nb_list:
+        run_mcmc_fit(nb1, nb2, region_list)
