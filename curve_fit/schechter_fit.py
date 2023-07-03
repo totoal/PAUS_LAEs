@@ -161,7 +161,7 @@ def run_mcmc_fit(nb1, nb2, region_list):
                                              log_like,
                                              transform=transform)
     # Run the sampler
-    sampler.run(max_ncalls=1e7)
+    sampler.run(max_ncalls=1e7, progress=False)
     # Print the results
     sampler.print_results()
 
@@ -186,4 +186,5 @@ if __name__ == '__main__':
                [8, 10], [10, 12], [12, 14], [14, 16]]
 
     for [nb1, nb2] in nb_list:
+        print(f'\n\n{nb1}-{nb2}')
         run_mcmc_fit(nb1, nb2, region_list)
