@@ -309,10 +309,10 @@ def ML_LAE_class(cat):
     save_dir = '/home/alberto/almacen/PAUS_data/ML_classifier'
     with open(f'{save_dir}/source_classifier.sav', 'rb') as file:
         classifier = pickle.load(file)
-    with open(f'{save_dir}/source_pca.sav', 'rb') as file:
-        pca = pickle.load(file)
-    with open(f'{save_dir}/source_scaler.sav', 'rb') as file:
-        scaler = pickle.load(file)
+    # with open(f'{save_dir}/source_pca.sav', 'rb') as file:
+    #     pca = pickle.load(file)
+    # with open(f'{save_dir}/source_scaler.sav', 'rb') as file:
+    #     scaler = pickle.load(file)
 
     # Pre-processing
     selection = cat['nice_lya']
@@ -323,7 +323,7 @@ def ML_LAE_class(cat):
         cat['r_mag'][selection].reshape(-1, 1),
     ])
 
-    # Apply caler and PCA
+    # Apply scaler and PCA
     # dataset = scaler.transform(dataset)
     # dataset = pca.transform(dataset)
     dataset[:, :40] /= np.sum(dataset[:, :40], axis=1).reshape(-1, 1)
