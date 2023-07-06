@@ -1,5 +1,8 @@
+import os
 import sys
 sys.path.insert(0, '..')
+
+import csv
 
 import numpy as np
 
@@ -10,7 +13,6 @@ matplotlib.rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 16})
 
 import corner
-
 
 from scipy import linalg
 
@@ -52,18 +54,13 @@ def compute_invcovmat(hist_mat, where_fit):
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
 
-def load_and_compute_invcovmat(nb1, nb2, region_list, where_fit):
+def load_and_compute_invcovmat(nb1, nb2, where_fit):
     # Load the matrix of LF realizations
-    hist_i_mat = None
-    for region_name in region_list:
-        LF_name = f'Lya_LF_nb{nb1}-{nb2}_W3'
-        pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-        filename_hist = f'{pathname}/hist_i_mat_0.npy'
+    name = f'bootstrap_errors'
+    pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
+    filename_hist = f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}.npy'
 
-        if hist_i_mat is None:
-            hist_i_mat = np.load(filename_hist)
-        else:
-            hist_i_mat += np.load(filename_hist)
+    hist_i_mat = np.load(filename_hist)
 
     return compute_invcovmat(np.log10(hist_i_mat), where_fit)
 
@@ -133,9 +130,9 @@ def run_mcmc_fit(nb1, nb2, region_list):
     yerr[LF_phi == 0] = np.inf
 
     # In which LF bins fit
-    where_fit = np.isfinite(yerr) & (LF_bins > 43) & (LF_bins < 46)# & (yerr > 0)
+    where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)# & (yerr > 0)
 
-    invcovmat, _ = load_and_compute_invcovmat(nb1, nb2, region_list, where_fit)
+    invcovmat, _ = load_and_compute_invcovmat(nb1, nb2, where_fit)
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Lstar', 'alpha']
@@ -177,6 +174,26 @@ def run_mcmc_fit(nb1, nb2, region_list):
     flat_samples = sampler.results['samples']
     np.save(f'chains/mcmc_schechter_fit_chain_nb{nb1}-{nb2}', flat_samples)
 
+    # Obtain the fit parameters
+    fit_params = sampler.results['posterior']['median']
+    fit_params_perc84 = np.percentile(flat_samples, [84], axis=0)[0]
+    fit_params_perc16 = np.percentile(flat_samples, [16], axis=0)[0]
+    fit_params_err_up = fit_params_perc84 - fit_params
+    fit_params_err_down = fit_params - fit_params_perc16
+
+    return fit_params, fit_params_err_up, fit_params_err_down
+
+
+def initialize_csv(filename, columns):
+    if os.path.exists(filename):
+        # If the file exists, overwrite it with an empty file
+        open(filename, 'w').close()
+
+    # Initialize the file with column names
+    with open(filename, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(columns)
+
 
 
 if __name__ == '__main__':
@@ -185,6 +202,26 @@ if __name__ == '__main__':
     nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
                [8, 10], [10, 12], [12, 14], [14, 16]]
 
+    # Initialize file to write the fit parameters
+    param_filename = 'schechter_fit_parameters.csv'
+    columns = ['Phistar', 'Lstar', 'alpha',
+               'Phistar_err_up', 'Lstar_err_up', 'alpha_err_up',
+               'Phistar_err_down', 'Lstar_err_down', 'alpha_err_down']
+    initialize_csv(param_filename, columns)
+
     for [nb1, nb2] in nb_list:
         print(f'\n\n{nb1}-{nb2}')
-        run_mcmc_fit(nb1, nb2, region_list)
+        # Run the MCMC fit
+        fit_params, fit_params_err_up, fit_params_err_down =\
+            run_mcmc_fit(nb1, nb2, region_list)
+
+        # Append the parameters to csv file
+        with open(param_filename, 'a', newline='') as param_file:
+            writer = csv.writer(param_file)
+            row_to_write = np.concatenate([
+                fit_params,
+                fit_params_err_up,
+                fit_params_err_down
+            ])
+            
+            writer.writerow(row_to_write)
