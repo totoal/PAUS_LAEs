@@ -165,3 +165,4 @@ if __name__ == '__main__':
     np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}', LF_err_plus)
     np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}', LF_err_minus)
     np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}', L_LF_err_percentiles[1])
+    np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}', hist_mat)
