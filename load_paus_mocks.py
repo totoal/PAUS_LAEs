@@ -16,6 +16,21 @@ The mocks must be dictionaries with this structure:
 '''
 
 def load_qso_mock(*path_list):
+    '''
+    Load QSO mock data from multiple files and return a dictionary containing relevant information.
+
+    Args:
+        *path_list: Variable-length argument list of paths to the mock data files.
+
+    Returns:
+        dict: A dictionary containing the following keys and corresponding values:
+            - 'flx_0': A 2D NumPy array representing the flux data from the mock files. 
+                       The array shape is (46, N), where N is the total number of objects.
+                       Infinite values are replaced with 99.
+            - 'zspec': A Pandas Series representing the spectroscopic redshifts of the objects.
+            - 'L_lya_spec': A Pandas Series representing the Lyman-alpha luminosities of the objects.
+            - 'EW0_lya_spec': A Pandas Series representing the Lyman-alpha equivalent widths of the objects.
+    '''
     fi = []
 
     for path_to_mock in path_list:
@@ -40,6 +55,20 @@ def load_qso_mock(*path_list):
     return cat
 
 def load_sfg_mock(path_to_mock):
+    '''
+    Load star-forming galaxy (SFG) mock data from files and return a dictionary containing relevant information.
+
+    Args:
+        path_to_mock (str): The path to the directory containing the mock data files.
+
+    Returns:
+        dict: A dictionary containing the following keys and corresponding values:
+            - 'flx_0': A 2D NumPy array representing the flux data from the mock files.
+                       The array shape is (46, N), where N is the total number of objects.
+            - 'zspec': A Pandas Series representing the spectroscopic redshifts of the objects.
+            - 'L_lya_spec': A Pandas Series representing the Lyman-alpha luminosities of the objects.
+            - 'EW0_lya_spec': A Pandas Series representing the Lyman-alpha equivalent widths of the objects.
+    '''
     files = glob.glob(f'{path_to_mock}/data*')
     files.sort()
     fi = []
@@ -61,6 +90,23 @@ def load_sfg_mock(path_to_mock):
     return cat
 
 def load_gal_mock(path_to_mock, cat_fraction=1.):
+    '''
+    Load galaxy mock data from a file and return a dictionary containing relevant information.
+
+    Args:
+        path_to_mock (str): The path to the mock data file.
+        cat_fraction (float, optional): The fraction of objects to select from the mock data.
+                                        Defaults to 1.0, which selects all objects.
+
+    Returns:
+        dict: A dictionary containing the following keys and corresponding values:
+            - 'flx_0': A 2D NumPy array representing the flux data from the mock file.
+                       The array shape is (N, M), where N is the number of selected objects and M is the number of filters.
+                       Flux values are converted from magnitudes using central wavelengths.
+            - 'zspec': A NumPy array representing the spectroscopic redshifts of the selected objects.
+            - 'L_lya_spec': A NumPy array representing the Lyman-alpha luminosities of the selected objects.
+            - 'EW0_lya_spec': A NumPy array representing the Lyman-alpha equivalent widths of the selected objects.
+    '''
     tab = Table.read(path_to_mock).to_pandas().to_numpy()
     mock_size = len(tab)
 
