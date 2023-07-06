@@ -320,14 +320,14 @@ def ML_LAE_class(cat):
         cat['flx'][:40, selection].T * 1e17,
         cat['lya_NB'][selection].reshape(-1, 1),
         cat['r_mag'][selection].reshape(-1, 1),
-        cat['flx'][41:45, selection].T * 1e17, # BBs
+        cat['flx'][40:45, selection].T * 1e17, # BBs
     ])
 
     # Apply scaler and PCA
     # dataset = scaler.transform(dataset)
     # dataset = pca.transform(dataset)
     dataset[:, :40] /= np.sum(dataset[:, :40], axis=1).reshape(-1, 1)
-    dataset[:, 41:45] /= np.sum(dataset[:, 41:45], axis=1).reshape(-1, 1)
+    dataset[:, 42:47] /= np.sum(dataset[:, 42:47], axis=1).reshape(-1, 1)
     dataset[:, 40] /= 16.
     dataset[:, 41] /= 24.
 
