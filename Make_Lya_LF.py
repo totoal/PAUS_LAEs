@@ -19,7 +19,7 @@ from LAE_selection_method import select_LAEs
 from PAUS_Lya_LF_corrections import L_lya_bias_apply
 
 
-def puricomp2d_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
+def puricomp2d_weights(r_Arr, L_lya_Arr, puri_mat, comp_mat,
                        puricomp2d_L_bins, puricomp2d_r_bins):
     '''
     Returns the array of weights, purity and completeness as estimated
@@ -33,9 +33,6 @@ def puricomp2d_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
                              bins=[puricomp2d_L_bins, puricomp2d_r_bins],
                              expand_binnumbers=True)
 
-    puri_mat = puri2d
-    comp_mat = comp2d
-    
     puri_mat[np.isnan(puri_mat) | np.isinf(puri_mat)] = 0.
     comp_mat[np.isnan(comp_mat) | np.isinf(comp_mat)] = 0.
 
@@ -133,7 +130,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.)
+            include_mask = (w <= puri_k) & (comp_k > 0.05)
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
