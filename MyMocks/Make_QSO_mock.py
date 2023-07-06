@@ -13,7 +13,7 @@ import astropy.units as u
 from jpasLAEs.utils import mag_to_flux
 
 
-fil_properties_dir = '/home/alberto/almacen/PAUS_data/csv/Filter_properties.csv'
+fil_properties_dir = '/home/alberto/almacen/PAUS_data/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
 w_central = np.array(data_tab['w_eff'])
 path_to_paus_data = '/home/alberto/almacen/PAUS_data'
