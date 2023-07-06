@@ -15,13 +15,15 @@ The mocks must be dictionaries with this structure:
     'EW_lya': (N_sources,) Array with the intrinsic Lya rest-frame EWs
 '''
 
-def load_qso_mock(path_to_mock):
-    files = glob.glob(f'{path_to_mock}/data*')
-    files.sort()
+def load_qso_mock(*path_list):
     fi = []
 
-    for name in files:
-        fi.append(pd.read_csv(name))
+    for path_to_mock in path_list:
+        files = glob.glob(f'{path_to_mock}/data*')
+        files.sort()
+
+        for name in files:
+            fi.append(pd.read_csv(name))
 
     qso_data = pd.concat(fi, axis=0, ignore_index=True)
 
