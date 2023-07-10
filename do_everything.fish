@@ -10,7 +10,7 @@ end
 
 set -l nb_list  "0 2" "2 4" "4 6" "6 8" "8 10" "10 12" "12 14" "14 16"
 for nb in $nb_list
-    /home/alberto/cosmos/paus_laes/paus_lya_lf_corrections.py $nb
+    /home/alberto/cosmos/PAUS_LAEs/PAUS_Lya_LF_corrections.py $nb
     check_py_exception
     /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
     check_py_exception

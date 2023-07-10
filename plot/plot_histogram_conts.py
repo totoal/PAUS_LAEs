@@ -43,7 +43,7 @@ line_name = gal_line_name + qso_line_name
 
 def main(field_name, nb1, nb2):
     # First load the mock dict
-    path_to_mock_dict = '/home/alberto/almacen/PAUS_data/LF_corrections/'
+    path_to_mock_dict = '/home/alberto/almacen/PAUS_data/LF_corrections'
     with open(f'{path_to_mock_dict}/mock_dict_{field_name}_nb{nb1}-{nb2}.pkl', 'rb') as f:
         mock_dict = pickle.load(f)
 
@@ -57,7 +57,7 @@ def main(field_name, nb1, nb2):
     for mock_name, mock in mock_dict.items():
         lya_lines = mock['lya_NB']
 
-        to_hist = (w_central[lya_lines] / (1 + mock['zspec']))[lya_lines >= 0]
+        to_hist = (w_central[lya_lines] / (1 + mock['zspec']))[(lya_lines >= 0) & mock['nice_lya']]
         h = np.histogram(to_hist, w_obs_bins)[0]
 
         if mock_name[:3] == 'QSO':
@@ -102,7 +102,7 @@ def main(field_name, nb1, nb2):
 
 
 if __name__ == '__main__':
-    field_name = 'foo' # Test data
+    field_name = 'W3'
     nbs_list = [[0, 2], [2, 4], [4, 6], [6, 8],
                 [8, 10], [10, 12], [12, 14], [14, 16]]
 

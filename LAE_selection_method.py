@@ -309,10 +309,8 @@ def ML_LAE_class(cat):
     save_dir = '/home/alberto/almacen/PAUS_data/ML_classifier'
     with open(f'{save_dir}/source_classifier.sav', 'rb') as file:
         classifier = pickle.load(file)
-    # with open(f'{save_dir}/source_pca.sav', 'rb') as file:
-    #     pca = pickle.load(file)
-    # with open(f'{save_dir}/source_scaler.sav', 'rb') as file:
-    #     scaler = pickle.load(file)
+    with open(f'{save_dir}/source_scaler.sav', 'rb') as file:
+        scaler = pickle.load(file)
 
     # Pre-processing
     selection = cat['nice_lya']
@@ -324,14 +322,17 @@ def ML_LAE_class(cat):
     ])
 
     # Apply scaler and PCA
-    # dataset = scaler.transform(dataset)
-    # dataset = pca.transform(dataset)
     dataset[:, :40] /= np.sum(dataset[:, :40], axis=1).reshape(-1, 1)
     dataset[:, 42:47] /= np.sum(dataset[:, 42:47], axis=1).reshape(-1, 1)
-    dataset[:, 40] /= 16.
-    dataset[:, 41] /= 24.
+    dataset[:, :47] = scaler.transform(dataset[:, :47])
 
     prediction = classifier.predict(dataset)
+    log_p = classifier.predict_log_proba(dataset)
+
+    class_log_p = log_p[np.arange(len(log_p)), prediction - 1]
+    log_p_mask = (class_log_p > np.log(0.90))
+
+    prediction[log_p_mask] = 5
 
     return prediction
 
