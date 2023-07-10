@@ -192,6 +192,10 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
             continue
         cat[key] = cat[key][mask_NB_number]
 
+    # Load the pointing_ids
+    load_path = f'/home/alberto/almacen/PAUS_data/catalogs/pointing_ids_{field_name}'
+    cat['pointing_id'] = np.load(load_path)[mask_NB_number]
+
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
     cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max)
