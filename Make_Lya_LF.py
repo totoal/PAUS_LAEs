@@ -88,9 +88,11 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
     hist_i_mat = np.zeros((N_iter, N_bins))
 
-    N_sources = len(total_nice_lya)
-    randomize_ids = np.random.permutation(np.arange(N_sources)).astype(int)
-    subregion_size = int(N_sources // N_boots)
+    unique_pointing_ids = np.unique(cat['pointing_id'])
+    N_boots = 10
+    point_ids_boots = np.random.choice(unique_pointing_ids,
+                                       size=(N_boots, len(unique_pointing_ids)),
+                                       replace=True)
 
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
@@ -98,16 +100,9 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             # First compute the LF with all the sources
             boot_nice_lya = total_nice_lya
         else:
-            # When boot_i > 0, compute the LF for random sub-regions
-            start_i = (boot_i - 1) * subregion_size
-            if boot_i < N_boots:
-                stop_i = boot_i * subregion_size
-            else:
-                stop_i = N_sources
-            subregion_ids = randomize_ids[start_i : stop_i]
-
-            boot_nice_lya = np.zeros_like(total_nice_lya).astype(bool)
-            boot_nice_lya[subregion_ids] = total_nice_lya[subregion_ids]
+            boot_nice_lya = np.concatenate([
+                np.where(cat['pointing_id'] == int(pid))[0] for pid in point_ids_boots[boot_i]
+            ]).astype(int)
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -120,9 +115,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
             L_perturbed[np.isnan(L_perturbed)] = 0.
 
-            puri_k = np.zeros_like(boot_nice_lya).astype(float) # Initialize puricomp arrays
-            comp_k = np.zeros_like(boot_nice_lya).astype(float) # Initialize puricomp arrays
-            puri_k[boot_nice_lya], comp_k[boot_nice_lya] =\
+            puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
                             puri2d, comp2d,
                             puricomp2d_L_bins, puricomp2d_r_bins)
@@ -137,7 +130,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
             # Store the realization of the LF in the hist matrix
             hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
-                                            bins=L_bins, weights=w[boot_nice_lya])
+                                            bins=L_bins, weights=w)
             
         # Save hist_i_mat
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)
@@ -193,8 +186,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         cat[key] = cat[key][mask_NB_number]
 
     # Load the pointing_ids
-    load_path = f'/home/alberto/almacen/PAUS_data/catalogs/pointing_ids_{field_name}'
-    cat['pointing_id'] = np.load(load_path)[mask_NB_number]
+    load_path = f'/home/alberto/almacen/PAUS_data/catalogs/pointing_ids_{field_name}.npy'
+    cat['pointing_id'] = np.load(load_path)[mask_NB_number].astype(int)
 
     # Select LAEs in the observational catalogs
     print('Selecting LAEs')
@@ -248,7 +241,8 @@ if __name__ == '__main__':
 
         r_min, r_max = 17, 24
 
-        [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
+        # [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
+        nb_min, nb_max = 2, 4
 
         args = (nb_min, nb_max, r_min, r_max, field_name)
 

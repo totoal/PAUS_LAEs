@@ -98,7 +98,7 @@ if __name__ == '__main__':
             this_hist_mat = 0.
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs(nb_list, region_list,
-                                                  boot_i, combined_LF=True)
+                                                  boot_i, combined_LF=True) / N_boots
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         this_hist_mat = 0.
         for boot_i in boots_ids:
             this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
-                                              boot_i, combined_LF=False)
+                                              boot_i, combined_LF=False) / N_boots
 
         if hist_mat is None:
             hist_mat = this_hist_mat
