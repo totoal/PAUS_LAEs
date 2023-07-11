@@ -73,8 +73,27 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     '''
     # Load the field correction matrices
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
-    puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy')
-    comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy')
+    
+    # For nb_min = nb_max, we load the corrections for three consecutive filters
+    # for better precision
+    if nb_min != nb_max:
+        nb_min_corr = nb_min
+        nb_max_corr = nb_max
+    elif nb_min % 2:
+        nb_min_corr = nb_min - 1
+        nb_min_corr = nb_min + 1
+    elif nb_min < 16:
+        nb_min_corr = nb_min
+        nb_max_corr = nb_min + 2
+    elif nb_min == 16:
+        nb_min_corr = nb_min - 2
+        nb_max_corr = nb_min
+    else:
+        raise Exception('No puricomp2d corrections available in this NB range.')
+
+    puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}.npy')
+    comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}.npy')
+
     puricomp2d_L_bins = np.load(f'{corr_dir}/puricomp2D_L_bins.npy')
     puricomp2d_r_bins = np.load(f'{corr_dir}/puricomp2D_r_bins.npy')
 
@@ -241,8 +260,7 @@ if __name__ == '__main__':
 
         r_min, r_max = 17, 24
 
-        # [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
-        nb_min, nb_max = 2, 4
+        [nb_min, nb_max] = [int(nb) for nb in sys.argv[1].split()]
 
         args = (nb_min, nb_max, r_min, r_max, field_name)
 
