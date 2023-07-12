@@ -191,8 +191,8 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
 
     mask_nonzero_nice = (h2d_nice_smooth > 0)
     mask_nonzero_parent = (h2d_parent_smooth > 0)
-    puri2d[mask_nonzero_nice] = (1 + h2d_sel_smooth[mask_nonzero_nice]\
-                                 / h2d_nice_smooth[mask_nonzero_nice]) ** -1
+    puri2d[mask_nonzero_nice] =\
+        h2d_nice_smooth[mask_nonzero_nice] / h2d_sel_smooth[mask_nonzero_nice]
     comp2d[mask_nonzero_parent] =\
         h2d_nice_smooth[mask_nonzero_parent] / h2d_parent_smooth[mask_nonzero_parent]
 
