@@ -109,9 +109,9 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
     unique_pointing_ids = np.unique(cat['pointing_id'])
     N_boots = 10
-    point_ids_boots = np.random.choice(unique_pointing_ids,
-                                       size=(N_boots, len(unique_pointing_ids)),
-                                       replace=True)
+    pointings_per_boot, remainder = divmod(len(unique_pointing_ids), N_boots)
+    N_pointings_Arr = np.ones(N_boots).astype(int) * pointings_per_boot
+    N_pointings_Arr[-1] += remainder
 
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
@@ -119,8 +119,12 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             # First compute the LF with all the sources
             boot_nice_lya = total_nice_lya
         else:
+            point_ids_boot = np.random.choice(unique_pointing_ids,
+                                              size=N_pointings_Arr[boot_i - 1],
+                                              replace=True)
+            
             boot_nice_lya = np.concatenate([
-                np.where(cat['pointing_id'] == int(pid))[0] for pid in point_ids_boots[boot_i - 1]
+                np.where(cat['pointing_id'] == int(pid))[0] for pid in point_ids_boot
             ]).astype(int)
 
         for k in range(N_iter):

@@ -62,7 +62,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
 
     this_LF_dict = {
         'LF_bins': L_bins_c,
-        'LF_total': LF_boots,
+        'LF_total': this_LF,
         'LF_total_err': [yerr_minus, yerr_plus],
     }
 
