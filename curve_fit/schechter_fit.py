@@ -202,6 +202,9 @@ if __name__ == '__main__':
     nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
                [8, 10], [10, 12], [12, 14], [14, 16]]
 
+    # Add individual NB LFs
+    nb_list = nb_list + [[n, n] for n in range(16 + 1)]
+
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
     columns = ['Phistar', 'Lstar', 'alpha',
