@@ -18,7 +18,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
             hist_i_mat = np.load(filename_hist)
 
             if combined_LF:
-                this_volume = Lya_effective_volume(nb1, nb2, 'W3')
+                this_volume = Lya_effective_volume(nb1, nb2, region_name)
                 vol_Arr = this_volume * np.ones_like(L_bins_c)
                 N_median_hist = np.nanmedian(hist_i_mat, axis=0)
                 vol_Arr[N_median_hist <= 0] = 0
@@ -38,8 +38,9 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
     if combined_LF:
         eff_vol = masked_volume
     else:
-        for [nb1, nb2] in NB_list:
-            eff_vol += Lya_effective_volume(nb1, nb2, 'W3') * np.ones_like(L_bins_c) # TODO: Change the area with region_name
+        for region_name in region_list:
+            for [nb1, nb2] in NB_list:
+                eff_vol += Lya_effective_volume(nb1, nb2, region_name) * np.ones_like(L_bins_c)
 
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
 
@@ -61,7 +62,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
 
     this_LF_dict = {
         'LF_bins': L_bins_c,
-        'LF_total': this_LF,
+        'LF_total': LF_boots,
         'LF_total_err': [yerr_minus, yerr_plus],
     }
 

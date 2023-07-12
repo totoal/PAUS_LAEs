@@ -329,10 +329,15 @@ def ML_LAE_class(cat):
     prediction = classifier.predict(dataset)
     log_p = classifier.predict_log_proba(dataset)
 
-    class_log_p = log_p[np.arange(len(log_p)), prediction - 1]
-    log_p_mask = (class_log_p > np.log(0.90))
+    for src in range(len(prediction)):
+        if prediction[src] == 4:
+            pred_i = 2
+        else:
+            pred_i = prediction[src] - 1
 
-    prediction[log_p_mask] = 5
+        class_log_p = log_p[src, pred_i]
+        if class_log_p < np.log(0.8):
+            prediction[src] = 5
 
     return prediction
 
@@ -386,14 +391,12 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     # Machine learning classification
     prediction = ML_LAE_class(cat)
     # If classified as Galaxy, nice_lya = False
-    # 0 for SFG
     # 1 for QSO_cont
-    # 2 for QSO_LAEs_loL
-    # 3 for QSO_LAEs_hiL
+    # 2 for QSO_LAEs
     # 4 for GAL
     class_mask = np.zeros_like(nice_lya).astype(bool)
     class_pred = np.ones_like(nice_lya).astype(int) * -1
-    class_mask[nice_lya] = (prediction != 4)
+    class_mask[nice_lya] = (prediction != 4) & (prediction != 1)
     class_pred[nice_lya] = prediction
     nice_lya = nice_lya & class_mask
     

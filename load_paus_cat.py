@@ -68,8 +68,6 @@ def load_paus_cat(cat_paths_list):
     cat['DEC'] = np.array(tab['delta_j2000'])
     cat['bulge_fraction'] = np.array(tab['bulge-fraction'])
     cat['flattening'] = 1 - np.array(tab['b_world']) / np.array(tab['a_world'])
-    # TODO: areas!
-    # cat['area'] = 16.1 # This is provisionally the area of W3
 
     return cat
 
