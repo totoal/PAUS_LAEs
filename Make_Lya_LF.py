@@ -81,7 +81,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         nb_max_corr = nb_max
     elif nb_min % 2:
         nb_min_corr = nb_min - 1
-        nb_min_corr = nb_min + 1
+        nb_max_corr = nb_min + 1
     elif nb_min < 16:
         nb_min_corr = nb_min
         nb_max_corr = nb_min + 2
@@ -127,6 +127,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
                 np.where(cat['pointing_id'] == int(pid))[0] for pid in point_ids_boot
             ]).astype(int)
 
+        # Preliminar completeness
+        _, comp_preliminar =\
+            Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
+                           puri2d, comp2d,
+                           puricomp2d_L_bins, puricomp2d_r_bins)
+        pre_comp_mask = (comp_preliminar > 0.05)
+
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
                 print(f'Progress: {k + 1} / {N_iter}',
@@ -140,13 +147,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
             puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
-                            puri2d, comp2d,
-                            puricomp2d_L_bins, puricomp2d_r_bins)
+                               puri2d, comp2d,
+                               puricomp2d_L_bins, puricomp2d_r_bins)
 
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.05)
+            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case

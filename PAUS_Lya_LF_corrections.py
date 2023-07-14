@@ -67,7 +67,22 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     '''
     corr_dir = f'/home/alberto/almacen/PAUS_data/LF_corrections'
 
-    surname = f'{field_name}_nb{nb_min}-{nb_max}'
+    if nb_min != nb_max:
+        nb_min_corr = nb_min
+        nb_max_corr = nb_max
+    elif nb_min % 2:
+        nb_min_corr = nb_min - 1
+        nb_max_corr = nb_min + 1
+    elif nb_min < 16:
+        nb_min_corr = nb_min
+        nb_max_corr = nb_min + 2
+    elif nb_min == 16:
+        nb_min_corr = nb_min - 2
+        nb_max_corr = nb_min
+    else:
+        raise Exception('No puricomp2d corrections available in this NB range.')
+
+    surname = f'{field_name}_nb{nb_min_corr}-{nb_max_corr}'
     L_Lbin_err_plus = np.load(f'{corr_dir}/L_nb_err_plus_{surname}.npy')
     L_Lbin_err_minus = np.load(f'{corr_dir}/L_nb_err_minus_{surname}.npy')
     L_median = np.load(f'{corr_dir}/L_bias_{surname}.npy')

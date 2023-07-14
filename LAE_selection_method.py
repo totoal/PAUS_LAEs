@@ -387,6 +387,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     cat['z_NB'] = z_Arr
     cat['lya_NB'] = lya_lines
     cat['other_lines_NBs'] = other_lines
+    cat['lya_snr'] = snr
 
     # Machine learning classification
     prediction = ML_LAE_class(cat)
