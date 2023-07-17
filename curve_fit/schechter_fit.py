@@ -54,11 +54,20 @@ def compute_invcovmat(hist_mat, where_fit):
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
 
-def load_and_compute_invcovmat(nb1, nb2, where_fit):
+def load_and_compute_invcovmat(nb_list, where_fit):
+    if len(nb_list) == 1:
+        [nb1, nb2] = nb_list[0]
+        combined_LF = False
+    else:
+        combined_LF = True
+
     # Load the matrix of LF realizations
     name = f'bootstrap_errors'
     pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
-    filename_hist = f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}.npy'
+    if combined_LF:
+        filename_hist = f'{pathname}/hist_mat_boots_combi.npy'
+    else:
+        filename_hist = f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}.npy'
 
     hist_i_mat = np.load(filename_hist)
 
@@ -116,9 +125,13 @@ def transform(theta):
     return theta_trans
 
 # Main function
-def run_mcmc_fit(nb1, nb2, region_list):
+def run_mcmc_fit(nb_list, region_list):
     # Load the Lya LF
-    LyaLF = load_combined_LF(region_list, [[nb1, nb2]])
+    if len(nb_list) == 1:
+        combined_LF = False
+    else:
+        combined_LF = True
+    LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF)
     LF_yerr_minus = LyaLF['LF_total_err'][0]
     LF_yerr_plus = LyaLF['LF_total_err'][1]
     LF_phi = LyaLF['LF_boots']
@@ -132,7 +145,7 @@ def run_mcmc_fit(nb1, nb2, region_list):
     # In which LF bins fit
     where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)# & (yerr > 0)
 
-    invcovmat, _ = load_and_compute_invcovmat(nb1, nb2, where_fit)
+    invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit)
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Lstar', 'alpha']
@@ -163,6 +176,8 @@ def run_mcmc_fit(nb1, nb2, region_list):
     sampler.print_results()
 
     # Plot results
+    nb1 = np.array(nb_list).flatten()[0]
+    nb2 = np.array(nb_list).flatten()[-1]
     fig = corner.corner(sampler.results['samples'], labels=paramnames,
                         show_titles=True, truths=sampler.results['posterior']['median'])
     fig.savefig(f'figures/corner_nb{nb1}-{nb2}.pdf', pad_inches=0.1,
@@ -203,7 +218,7 @@ if __name__ == '__main__':
                [8, 10], [10, 12], [12, 14], [14, 16]]
 
     # Add individual NB LFs
-    nb_list = nb_list + [[n, n] for n in range(16 + 1)]
+    nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(16 + 1)] + [nb_list]
 
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
@@ -212,11 +227,11 @@ if __name__ == '__main__':
                'Phistar_err_down', 'Lstar_err_down', 'alpha_err_down']
     initialize_csv(param_filename, columns)
 
-    for [nb1, nb2] in nb_list:
-        print(f'\n\n{nb1}-{nb2}')
+    for nbl in nb_list:
+        print(nbl)
         # Run the MCMC fit
         fit_params, fit_params_err_up, fit_params_err_down =\
-            run_mcmc_fit(nb1, nb2, region_list)
+            run_mcmc_fit(nbl, region_list)
 
         # Append the parameters to csv file
         with open(param_filename, 'a', newline='') as param_file:
