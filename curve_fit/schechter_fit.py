@@ -121,7 +121,7 @@ def run_mcmc_fit(nb1, nb2, region_list):
     LyaLF = load_combined_LF(region_list, [[nb1, nb2]])
     LF_yerr_minus = LyaLF['LF_total_err'][0]
     LF_yerr_plus = LyaLF['LF_total_err'][1]
-    LF_phi = LyaLF['LF_total']
+    LF_phi = LyaLF['LF_boots']
     LF_bins = LyaLF['LF_bins']
     
 
