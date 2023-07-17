@@ -117,6 +117,7 @@ if __name__ == '__main__':
         np.save(f'{pathname}/LF_err_plus_combi', LF_err_plus)
         np.save(f'{pathname}/LF_err_minus_combi', LF_err_minus)
         np.save(f'{pathname}/median_LF_combi', L_LF_err_percentiles[1])
+        np.save(f'{pathname}/hist_mat_boots_combi', hist_mat)
 
         sys.exit(0)
 
