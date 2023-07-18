@@ -233,14 +233,25 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         A boolean array indicating if the mask for the other lines is met.
     '''
     # TODO: Check colors of PAUS. Extend to all BBs
-    i = flux_to_mag(pm_flx[-3], w_central[-3])
+    # i = flux_to_mag(pm_flx[-3], w_central[-3])
     r = flux_to_mag(pm_flx[-4], w_central[-4])
-    # g = flux_to_mag(pm_flx[-5], w_central[-5])
-    # gr = g - r
-    ri = r - i
-    # # For z > 3
-    # color_aux1 = (ri < 0.5) & (r > 0) & (i > 0) & (r < 26) & (i < 26)
-    color_aux1 = np.ones_like(ri).astype(bool)
+    g = flux_to_mag(pm_flx[-5], w_central[-5])
+    gr = g - r
+
+    color_aux = np.ones_like(gr).astype(bool)
+    # NBs: 8-10
+    mask_llines = (lya_lines >= 8) & (lya_lines < 10)
+    color_aux[mask_llines] = (gr > 0.09)
+    # NBs: 10-12
+    mask_llines = (lya_lines >= 10) & (lya_lines < 12)
+    color_aux[mask_llines] = (gr > 0.55)
+    # NBs: 12-14
+    mask_llines = (lya_lines >= 12) & (lya_lines < 14)
+    color_aux[mask_llines] = (gr > 0.81)
+    # NBs: 14-16
+    mask_llines = (lya_lines >= 14) & (lya_lines <= 16)
+    color_aux[mask_llines] = (gr > 0.93)
+
 
     N_sources = pm_flx.shape[1]
 
@@ -282,7 +293,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
         if len(other_lines[src]) > 1:
             pass
         else:
-            good_colors = color_aux1[src]
+            good_colors = color_aux[src]
 
             if ~good_colors:
                 color_mask[src] = False
