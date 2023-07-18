@@ -166,3 +166,4 @@ cython_debug/
 figures
 curve_fit/chains
 curve_fit/figures
+tables
