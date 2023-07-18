@@ -49,7 +49,7 @@ with open(filename, 'w') as file:
         file.write(f'z = {this_z:0.2f}\\\\\n')
         for ri, row in enumerate([row1, row2, row3]):
             if ri == 0:
-                leftcol_text = r'$\Phi$ ($10^6$Mpc$^{-3}$\,$\Delta\log_{10}L^{-1}$)'
+                leftcol_text = r'$\Phi$ ($10^6\,$Mpc$^{-3}$\,$\Delta\log_{10}L^{-1}$)'
             elif ri == 1:
                 leftcol_text = 'err up'
             elif ri == 2:
