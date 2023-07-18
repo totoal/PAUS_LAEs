@@ -143,7 +143,7 @@ def run_mcmc_fit(nb_list, region_list):
     yerr[LF_phi == 0] = np.inf
 
     # In which LF bins fit
-    where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)# & (yerr > 0)
+    where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)
 
     invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit)
 
