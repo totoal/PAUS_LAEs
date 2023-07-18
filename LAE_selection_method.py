@@ -241,16 +241,16 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     color_aux = np.ones_like(gr).astype(bool)
     # NBs: 8-10
     mask_llines = (lya_lines >= 8) & (lya_lines < 10)
-    color_aux[mask_llines] = (gr > 0.09)
+    color_aux[mask_llines] = (gr > 0.09)[mask_llines]
     # NBs: 10-12
     mask_llines = (lya_lines >= 10) & (lya_lines < 12)
-    color_aux[mask_llines] = (gr > 0.55)
+    color_aux[mask_llines] = (gr > 0.55)[mask_llines]
     # NBs: 12-14
     mask_llines = (lya_lines >= 12) & (lya_lines < 14)
-    color_aux[mask_llines] = (gr > 0.81)
+    color_aux[mask_llines] = (gr > 0.81)[mask_llines]
     # NBs: 14-16
     mask_llines = (lya_lines >= 14) & (lya_lines <= 16)
-    color_aux[mask_llines] = (gr > 0.93)
+    color_aux[mask_llines] = (gr > 0.93)[mask_llines]
 
 
     N_sources = pm_flx.shape[1]
