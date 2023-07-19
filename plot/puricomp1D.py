@@ -38,7 +38,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
     for mock_name, mock in mocks_dict.items():
         # Define nice_z
-        nice_z = np.abs(mock['zspec'] - z_NB(mock['lya_NB'])) < 0.6
+        nice_z = np.abs(mock['zspec'] - z_NB(mock['lya_NB'])) < 0.2
 
         mask_r = (mock['r_mag'] >= r_min) & (mock['r_mag'] <= r_max)
         mask_sel = (mock['nice_lya']
@@ -49,8 +49,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
                        & (NB_z(mock['zspec']) >= nb_min)
                        & (NB_z(mock['zspec']) <= nb_max)
                        & mask_r)
-        mask_nice = (mask_parent
-                     & mock['nice_lya'] & nice_z)
+        mask_nice = (mask_sel & nice_z)
 
         area_obs = area_dict[mock_name]
 
@@ -58,7 +57,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
                               L_bins)[0] / area_obs
         h_nice += np.histogram(mock['L_lya'][mask_nice],
                                     L_bins)[0] / area_obs
-        h_nice_spec += np.histogram(mock['L_lya_spec'][mask_nice],
+        h_nice_spec += np.histogram(mock['L_lya_spec'][mask_nice & mask_parent],
                                     L_bins)[0] / area_obs
         h_parent += np.histogram(mock['L_lya_spec'][mask_parent],
                                   L_bins)[0] / area_obs
