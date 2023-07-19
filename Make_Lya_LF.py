@@ -250,7 +250,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     # Save a dictionary with useful data about the selection
     reduced_cat = {}
-    keys_to_save = ['ref_id', 'r_mag', 'lya_NB', 'EW0_lya', 'EW0_lya_err',
+    keys_to_save = ['ref_id', 'RA', 'DEC', 'r_mag', 'lya_NB', 'EW0_lya', 'EW0_lya_err',
                     'L_lya', 'L_lya_corr', 'L_lya_corr_err']
     for key in keys_to_save:
         reduced_cat[key] = cat[key][..., cat['nice_lya']]
