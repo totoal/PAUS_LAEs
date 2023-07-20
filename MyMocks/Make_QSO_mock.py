@@ -21,7 +21,8 @@ with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'rb') as f:
     tcurves = pickle.load(f)
 
 
-def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
+def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+         surname='', contaminants=False):
     # Load the SDSS catalog
     filename_pm_DR16 = '/home/alberto/almacen/PAUS_data/PAUS-PHOTOSPECTRA_QSO_Superset_DR16_v2.csv'
 
@@ -93,7 +94,12 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname=''):
     # Look for the closest source of SDSS in redshift
     out_sdss_idx_list = np.zeros(out_z_Arr.shape).astype(int)
     print('Looking for the sources in SDSS catalog')
-    general_mask = (((z_Arr > 2.55) & (L > 40) & (EW0 > 0)) | (z_Arr <= 2.55))
+    # general_mask = (((z_Arr > 2.55) & (L > 40) & (EW0 > 0)) | (z_Arr <= 2.55))
+    if contaminants:
+        general_mask = np.ones_like(z_Arr).astype(bool)
+    else:
+        general_mask = (L > 40) & (EW0 > 0)
+
     for src in range(N_src):
         if src % 500 == 0:
             print(f'{src} / {N_src}')
@@ -185,7 +191,8 @@ if __name__ == '__main__':
         L_max = 0
         area_obs = 200
         surname = 'PAUS_contaminants_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname)
+        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+             surname=surname, contaminants=True)
 
     zs_list = [[2.25, 2.5], [2.5, 2.75], [2.75, 3],
                [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
@@ -196,7 +203,8 @@ if __name__ == '__main__':
         L_max = 47
         area_obs = 400
         surname = 'PAUS_LAES_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname)
+        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+             surname=surname, contaminants=False)
 
         r_min = 16
         r_max = 24
@@ -204,4 +212,5 @@ if __name__ == '__main__':
         L_max = 47
         area_obs = 4000
         surname = 'PAUS_LAES_hiL_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs, surname)
+        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+             surname=surname, contaminants=False)

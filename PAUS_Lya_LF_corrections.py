@@ -269,7 +269,7 @@ def compute_LF_corrections(mock_dict, field_name,
     reduced_mock_dict = {}
     keys_to_save = ['nice_lya', 'nice_lya_0', 'zspec', 'r_mag', 'lya_NB',
                     'EW0_lya_spec', 'L_lya_spec', 'EW0_lya',
-                    'L_lya', 'area', 'flx', 'err']
+                    'L_lya', 'L_lya_corr', 'area', 'flx', 'err']
     for mock_name in mock_dict.keys():
         reduced_mock_dict[mock_name] = {}
         for key in keys_to_save:
