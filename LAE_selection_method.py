@@ -239,6 +239,9 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     gr = g - r
 
     color_aux = np.ones_like(gr).astype(bool)
+    # NBs: 6-8
+    mask_llines = (lya_lines >= 6) & (lya_lines < 8)
+    color_aux[mask_llines] = (gr > -0.06)[mask_llines]
     # NBs: 8-10
     mask_llines = (lya_lines >= 8) & (lya_lines < 10)
     color_aux[mask_llines] = (gr > 0.09)[mask_llines]
