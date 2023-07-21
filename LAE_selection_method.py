@@ -255,7 +255,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     color_aux[mask_llines] = ((gr > -0.06) & (ug > 0.5))[mask_llines]
     # NBs: 8-10
     mask_llines = (lya_lines >= 8) & (lya_lines < 10)
-    color_aux[mask_llines] = ((gr > 0.9) & (ug > 0.56))[mask_llines]
+    color_aux[mask_llines] = ((gr > 0.10) & (ug > 0.56))[mask_llines]
     # NBs: 10-12
     mask_llines = (lya_lines >= 10) & (lya_lines < 12)
     color_aux[mask_llines] = ((gr > 0.6) & (ug > 0.51))[mask_llines]
