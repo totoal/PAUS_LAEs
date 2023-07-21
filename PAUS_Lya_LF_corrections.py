@@ -73,10 +73,10 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
     elif nb_min % 2:
         nb_min_corr = nb_min - 1
         nb_max_corr = nb_min + 1
-    elif nb_min < 16:
+    elif nb_min < 18:
         nb_min_corr = nb_min
         nb_max_corr = nb_min + 2
-    elif nb_min == 16:
+    elif nb_min == 18:
         nb_min_corr = nb_min - 2
         nb_max_corr = nb_min
     else:
