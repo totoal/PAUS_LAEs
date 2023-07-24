@@ -56,7 +56,10 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
     LF_boots = np.load(f'{boots_path}/median_LF_{err_surname}.npy')
 
     this_LF = np.zeros_like(hist_median).astype(float)
+    poisson_err = np.zeros_like(hist_median).astype(float)
     this_LF[eff_vol > 0] = hist_median[eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
+    poisson_err[eff_vol > 0] = hist_median[eff_vol > 0] ** 0.5\
+        / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
     # Fix yerr_minus when LF_boots == 0
     yerr_minus[LF_boots == 0] = this_LF[LF_boots == 0]
 
@@ -65,6 +68,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
         'LF_total': this_LF,
         'LF_boots': LF_boots,
         'LF_total_err': [yerr_plus, yerr_minus],
+        'poisson_err': poisson_err
     }
 
     return this_LF_dict
