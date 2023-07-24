@@ -145,10 +145,7 @@ def run_mcmc_fit(nb_list, region_list):
     # In which LF bins fit
     where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)
 
-    # invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit)
-    yerr = np.log10(LF_phi[where_fit] + LF_yerr_plus[where_fit]) - np.log10(LF_phi[where_fit])
-    covmat = np.eye(sum(where_fit)) * yerr.reshape(-1, 1) ** 2
-    invcovmat = linalg.inv(covmat)
+    invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit)
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Lstar', 'alpha']
