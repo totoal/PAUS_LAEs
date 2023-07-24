@@ -265,6 +265,9 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # NBs: 14-16
     mask_llines = (lya_lines >= 14) & (lya_lines <= 16)
     color_aux[mask_llines] = ((gr > 0.93) & (ug > 0.63))[mask_llines]
+    # NBs: 16-18
+    mask_llines = (lya_lines >= 16) & (lya_lines <= 18)
+    color_aux[mask_llines] = ((gr > 1.12) & (ug > 0.31))[mask_llines]
 
 
     N_sources = pm_flx.shape[1]
