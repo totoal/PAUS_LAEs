@@ -223,7 +223,7 @@ if __name__ == '__main__':
 
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
-    columns = ['Phistar', 'Lstar', 'alpha',
+    columns = ['nb_min', 'nb_max', 'Phistar', 'Lstar', 'alpha',
                'Phistar_err_up', 'Lstar_err_up', 'alpha_err_up',
                'Phistar_err_down', 'Lstar_err_down', 'alpha_err_down']
     initialize_csv(param_filename, columns)
@@ -238,6 +238,7 @@ if __name__ == '__main__':
         with open(param_filename, 'a', newline='') as param_file:
             writer = csv.writer(param_file)
             row_to_write = np.concatenate([
+                [nbl[0][0], nbl[-1][-1]],
                 fit_params,
                 fit_params_err_up,
                 fit_params_err_down
