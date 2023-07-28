@@ -70,7 +70,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
     except:
         pass
 
-    ax.set_xlabel('$\lambda$ (\AA)', size=fs)
+    ax.set_xlabel('$\lambda$ [\AA]', size=fs)
     if e17scale:
         ax.set_ylabel(
             r'$f_\lambda\cdot10^{17}$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
