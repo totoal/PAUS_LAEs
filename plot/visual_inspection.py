@@ -13,9 +13,11 @@ import pandas as pd
 
 from load_paus_cat import load_paus_cat
 from paus_utils import w_central, plot_PAUS_source
-from jpasLAEs.utils import flux_to_mag, mag_to_flux
+from jpasLAEs.utils import flux_to_mag, mag_to_flux, rebin_1d_arr
 
 from astropy.table import Table
+
+w_lya = 1215.67
 
 def nanomaggie_to_flux(nmagg, wavelength):
     mAB = -2.5 * np.log10(nmagg * 1e-9)
@@ -57,10 +59,14 @@ if __name__ == '__main__':
         err = cat['err'][:, cat_src]
         r_synth_mag = synth_BB_flx[cat_src]
 
-        fig, ax = plt.subplots(figsize=(12, 5))
+        fig, ax = plt.subplots(figsize=(12, 7))
 
         #### Plot the P-spectra ####
         plot_PAUS_source(flx, err, ax=ax, set_ylim=False)
+
+        #### Mark the selected NB ####
+        ax.axvline(w_lya * (selection['z_NB'][sel_src] + 1),
+                   c='r', ls='--', lw=2)
 
         #### Plot SDSS spectrum if available ####
         plate = selection['plate'][sel_src]
@@ -80,10 +86,22 @@ if __name__ == '__main__':
         if spec_bool:
             # Normalizing factor:
             norm = r_synth_mag / r_band_sdss
-            spec_flx_sdss = spec_sdss['MODEL'] * norm
+            spec_flx_sdss = spec_sdss['FLUX'] * norm
             spec_w_sdss = 10 ** spec_sdss['LOGLAM']
 
-            ax.plot(spec_w_sdss, spec_flx_sdss, c='dimgray', zorder=-99, alpha=0.7)
+            rebin_factor = 5
+            spec_flx_sdss_rb, _ = rebin_1d_arr(spec_flx_sdss,
+                                               spec_w_sdss,
+                                               rebin_factor)
+
+            spec_w_sdss_rb = np.empty_like(spec_flx_sdss_rb)
+            for i in range(len(spec_flx_sdss_rb)):
+                spec_w_sdss_rb[i] = spec_w_sdss[i * rebin_factor]
+
+            ax.plot(spec_w_sdss_rb, spec_flx_sdss_rb,
+                    c='dimgray', zorder=-99, alpha=0.7)
 
         #########################################
         plt.show()
+
+        break
