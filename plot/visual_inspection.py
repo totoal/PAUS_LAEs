@@ -52,6 +52,9 @@ if __name__ == '__main__':
 
     # Directory of the spectra .fits files
     fits_dir = '/home/alberto/almacen/SDSS_spectra_fits/DR16/QSO'
+    
+    # Dir to save the figures
+    fig_save_dir = '/home/alberto/almacen/PAUS_data/candidates'
 
     for sel_src, refid in enumerate(selection['ref_id']):
         cat_src = np.where(refid == cat['ref_id'])[0][0]
@@ -59,10 +62,10 @@ if __name__ == '__main__':
         err = cat['err'][:, cat_src]
         r_synth_mag = synth_BB_flx[cat_src]
 
-        fig, ax = plt.subplots(figsize=(12, 7))
+        fig = plt.figure(figsize=(8, 4))
 
         #### Plot the P-spectra ####
-        plot_PAUS_source(flx, err, ax=ax, set_ylim=False)
+        ax = plot_PAUS_source(flx, err, set_ylim=True)
 
         #### Mark the selected NB ####
         ax.axvline(w_lya * (selection['z_NB'][sel_src] + 1),
@@ -82,6 +85,7 @@ if __name__ == '__main__':
         except:
             print('Couldn\'t load the SDSS spectrum.')
             spec_bool = False
+            continue # NOTE: By now, only plotting sources with SDSS spectrum
 
         if spec_bool:
             # Normalizing factor:
@@ -101,7 +105,33 @@ if __name__ == '__main__':
             ax.plot(spec_w_sdss_rb, spec_flx_sdss_rb,
                     c='dimgray', zorder=-99, alpha=0.7)
 
-        #########################################
-        plt.show()
+        #### Info text ####
+        ypos = ax.get_ylim()[1] * 1.05
 
-        break
+        text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
+                 f'RA: {selection["RA"][sel_src]:0.2f}\n'
+                 f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
+                 f'r_synth = {cat["r_mag"][cat_src]:0.1f}')
+
+        text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
+                 f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}\AA\n'
+                 f'z_NB = {selection["z_NB"][sel_src]:0.2f}')
+
+        text3 = ('SDSS\n'
+                 f'MJD: {selection["mjd"][sel_src]}\n'
+                 f'fiber: {selection["fiberid"][sel_src]}\n'
+                 f'plate: {selection["plate"][sel_src]}\n'
+                 f'L_lya = {selection["L_lya_SDSS"][sel_src]:0.2f}\n'
+                 f'z_spec = {selection["z_best"][sel_src]:0.2f}')
+
+        text_to_plot = [[3500, text1],
+                        [5500, text2],
+                        [7400, text3]]
+        for [xpos, txt] in text_to_plot:
+            ax.text(xpos, ypos, txt, fontsize=12)
+
+
+        #########################################
+
+        fig.savefig(f'{fig_save_dir}/{sel_src}-{selection["ref_id"][sel_src]}.png',
+                    pad_inches=0.1, bbox_inches='tight', facecolor='w')
