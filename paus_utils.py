@@ -32,8 +32,8 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
 
     cmap = np.array(data_tab['color'])
 
-    data_max = np.max(flx)
-    data_min = np.min(flx)
+    data_max = np.max(flx[err > 0])
+    data_min = np.min(flx[err > 0])
     y_max = (data_max - data_min) * 2/3 + data_max
     y_min = data_min - (data_max - data_min) * 0.3
 
