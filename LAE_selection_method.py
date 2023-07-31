@@ -364,14 +364,14 @@ def ML_LAE_class(cat):
             pred_i = prediction[src] - 1
 
         class_log_p = log_p[src, pred_i]
-        if class_log_p < np.log(0.88):
+        if class_log_p < np.log(0.90):
             prediction[src] = 5
 
     return prediction
 
 
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
-                ewmin_other=100, check_nice_z=False):
+                ewmin_other=10000000, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
     # Estimate continuum
     cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],

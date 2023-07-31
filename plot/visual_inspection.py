@@ -61,8 +61,9 @@ if __name__ == '__main__':
         flx = cat['flx'][:, cat_src]
         err = cat['err'][:, cat_src]
         r_synth_mag = synth_BB_flx[cat_src]
+        cat['r_mag'] = flux_to_mag(synth_BB_flx, w_central[-4])
 
-        fig = plt.figure(figsize=(8, 4))
+        fig = plt.figure(figsize=(16, 4))
 
         #### Plot the P-spectra ####
         ax = plot_PAUS_source(flx, err, set_ylim=True)
@@ -85,6 +86,7 @@ if __name__ == '__main__':
         except:
             print('Couldn\'t load the SDSS spectrum.')
             spec_bool = False
+            plt.close()
             continue # NOTE: By now, only plotting sources with SDSS spectrum
 
         if spec_bool:
@@ -93,7 +95,7 @@ if __name__ == '__main__':
             spec_flx_sdss = spec_sdss['FLUX'] * norm
             spec_w_sdss = 10 ** spec_sdss['LOGLAM']
 
-            rebin_factor = 5
+            rebin_factor = 2
             spec_flx_sdss_rb, _ = rebin_1d_arr(spec_flx_sdss,
                                                spec_w_sdss,
                                                rebin_factor)
@@ -135,3 +137,4 @@ if __name__ == '__main__':
 
         fig.savefig(f'{fig_save_dir}/{sel_src}-{selection["ref_id"][sel_src]}.png',
                     pad_inches=0.1, bbox_inches='tight', facecolor='w')
+        plt.close()
