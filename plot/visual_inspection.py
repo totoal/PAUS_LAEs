@@ -1,3 +1,4 @@
+import os
 import sys
 sys.path.insert(0, '..')
 
@@ -18,6 +19,8 @@ from jpasLAEs.utils import flux_to_mag, mag_to_flux, rebin_1d_arr
 from astropy.table import Table
 
 w_lya = 1215.67
+w_CIV = 1549.48
+w_CIII = 1908.734
 
 def nanomaggie_to_flux(nmagg, wavelength):
     mAB = -2.5 * np.log10(nmagg * 1e-9)
@@ -55,6 +58,9 @@ if __name__ == '__main__':
     
     # Dir to save the figures
     fig_save_dir = '/home/alberto/almacen/PAUS_data/candidates'
+    # Make dirs if they don't exist
+    os.makedirs(f'{fig_save_dir}/with_spec', exist_ok=True)
+    os.makedirs(f'{fig_save_dir}/no_spec', exist_ok=True)
 
     for sel_src, refid in enumerate(selection['ref_id']):
         cat_src = np.where(refid == cat['ref_id'])[0][0]
@@ -86,8 +92,8 @@ if __name__ == '__main__':
         except:
             print('Couldn\'t load the SDSS spectrum.')
             spec_bool = False
-            plt.close()
-            continue # NOTE: By now, only plotting sources with SDSS spectrum
+            # plt.close()
+            # continue # NOTE: By now, only plotting sources with SDSS spectrum
 
         if spec_bool:
             # Normalizing factor:
@@ -110,6 +116,19 @@ if __name__ == '__main__':
         #### Info text ####
         ypos = ax.get_ylim()[1] * 1.05
 
+        # Define the ML predicted class
+        cl_num = selection["class_pred"][sel_src]
+        if cl_num == 1:
+            ml_class = 'QSO Cont.'
+        elif cl_num == 2:
+            ml_class = 'LAE'
+        elif cl_num == 4:
+            ml_class = 'Low-z Gal.'
+        elif cl_num == 5:
+            ml_class = '?'
+        else:
+            raise Exception('I don\'t know this class.')
+
         text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
                  f'RA: {selection["RA"][sel_src]:0.2f}\n'
                  f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
@@ -117,6 +136,7 @@ if __name__ == '__main__':
 
         text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
                  f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}\AA\n'
+                 f'pred_class = {ml_class}\n'
                  f'z_NB = {selection["z_NB"][sel_src]:0.2f}')
 
         text3 = ('SDSS\n'
@@ -132,9 +152,19 @@ if __name__ == '__main__':
         for [xpos, txt] in text_to_plot:
             ax.text(xpos, ypos, txt, fontsize=12)
 
+        
+        # Draw CIV and CIII positions
+        for w in [w_CIV, w_CIII]:
+            ax.axvline(w * (1 + selection['z_NB'][sel_src]),
+                       ls=':', color='dimgray')
 
         #########################################
 
-        fig.savefig(f'{fig_save_dir}/{sel_src}-{selection["ref_id"][sel_src]}.png',
+        savename = f'{sel_src}-{selection["ref_id"][sel_src]}.png'
+        if spec_bool:
+            subfolder = 'with_spec'
+        else:
+            subfolder = 'no_spec'
+        fig.savefig(f'{fig_save_dir}/{subfolder}/{savename}',
                     pad_inches=0.1, bbox_inches='tight', facecolor='w')
         plt.close()

@@ -316,7 +316,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
                 color_mask[src] = False
 
     # Define nice_lya
-    nice_lya = (lya_lines >= 0) & color_mask & mlines_mask
+    nice_lya = (lya_lines >= 0) # & color_mask & mlines_mask
     if mask is not None:
         nice_lya = nice_lya & mask
 
@@ -371,7 +371,7 @@ def ML_LAE_class(cat):
 
 
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
-                ewmin_other=10000000, check_nice_z=False):
+                ewmin_other=100, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
     # Estimate continuum
     cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
@@ -431,7 +431,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     
     # Update cat
     cat['nice_lya_0'] = np.copy(cat['nice_lya'])
-    cat['nice_lya'] = nice_lya
+    cat['nice_lya'] = nice_lya & color_mask & ml_mask
     cat['class_pred'] = class_pred
 
     if check_nice_z:
