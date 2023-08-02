@@ -462,7 +462,7 @@ def Lya_L_estimation(cat, cont_est, cont_est_err):
     Returns a catalog including L_lya and EW0_lya estimations
     '''
     mask_selected_NB = (cat['lya_NB'], np.arange(len(cat['lya_NB'])))
-    nice_lya = cat['nice_lya']
+    nice_lya = cat['nice_lya_0']
 
     Flambda_lya = (
         cat['flx'][mask_selected_NB] - cont_est[mask_selected_NB]
