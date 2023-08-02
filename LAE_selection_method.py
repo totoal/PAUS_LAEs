@@ -323,7 +323,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     return nice_lya, color_mask, mlines_mask
 
 
-def ML_LAE_class(cat):
+def ML_LAE_class(cat, p_min=0.0, nice_col_name='nice_lya'):
     '''
     This function applies a pre-trained machine learning classifier to predict the class of a given input catalog.
 
@@ -341,7 +341,7 @@ def ML_LAE_class(cat):
         scaler = pickle.load(file)
 
     # Pre-processing
-    selection = cat['nice_lya']
+    selection = cat[nice_col_name]
     dataset = np.hstack([
         cat['flx'][:40, selection].T * 1e17,
         cat['lya_NB'][selection].reshape(-1, 1),
@@ -364,10 +364,11 @@ def ML_LAE_class(cat):
             pred_i = prediction[src] - 1
 
         class_log_p = log_p[src, pred_i]
-        if class_log_p < np.log(0.90):
-            prediction[src] = 5
+        if p_min > 0:
+            if class_log_p < np.log(p_min):
+                prediction[src] = 5
 
-    return prediction
+    return prediction, log_p
 
 
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
@@ -418,7 +419,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     cat['lya_snr'] = snr
 
     # Machine learning classification
-    prediction = ML_LAE_class(cat)
+    prediction, _ = ML_LAE_class(cat)
     # If classified as Galaxy, nice_lya = False
     # 1 for QSO_cont
     # 2 for QSO_LAEs

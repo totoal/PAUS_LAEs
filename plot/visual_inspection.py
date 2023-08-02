@@ -124,10 +124,10 @@ if __name__ == '__main__':
             ml_class = 'LAE'
         elif cl_num == 4:
             ml_class = 'Low-z Gal.'
-        elif cl_num == 5:
+        elif cl_num == 5 or cl_num < 0:
             ml_class = '?'
         else:
-            raise Exception('I don\'t know this class.')
+            raise Exception(f'I don\'t know this class: {cl_num}')
 
         text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
                  f'RA: {selection["RA"][sel_src]:0.2f}\n'
