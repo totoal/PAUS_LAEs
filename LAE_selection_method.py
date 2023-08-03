@@ -323,7 +323,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     return nice_lya, color_mask, mlines_mask
 
 
-def ML_LAE_class(cat, p_min=0.9, nice_col_name='nice_lya'):
+def ML_LAE_class(cat, p_min=0.0, nice_col_name='nice_lya'):
     '''
     This function applies a pre-trained machine learning classifier to predict the class of a given input catalog.
 
