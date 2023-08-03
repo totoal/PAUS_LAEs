@@ -219,7 +219,7 @@ if __name__ == '__main__':
                [16, 18]]
 
     # Add individual NB LFs
-    nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(16 + 1)] + [nb_list]
+    nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
 
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
