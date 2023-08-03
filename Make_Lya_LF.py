@@ -124,7 +124,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
                                               replace=True)
             
             boot_nice_lya = np.concatenate([
-                np.where(cat['pointing_id'] == int(pid))[0] for pid in point_ids_boot
+                np.where((cat['pointing_id'] == int(pid)) & total_nice_lya)[0]
+                for pid in point_ids_boot
             ]).astype(int)
 
         # Preliminar completeness
