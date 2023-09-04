@@ -191,7 +191,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         cat = mocks_dict[field_name]
     elif field_name in PAUS_field_names:
         cats_dir = '/home/alberto/almacen/PAUS_data/catalogs'
-        path_to_cat_list = [f'{cats_dir}/PAUS_3arcsec_{field_name}.csv']
+        path_to_cat_list = [f'{cats_dir}/PAUS_3arcsec_{field_name}_extinction_corrected.pq']
         cat = load_paus_cat(path_to_cat_list)
     else:
         raise ValueError(f'Field name `{field_name}` not valid')
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    field_list = ['W3']
+    field_list = ['W3', 'W1']
 
     t00 = time.time()
 
