@@ -27,7 +27,7 @@ def puricomp2d_weights(r_Arr, L_lya_Arr, puri_mat, comp_mat,
     '''
     # If L_Arr is empty, return empty weights lists
     if len(L_lya_Arr) == 0:
-        return np.array([]), np.array([]), np.array([])
+        return np.array([]), np.array([])
 
     bs = binned_statistic_2d(L_lya_Arr, r_Arr, None, 'count',
                              bins=[puricomp2d_L_bins, puricomp2d_r_bins],
