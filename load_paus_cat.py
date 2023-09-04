@@ -17,7 +17,15 @@ def paus_flux_units(paus_flx, w):
 
 
 def load_paus_cat(cat_paths_list):
-    tab = pd.concat([pd.read_csv(path) for path in cat_paths_list])
+    extension = cat_paths_list[0].split('.')[-1]
+    if extension == 'pq':
+        pd_read_func = pd.read_parquet
+    elif extension == 'csv':
+        pd_read_func = pd.read_csv
+    else:
+        raise Exception('Catalog format not known.')
+
+    tab = pd.concat([pd_read_func(path) for path in cat_paths_list])
 
     # Stack the NBs and BBs
     flx_mat = np.array([]).reshape(0, len(tab))
@@ -58,9 +66,17 @@ def load_paus_cat(cat_paths_list):
     # Number of available NBs
     measured_NBs = np.sum(measured_mask[:40], axis=0)
 
+    # If available, use ref_id column.
+    # If not, make a fake one
+    if 'ref_id' in tab.keys():
+        ref_id_Arr = np.array(tab['ref_id'])
+    else:
+        ref_id_Arr = (np.array(tab['alpha_j2000'] * 10000).astype(int)
+                      + np.array(tab['alpha_j2000'] * 10000).astype(int) * 10000000)
+
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat
-    cat['ref_id'] = np.array(tab['ref_id'])
+    cat['ref_id'] = ref_id_Arr
     cat['r_mag'] = np.array(tab['mag_r'])
     cat['NB_mask'] = measured_mask
     cat['NB_number'] = measured_NBs
@@ -73,5 +89,6 @@ def load_paus_cat(cat_paths_list):
 
 
 if __name__ == '__main__':
-    path = '/home/alberto/almacen/PAUS_data/catalogs/PAUS_W1.csv'
-    load_paus_cat(path)
+    path = ['/home/alberto/almacen/PAUS_data/catalogs/PAUS_3arcsec_W3_extinction_corrected.pq']
+    cat = load_paus_cat(path)
+    print(cat['ref_id'])
