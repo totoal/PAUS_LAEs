@@ -175,7 +175,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print('----------------------')
     mock_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
-    PAUS_field_names = ['W1', 'W3']
+    PAUS_field_names = ['W1', 'W2', 'W3']
 
     if field_name in mock_list:
         print('Loading catalog (mock)')
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     print('\n##########################')
     print('Computing the Lya LF')
 
-    field_list = ['W3', 'W1']
+    field_list = ['W1', 'W2', 'W3']
 
     t00 = time.time()
 
