@@ -93,7 +93,7 @@ if __name__ == '__main__':
             N_boots = count_N_boots(pathname)
             boots_ids = np.random.choice(np.arange(N_boots), N_boots,
                                          replace=True) + 1
-            region_list = ['W3', 'W1']
+            region_list = ['W3', 'W1', 'W2']
 
             this_hist_mat = 0.
             for boot_i in boots_ids:
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         N_boots = count_N_boots(pathname)
         boots_ids = np.random.choice(np.arange(N_boots), N_boots,
                                      replace=True) + 1
-        region_list = ['W3', 'W1']
+        region_list = ['W3', 'W1', 'W2']
 
         this_hist_mat = 0.
         for boot_i in boots_ids:
