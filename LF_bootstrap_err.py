@@ -39,24 +39,23 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
                     masked_volume = vol_Arr
                 else:
                     masked_volume += vol_Arr
-
-            if this_hist is None:
-                this_hist = hist_i_mat
             else:
-                this_hist += hist_i_mat
+                for region_name in region_list:
+                    for [nb1, nb2] in nb_list:
+                        this_vol = Lya_effective_volume(nb1, nb2, region_name)
+
+                if this_hist is None:
+                    this_hist = hist_i_mat / this_vol
+                else:
+                    this_hist += hist_i_mat / this_vol
 
 
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
 
-    # Hay que hacer que se divida por el volumen sólo de cada sub-área
     if combined_LF:
         eff_vol = masked_volume
     else:
-        eff_vol = 0
-        for region_name in region_list:
-            for [nb1, nb2] in nb_list:
-                this_vol = Lya_effective_volume(nb1, nb2, region_name)
-                eff_vol += this_vol * np.ones_like(bin_width).astype(float)
+        eff_vol = np.ones_like(this_vol)
 
     lum_func = np.zeros_like(this_hist).astype(float)
     lum_func[:, eff_vol > 0] = this_hist[:, eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
