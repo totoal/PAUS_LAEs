@@ -44,10 +44,10 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
                     for [nb1, nb2] in nb_list:
                         this_vol = Lya_effective_volume(nb1, nb2, region_name)
 
-                if this_hist is None:
-                    this_hist = hist_i_mat / this_vol
-                else:
-                    this_hist += hist_i_mat / this_vol
+            if this_hist is None:
+                this_hist = hist_i_mat / this_vol
+            else:
+                this_hist += hist_i_mat / this_vol
 
 
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     hist_mat = None
     
-    N_realizations = 1000
+    N_realizations = 100
     for iter_i in range(N_realizations):
         print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
