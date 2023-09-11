@@ -40,9 +40,7 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
                 else:
                     masked_volume += vol_Arr
             else:
-                for region_name in region_list:
-                    for [nb1, nb2] in nb_list:
-                        this_vol = Lya_effective_volume(nb1, nb2, region_name)
+                this_vol = Lya_effective_volume(nb1, nb2, region_name)
 
             if this_hist is None:
                 this_hist = hist_i_mat / this_vol
@@ -58,9 +56,9 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
         eff_vol = np.ones_like(this_vol)
 
     lum_func = np.zeros_like(this_hist).astype(float)
-    lum_func[:, eff_vol > 0] = this_hist[:, eff_vol > 0] / bin_width[eff_vol > 0] / eff_vol[eff_vol > 0]
+    lum_func[:, eff_vol > 0] = this_hist[:, eff_vol > 0] / bin_width[eff_vol > 0]
 
-    return lum_func
+    return lum_func, eff_vol[eff_vol > 0]
 
 
 def count_N_boots(directory):
@@ -96,14 +94,20 @@ if __name__ == '__main__':
             region_list = ['W3', 'W1', 'W2']
 
             this_hist_mat = 0.
+            this_vol = 0.
             for boot_i in boots_ids:
-                this_hist_mat += bootstrapped_LFs(nb_list, region_list,
-                                                  boot_i, combined_LF=True)
+                this_hist_mat_aux, this_vol_aux =\
+                    bootstrapped_LFs(nb_list, region_list,
+                                     boot_i, combined_LF=True)
+                this_hist_mat += this_hist_mat_aux
+                this_vol += this_vol_aux
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
             else:
                 hist_mat = np.vstack([hist_mat, this_hist_mat])
+
+        hist_mat /= this_vol
         print('\n')
 
         L_LF_err_percentiles = np.percentile(hist_mat, [16, 50, 84], axis=0)
@@ -145,14 +149,20 @@ if __name__ == '__main__':
         region_list = ['W3', 'W1', 'W2']
 
         this_hist_mat = 0.
+        this_vol = 0.
         for boot_i in boots_ids:
-            this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
-                                              boot_i, combined_LF=False)
+            this_hist_mat_aux, this_vol_aux =\
+                bootstrapped_LFs([[nb1, nb2]], region_list,
+                                 boot_i, combined_LF=False)
+            this_hist_mat += this_hist_mat_aux
+            this_vol += this_vol_aux
 
         if hist_mat is None:
             hist_mat = this_hist_mat
         else:
             hist_mat = np.vstack([hist_mat, this_hist_mat])
+    
+    hist_mat /= this_vol
     print('\n')
 
     L_LF_err_percentiles = np.percentile(hist_mat, [16, 50, 84], axis=0)
