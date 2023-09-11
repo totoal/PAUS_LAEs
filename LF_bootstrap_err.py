@@ -39,13 +39,11 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
                     masked_volume = vol_Arr
                 else:
                     masked_volume += vol_Arr
-            else:
-                this_vol = Lya_effective_volume(nb1, nb2, region_name)
 
             if this_hist is None:
-                this_hist = hist_i_mat / this_vol
+                this_hist = hist_i_mat
             else:
-                this_hist += hist_i_mat / this_vol
+                this_hist += hist_i_mat
 
 
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
@@ -53,7 +51,11 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
     if combined_LF:
         eff_vol = masked_volume
     else:
-        eff_vol = np.ones_like(this_vol)
+        eff_vol = 0.
+        for region_name in region_list:
+            for [nb1, nb2] in nb_list:
+                eff_vol += Lya_effective_volume(nb1, nb2, region_name) * np.ones_like(L_bins_c)
+
 
     lum_func = np.zeros_like(this_hist).astype(float)
     lum_func[:, eff_vol > 0] = this_hist[:, eff_vol > 0]\
@@ -147,7 +149,7 @@ if __name__ == '__main__':
         this_hist_mat = 0.
         for boot_i in boots_ids:
             this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
-                                                  boot_i, combined_LF=False)
+                                              boot_i, combined_LF=False)
 
         if hist_mat is None:
             hist_mat = this_hist_mat
