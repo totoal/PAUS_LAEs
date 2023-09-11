@@ -5,7 +5,6 @@ from paus_utils import Lya_effective_volume
 def load_combined_LF(region_list, NB_list, combined_LF=False):
     this_hist = None
     masked_volume = None
-    eff_vol = 0
     for region_name in region_list:
         for [nb1, nb2] in NB_list:
             LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region_name}'
@@ -35,6 +34,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
                 this_hist += hist_i_mat
 
 
+    eff_vol = 0
     if combined_LF:
         eff_vol = masked_volume
     else:
