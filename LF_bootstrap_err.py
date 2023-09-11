@@ -126,7 +126,7 @@ if __name__ == '__main__':
     else:
         print('\n##########################')
         print('\nBootstrapping sky regions')
-        print(f'\nAll fields\n')
+        print(f'\nAll fields')
 
         [nb1, nb2] = [int(nb) for nb in sys.argv[1].split()]
 
@@ -178,7 +178,7 @@ if __name__ == '__main__':
         region_list = ['W3', 'W1', 'W2']
 
         for reg in region_list:
-            print(f'\nRegion: {reg}\n')
+            print(f'\nRegion: {reg}')
             [nb1, nb2] = [int(nb) for nb in sys.argv[1].split()]
 
             if nb1 == nb2:
