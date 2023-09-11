@@ -49,8 +49,11 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
     boots_path = f'/home/alberto/almacen/PAUS_data/Lya_LFs/bootstrap_errors'
     if combined_LF:
         err_surname = 'combi'
+    elif len(region_list) == 1:
+        err_surname = f'nb{nb1}-{nb2}_{region_list[0]}'
     else:
         err_surname = f'nb{nb1}-{nb2}'
+
     yerr_minus = np.load(f'{boots_path}/LF_err_minus_{err_surname}.npy')
     yerr_plus = np.load(f'{boots_path}/LF_err_plus_{err_surname}.npy')
     LF_boots = np.load(f'{boots_path}/median_LF_{err_surname}.npy')
