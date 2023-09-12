@@ -128,7 +128,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         print(f'Subregion: {boot_i}')
         if boot_i == 0:
             # First compute the LF with all the sources
-            boot_nice_lya = total_nice_lya
+            boot_nice_lya = np.copy(total_nice_lya)
         else:
             # point_ids_boot_i = np.random.choice(np.arange(len(unique_pointing_ids)),
             #                                     size=N_pointings_Arr[boot_i - 1],
@@ -143,10 +143,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
 
             # TODO: Provisionally bootstrapping sources instead of areas.
             # I have to define regios with equal areas to do this right
-            boot_mask = np.random.choice(np.arange(N_sources),
-                                         size=int(N_sources / N_boots),
-                                         replace=True)
-            boot_nice_lya = np.where(total_nice_lya[boot_mask])[0]
+            boot_ids = np.random.choice(np.arange(N_sources),
+                                        size=int(N_sources / N_boots),
+                                        replace=True)
+            boot_mask = np.zeros_like(total_nice_lya).astype(bool)
+            boot_mask[boot_ids] = True
+            boot_nice_lya = np.copy(total_nice_lya)
+            boot_nice_lya[~boot_mask] = False
             total_N_sources_boot += N_sources / N_boots
 
 
