@@ -113,6 +113,16 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     N_pointings_Arr = np.ones(N_boots).astype(int) * pointings_per_boot
     N_pointings_Arr[-1] += remainder
 
+    # Compute normalization for bootstrapped LFs:
+    # Every pointing has a slightly different area (not so slightly in some cases)
+    # so, we compute the total number of sources in the catalog as a proxy for
+    # the pointing area. Then, we will normalize the bootstrapped LFs according
+    # to this number.
+    region_N_sources_Arr = np.empty_like(unique_pointing_ids).astype(float)
+    for jjj, pid in enumerate(unique_pointing_ids):
+        region_N_sources_Arr[jjj] = sum(cat['pointing_id'] == pid)
+    N_sources = len(cat['pointing_id']) # Total number of sources
+
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
         if boot_i == 0:
@@ -127,6 +137,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
                 np.where((cat['pointing_id'] == int(pid)) & total_nice_lya)[0]
                 for pid in point_ids_boot
             ]).astype(int)
+
+            total_N_sources_boot = sum(region_N_sources_Arr[point_ids_boot])
 
         # Preliminar completeness
         _, comp_preliminar =\
@@ -158,6 +170,10 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
+
+            if boot_i > 0:
+                # Bootstrap normalization
+                w = w * N_sources / len(point_ids_boot) / total_N_sources_boot
 
             # Store the realization of the LF in the hist matrix
             hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
