@@ -130,17 +130,25 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             # First compute the LF with all the sources
             boot_nice_lya = total_nice_lya
         else:
-            point_ids_boot_i = np.random.choice(np.arange(len(unique_pointing_ids)),
-                                                size=N_pointings_Arr[boot_i - 1],
-                                                replace=True)
-            point_ids_boot = unique_pointing_ids[point_ids_boot_i]
+            # point_ids_boot_i = np.random.choice(np.arange(len(unique_pointing_ids)),
+            #                                     size=N_pointings_Arr[boot_i - 1],
+            #                                     replace=True)
+            # point_ids_boot = unique_pointing_ids[point_ids_boot_i]
             
-            boot_nice_lya = np.concatenate([
-                np.where((cat['pointing_id'] == int(pid)) & total_nice_lya)[0]
-                for pid in point_ids_boot
-            ]).astype(int)
+            # boot_nice_lya = np.concatenate([
+            #     np.where((cat['pointing_id'] == int(pid)) & total_nice_lya)[0]
+            #     for pid in point_ids_boot
+            # ]).astype(int)
+            # total_N_sources_boot += sum(region_N_sources_Arr[point_ids_boot_i])
 
-            total_N_sources_boot += sum(region_N_sources_Arr[point_ids_boot_i])
+            # TODO: Provisionally bootstrapping sources instead of areas.
+            # I have to define regios with equal areas to do this right
+            boot_mask = np.random.choice(np.arange(N_sources),
+                                         size=int(N_sources / N_boots),
+                                         replace=True)
+            boot_nice_lya = np.where(total_nice_lya[boot_mask])[0]
+            total_N_sources_boot += N_sources / N_boots
+
 
         # Preliminar completeness
         _, comp_preliminar =\
