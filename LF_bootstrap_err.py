@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
         hist_mat = None
         
-        N_realizations = 100
+        N_realizations = 200
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
@@ -177,51 +177,51 @@ if __name__ == '__main__':
         np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}', hist_mat)
 
 
-    # # Thist part computes the errors for individual fields
-    #     region_list = ['W3', 'W1', 'W2']
+    # Thist part computes the errors for individual fields
+        region_list = ['W3', 'W1', 'W2']
 
-    #     for reg in region_list:
-    #         print(f'\nRegion: {reg}')
-    #         [nb1, nb2] = [int(nb) for nb in sys.argv[1].split()]
+        for reg in region_list:
+            print(f'\nRegion: {reg}')
+            [nb1, nb2] = [int(nb) for nb in sys.argv[1].split()]
 
-    #         if nb1 == nb2:
-    #             print(f'NB: {nb1}')
-    #         else:
-    #             print(f'NB: {nb1}-{nb2}')
+            if nb1 == nb2:
+                print(f'NB: {nb1}')
+            else:
+                print(f'NB: {nb1}-{nb2}')
 
-    #         hist_mat = None
+            hist_mat = None
             
-    #         N_realizations = 100
-    #         for iter_i in range(N_realizations):
-    #             print(f'{iter_i + 1} / {N_realizations}', end='\r')
+            N_realizations = 100
+            for iter_i in range(N_realizations):
+                print(f'{iter_i + 1} / {N_realizations}', end='\r')
 
-    #             LF_name = f'Lya_LF_nb{nb1}-{nb2}_W3'
-    #             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-    #             N_boots = count_N_boots(pathname)
-    #             boots_ids = np.random.choice(np.arange(N_boots), N_boots,
-    #                                         replace=True) + 1
+                LF_name = f'Lya_LF_nb{nb1}-{nb2}_W3'
+                pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
+                N_boots = count_N_boots(pathname)
+                boots_ids = np.random.choice(np.arange(N_boots), N_boots,
+                                            replace=True) + 1
 
-    #             this_hist_mat = 0.
-    #             for boot_i in boots_ids:
-    #                 this_hist_mat += bootstrapped_LFs([[nb1, nb2]], [reg],
-    #                                                 boot_i, combined_LF=False)
+                this_hist_mat = 0.
+                for boot_i in boots_ids:
+                    this_hist_mat += bootstrapped_LFs([[nb1, nb2]], [reg],
+                                                    boot_i, combined_LF=False)
 
-    #             if hist_mat is None:
-    #                 hist_mat = this_hist_mat
-    #             else:
-    #                 hist_mat = np.vstack([hist_mat, this_hist_mat])
+                if hist_mat is None:
+                    hist_mat = this_hist_mat
+                else:
+                    hist_mat = np.vstack([hist_mat, this_hist_mat])
             
-    #         print('\n')
+            print('\n')
 
-    #         L_LF_err_percentiles = np.percentile(hist_mat, [16, 50, 84], axis=0)
-    #         LF_err_plus = L_LF_err_percentiles[2] - L_LF_err_percentiles[1]
-    #         LF_err_minus = L_LF_err_percentiles[1] - L_LF_err_percentiles[0]
+            L_LF_err_percentiles = np.percentile(hist_mat, [16, 50, 84], axis=0)
+            LF_err_plus = L_LF_err_percentiles[2] - L_LF_err_percentiles[1]
+            LF_err_minus = L_LF_err_percentiles[1] - L_LF_err_percentiles[0]
 
-    #         name = f'bootstrap_errors'
-    #         pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
-    #         os.makedirs(pathname, exist_ok=True)
+            name = f'bootstrap_errors'
+            pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
+            os.makedirs(pathname, exist_ok=True)
 
-    #         np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}_{reg}', LF_err_plus)
-    #         np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}_{reg}', LF_err_minus)
-    #         np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}_{reg}', L_LF_err_percentiles[1])
-    #         np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}_{reg}', hist_mat)
+            np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}_{reg}', LF_err_plus)
+            np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}_{reg}', LF_err_minus)
+            np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}_{reg}', L_LF_err_percentiles[1])
+            np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}_{reg}', hist_mat)
