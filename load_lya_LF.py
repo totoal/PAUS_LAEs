@@ -75,3 +75,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
     }
 
     return this_LF_dict
+
+
+if __name__ == '__main__':
+    lf = load_combined_LF(['W1'], [[2, 4]])
