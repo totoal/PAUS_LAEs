@@ -38,14 +38,14 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
     for mock_name, mock in mocks_dict.items():
         # Define nice_z
-        nice_z = np.abs(mock['zspec'] - z_NB(mock['lya_NB'])) < 0.2
+        nice_z = np.abs(mock['zspec'] - z_NB(mock['lya_NB'])) < 0.12
 
         mask_r = (mock['r_mag'] >= r_min) & (mock['r_mag'] <= r_max)
         mask_sel = (mock['nice_lya']
                     & (mock['lya_NB'] >= nb_min)
                     & (mock['lya_NB'] <= nb_max)
                     & mask_r)
-        mask_parent = ((mock['EW0_lya_spec'] > 30)
+        mask_parent = ((mock['EW0_lya_spec'] > 0)
                        & (NB_z(mock['zspec']) >= nb_min)
                        & (NB_z(mock['zspec']) <= nb_max)
                        & mask_r)
