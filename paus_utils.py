@@ -192,7 +192,7 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
         'QSO_LAEs_hiL': 4000,
         'GAL': 59.97,
         'W3': 14.74,
-        'W2': 15.,
+        'W2': 10.,
         'W1': 7.67
     }
         
