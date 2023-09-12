@@ -66,7 +66,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
-                  N_iter=1000, N_boots=5):
+                  N_iter=100, N_boots=5):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
@@ -122,6 +122,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     for jjj, pid in enumerate(unique_pointing_ids):
         region_N_sources_Arr[jjj] = sum(cat['pointing_id'] == pid)
     N_sources = len(cat['pointing_id']) # Total number of sources
+    total_N_sources_boot = 0.
 
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
@@ -139,7 +140,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
                 for pid in point_ids_boot
             ]).astype(int)
 
-            total_N_sources_boot = sum(region_N_sources_Arr[point_ids_boot_i])
+            total_N_sources_boot += sum(region_N_sources_Arr[point_ids_boot_i])
 
         # Preliminar completeness
         _, comp_preliminar =\
@@ -172,16 +173,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
 
-            if boot_i > 0:
-                # Bootstrap normalization
-                w = w * N_sources / len(point_ids_boot) / total_N_sources_boot
-
             # Store the realization of the LF in the hist matrix
             hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
                                             bins=L_bins, weights=w)
             
         # Save hist_i_mat
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)
+    np.save(f'{LF_savedir}/boot_norm.npy', N_sources / total_N_sources_boot)
         
 
 
