@@ -66,7 +66,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
-                  N_iter=100, N_boots=5):
+                  N_iter=1000, N_boots=5):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
