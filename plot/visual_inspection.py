@@ -44,7 +44,7 @@ if __name__ == '__main__':
             continue
         cat[key] = cat[key][mask_NB_number]
 
-    stack_nb_ids = np.arange(12, 16 + 1)
+    stack_nb_ids = np.arange(12, 26 + 1)
     synth_BB_flx = np.average(cat['flx'][stack_nb_ids],
                             weights=cat['err'][stack_nb_ids] ** -2,
                             axis=0)

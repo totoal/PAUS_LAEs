@@ -83,6 +83,14 @@ def load_paus_cat(cat_paths_list):
     cat['NB_number'] = measured_NBs
     cat['RA'] = np.array(tab['alpha_j2000'])
     cat['DEC'] = np.array(tab['delta_j2000'])
+    
+    if 'sg_flag' in tab.keys():
+        star_flag_name = 'sg_flag'
+    elif 'star_flag' in tab.keys():
+        star_flag_name = 'star_flag'
+    else:
+        raise ValueError('No star flag.')
+    cat['sg_flag'] = np.array(tab[star_flag_name])
     # cat['bulge_fraction'] = np.array(tab['bulge-fraction'])
     # cat['flattening'] = 1 - np.array(tab['b_world']) / np.array(tab['a_world'])
 

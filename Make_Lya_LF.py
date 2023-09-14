@@ -225,7 +225,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # cat['r_mag'] = flux_to_mag(cat['flx'][-4], w_central[-4])
     ################################################
     #### Testing with a synthetic BB ####
-    stack_nb_ids = np.arange(12, 16 + 1)
+    stack_nb_ids = np.arange(12, 26 + 1)
     synth_BB_flx = np.average(cat['flx'][stack_nb_ids],
                               weights=cat['err'][stack_nb_ids] ** -2,
                               axis=0)

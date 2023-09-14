@@ -228,7 +228,7 @@ def compute_LF_corrections(mock_dict, field_name,
         # # Compute r_mag
         # mock['r_mag'] = flux_to_mag(mock['flx'][-4], w_central[-4])
         #### Testing with a synthetic BB ####
-        stack_nb_ids = np.arange(12, 16 + 1)
+        stack_nb_ids = np.arange(12, 26 + 1)
         synth_BB_flx = np.average(mock['flx'][stack_nb_ids],
                                 weights=mock['err'][stack_nb_ids] ** -2,
                                 axis=0)
