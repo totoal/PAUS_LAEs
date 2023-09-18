@@ -86,11 +86,12 @@ def load_paus_cat(cat_paths_list):
     
     if 'sg_flag' in tab.keys():
         star_flag_name = 'sg_flag'
+        cat['sg_flag'] = np.abs(np.array(tab[star_flag_name]) - 1)
     elif 'star_flag' in tab.keys():
         star_flag_name = 'star_flag'
+        cat['sg_flag'] = np.array(tab[star_flag_name])
     else:
         raise ValueError('No star flag.')
-    cat['sg_flag'] = np.array(tab[star_flag_name])
     # cat['bulge_fraction'] = np.array(tab['bulge-fraction'])
     # cat['flattening'] = 1 - np.array(tab['b_world']) / np.array(tab['a_world'])
 
