@@ -106,6 +106,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     total_nice_lya = cat['nice_lya']
 
     hist_i_mat = np.zeros((N_iter, N_bins))
+    hist_i_mat_M = np.zeros((N_iter, N_bins))
+
+    # Compute the absolute UV magnitude
+    M_UV_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    M_UV_bins = np.linspace(-26, -15, 25)
+    # Save the M_bins
+    np.save(f'{LF_savedir}/M_UV_bins.npy', M_UV_bins)
 
     unique_pointing_ids = np.unique(cat['pointing_id'])
     N_boots = 10
@@ -185,11 +192,16 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
 
             # Store the realization of the LF in the hist matrix
+            # For Lya Luminosity
             hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
                                             bins=L_bins, weights=w)
+            # And for UV absolute magnitude
+            hist_i_mat_M[k], _ = np.histogram(M_UV_Arr[boot_nice_lya],
+                                              bins=M_UV_bins, weights=w)
             
         # Save hist_i_mat
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)
+        np.save(f'{LF_savedir}/hist_i_mat_{boot_i}_M.npy', hist_i_mat_M)
     np.save(f'{LF_savedir}/boot_norm.npy', N_sources / total_N_sources_boot)
         
 
