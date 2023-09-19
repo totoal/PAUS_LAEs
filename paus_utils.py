@@ -230,7 +230,7 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
 def PAUS_monochromatic_Mag(cat, wavelength=1450):
     # Find the NB of the specified wavelength in rest-frame
     nb_w_rest = NB_z(cat['z_NB'], wavelength)
-    dist_lum_Arr = cosmo.luminosity_distance(cat['z_NB'])
+    dist_lum_Arr = cosmo.luminosity_distance(cat['z_NB']).to(u.pc).value
 
     N_sources = len(cat['z_NB'])
 
