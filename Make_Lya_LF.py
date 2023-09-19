@@ -105,14 +105,16 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     # This is the global nice_lya array. We the selection in N_boots subsamples.
     total_nice_lya = cat['nice_lya']
 
-    hist_i_mat = np.zeros((N_iter, N_bins))
-    hist_i_mat_M = np.zeros((N_iter, N_bins))
-
     # Compute the absolute UV magnitude
     M_UV_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
-    M_UV_bins = np.linspace(-26, -15, 25)
+    N_bins_UV = 25
+    M_UV_bins = np.linspace(-26, -15, N_bins_UV)
     # Save the M_bins
     np.save(f'{LF_savedir}/M_UV_bins.npy', M_UV_bins)
+
+    hist_i_mat = np.zeros((N_iter, N_bins))
+    hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
+
 
     unique_pointing_ids = np.unique(cat['pointing_id'])
     N_boots = 10
