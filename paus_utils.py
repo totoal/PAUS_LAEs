@@ -12,6 +12,8 @@ import astropy.units as u
 
 from scipy.integrate import simpson
 
+from jpasLAEs.utils import flux_to_mag
+
 
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
@@ -223,3 +225,26 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
     )
 
     return volume_abs + volume_overlap * 0.5
+
+
+def PAUS_monochromatic_Mag(cat, wavelength=1450):
+    # Find the NB of the specified wavelength in rest-frame
+    nb_w_rest = NB_z(cat['z_NB'], wavelength)
+    dist_lum_Arr = cosmo.luminosity_distance(cat['z_NB'])
+
+    N_sources = len(cat['z_NB'])
+
+    flambda_Arr = np.ones(N_sources).astype(float) * 99.
+
+    for src in range(N_sources):
+        nb_min = np.max([nb_w_rest[src] - 1, 0])
+        nb_max = nb_w_rest[src] + 1
+
+        slc = slice(nb_min, nb_max, src)
+        flambda_Arr[src] = np.nanmean(cat['flx'][slc],
+                                  weights=cat['err'][slc] ** -2)
+
+    magAB_Arr = flux_to_mag(flambda_Arr, wavelength)
+    M_Arr = magAB_Arr - 5 * (np.log10(dist_lum_Arr) - 1)
+
+    return M_Arr
