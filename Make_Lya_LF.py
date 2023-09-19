@@ -115,7 +115,6 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     hist_i_mat = np.zeros((N_iter, N_bins))
     hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
 
-
     unique_pointing_ids = np.unique(cat['pointing_id'])
     N_boots = 10
     pointings_per_boot, remainder = divmod(len(unique_pointing_ids), N_boots)

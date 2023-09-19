@@ -10,7 +10,7 @@ import os
 import sys
 
 def bootstrapped_LFs(nb_list, region_list, boot_i,
-                     combined_LF=False):
+                     combined_LF=False, kind_surname=''):
     '''
     Returns a matrix of N iterations of the LF using the fields given by
     region_list_indices.
@@ -21,9 +21,15 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
         for [nb1, nb2] in nb_list:
             LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region_name}'
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-            filename_hist = f'{pathname}/hist_i_mat_{boot_i}.npy'
+            filename_hist = f'{pathname}/hist_i_mat_{boot_i}{kind_surname}.npy'
 
-            L_bins = np.load(f'{pathname}/LF_L_bins.npy')
+            if kind_surname == '':
+                L_bins = np.load(f'{pathname}/LF_L_bins.npy')
+            elif kind_surname == '_M':
+                L_bins = np.load(f'{pathname}/M_UV_bins.npy')
+            else:
+                raise ValueError('Unknown LF_kind.')
+
             L_bins_c = bin_centers(L_bins)
 
             hist_i_mat = np.load(filename_hist)
@@ -73,12 +79,12 @@ def count_N_boots(directory):
         if filename[-5] == '0':
             continue
         if filename.startswith('hist_i_mat') and os.path.isfile(os.path.join(directory, filename)):
+            if filename[-5] == 'M':
+                continue
             count += 1
     return count
 
-
-
-if __name__ == '__main__':
+def main(kind_surname=''):
     if sys.argv[1] == 'combi':
         print('\n##########################')
         print('\nBootstrapping combined sky regions')
@@ -102,7 +108,8 @@ if __name__ == '__main__':
             this_hist_mat = 0.
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs(nb_list, region_list,
-                                                  boot_i, combined_LF=True)
+                                                  boot_i, combined_LF=True,
+                                                  kind_surname=kind_surname)
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -119,10 +126,10 @@ if __name__ == '__main__':
         pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
         os.makedirs(pathname, exist_ok=True)
 
-        np.save(f'{pathname}/LF_err_plus_combi', LF_err_plus)
-        np.save(f'{pathname}/LF_err_minus_combi', LF_err_minus)
-        np.save(f'{pathname}/median_LF_combi', L_LF_err_percentiles[1])
-        np.save(f'{pathname}/hist_mat_boots_combi', hist_mat)
+        np.save(f'{pathname}/LF_err_plus_combi{kind_surname}', LF_err_plus)
+        np.save(f'{pathname}/LF_err_minus_combi{kind_surname}', LF_err_minus)
+        np.save(f'{pathname}/median_LF_combi{kind_surname}', L_LF_err_percentiles[1])
+        np.save(f'{pathname}/hist_mat_boots_combi{kind_surname}', hist_mat)
 
         sys.exit(0)
 
@@ -148,13 +155,14 @@ if __name__ == '__main__':
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
             N_boots = count_N_boots(pathname)
             boots_ids = np.random.choice(np.arange(N_boots), N_boots,
-                                        replace=True) + 1
+                                         replace=True) + 1
             region_list = ['W3', 'W1', 'W2']
 
             this_hist_mat = 0.
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
-                                                boot_i, combined_LF=False)
+                                                boot_i, combined_LF=False,
+                                                kind_surname=kind_surname)
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -171,10 +179,10 @@ if __name__ == '__main__':
         pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
         os.makedirs(pathname, exist_ok=True)
 
-        np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}', LF_err_plus)
-        np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}', LF_err_minus)
-        np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}', L_LF_err_percentiles[1])
-        np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}', hist_mat)
+        np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}{kind_surname}', LF_err_plus)
+        np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}{kind_surname}', LF_err_minus)
+        np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}{kind_surname}', L_LF_err_percentiles[1])
+        np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}{kind_surname}', hist_mat)
 
 
     # Thist part computes the errors for individual fields
@@ -204,7 +212,8 @@ if __name__ == '__main__':
                 this_hist_mat = 0.
                 for boot_i in boots_ids:
                     this_hist_mat += bootstrapped_LFs([[nb1, nb2]], [reg],
-                                                    boot_i, combined_LF=False)
+                                                    boot_i, combined_LF=False,
+                                                  kind_surname=kind_surname)
 
                 if hist_mat is None:
                     hist_mat = this_hist_mat
@@ -221,7 +230,11 @@ if __name__ == '__main__':
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{name}'
             os.makedirs(pathname, exist_ok=True)
 
-            np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}_{reg}', LF_err_plus)
-            np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}_{reg}', LF_err_minus)
-            np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}_{reg}', L_LF_err_percentiles[1])
-            np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}_{reg}', hist_mat)
+            np.save(f'{pathname}/LF_err_plus_nb{nb1}-{nb2}_{reg}{kind_surname}', LF_err_plus)
+            np.save(f'{pathname}/LF_err_minus_nb{nb1}-{nb2}_{reg}{kind_surname}', LF_err_minus)
+            np.save(f'{pathname}/median_LF_nb{nb1}-{nb2}_{reg}{kind_surname}', L_LF_err_percentiles[1])
+            np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}_{reg}{kind_surname}', hist_mat)
+
+if __name__ == '__main__':
+    main('')
+    main('_M')
