@@ -2,17 +2,27 @@ import numpy as np
 from jpasLAEs.utils import bin_centers
 from paus_utils import Lya_effective_volume
 
-def load_combined_LF(region_list, NB_list, combined_LF=False):
+def load_combined_LF(region_list, NB_list, combined_LF=False,
+                     LF_kind='Lya'):
     this_hist = None
     masked_volume = None
     for region_name in region_list:
         for [nb1, nb2] in NB_list:
             LF_name = f'Lya_LF_nb{nb1}-{nb2}_{region_name}'
             pathname = f'/home/alberto/almacen/PAUS_data/Lya_LFs/{LF_name}'
-            filename_hist = f'{pathname}/hist_i_mat_0.npy'
 
-            L_bins = np.load(f'{pathname}/LF_L_bins.npy')
+            if LF_kind == 'Lya':
+                kind_surname = ''
+                L_bins = np.load(f'{pathname}/LF_L_bins.npy')
+            elif LF_kind == 'UV':
+                kind_surname = '_M'
+                L_bins = np.load(f'{pathname}/M_UV_bins.npy')
+            else:
+                raise ValueError('Unknown LF_kind.')
+
             L_bins_c = bin_centers(L_bins)
+
+            filename_hist = f'{pathname}/hist_i_mat_0{kind_surname}.npy'
 
             hist_i_mat = np.load(filename_hist)
 
@@ -48,11 +58,11 @@ def load_combined_LF(region_list, NB_list, combined_LF=False):
 
     boots_path = f'/home/alberto/almacen/PAUS_data/Lya_LFs/bootstrap_errors'
     if combined_LF:
-        err_surname = 'combi'
+        err_surname = f'combi{kind_surname}'
     elif len(region_list) == 1:
-        err_surname = f'nb{nb1}-{nb2}_{region_list[0]}'
+        err_surname = f'nb{nb1}-{nb2}_{region_list[0]}{kind_surname}'
     else:
-        err_surname = f'nb{nb1}-{nb2}'
+        err_surname = f'nb{nb1}-{nb2}{kind_surname}'
 
     yerr_minus = np.load(f'{boots_path}/LF_err_minus_{err_surname}.npy')
     yerr_plus = np.load(f'{boots_path}/LF_err_plus_{err_surname}.npy')
