@@ -240,7 +240,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
         nb_min = np.max([nb_w_rest[src] - 1, 0])
         nb_max = nb_w_rest[src] + 1
 
-        slc = slice(nb_min, nb_max, src)
+        slc = slice(nb_min, nb_max + 1, src)
         flambda_Arr[src] = np.nanmean(cat['flx'][slc],
                                   weights=cat['err'][slc] ** -2)
 
