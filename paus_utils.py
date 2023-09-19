@@ -250,6 +250,9 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
                              axis=0)
 
     magAB_Arr = flux_to_mag(flambda_Arr, wavelength)
-    M_Arr = magAB_Arr - 5 * (np.log10(dist_lum_Arr) - 1)
+    M_Arr = np.ones(N_sources) * 99
+
+    mask = (dist_lum_Arr > 0)
+    M_Arr[mask] = magAB_Arr[mask] - 5 * (np.log10(dist_lum_Arr[mask]) - 1)
 
     return M_Arr
