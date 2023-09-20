@@ -106,7 +106,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     total_nice_lya = cat['nice_lya']
 
     # Compute the absolute UV magnitude
-    M_UV_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
     N_bins_UV = 20 + 1
     M_UV_bins = np.linspace(-26, -17, N_bins_UV)
     # Save the M_bins
@@ -179,6 +179,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
             L_perturbed[np.isnan(L_perturbed)] = 0.
 
+            M_perturbed = M_UV_Arr + randN * M_UV_err_Arr
+
             puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
                                puri2d, comp2d,
@@ -197,7 +199,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             hist_i_mat[k], _ = np.histogram(L_perturbed[boot_nice_lya],
                                             bins=L_bins, weights=w)
             # And for UV absolute magnitude
-            hist_i_mat_M[k], _ = np.histogram(M_UV_Arr[boot_nice_lya],
+            hist_i_mat_M[k], _ = np.histogram(M_perturbed[boot_nice_lya],
                                               bins=M_UV_bins, weights=w)
             
         # Save hist_i_mat
