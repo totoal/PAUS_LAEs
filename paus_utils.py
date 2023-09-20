@@ -194,8 +194,8 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
         'QSO_LAEs_hiL': 4000,
         'GAL': 59.97,
         'W3': 14.74,
-        'W2': 10.,
-        'W1': 7.67
+        'W2': 10.36,
+        'W1': 8.35
     }
         
     try:
@@ -228,6 +228,26 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
 
 
 def PAUS_monochromatic_Mag(cat, wavelength=1450):
+    '''
+    Calculate the absolute magnitude (M) and its error for sources in a catalog
+    at a specified monochromatic wavelength in the rest-frame.
+
+    Parameters:
+    cat (dict): A dictionary containing information about sources, including:
+        - 'z_NB' (numpy.ndarray): Redshift values for sources.
+        - 'flx' (numpy.ndarray): Flux values for sources.
+        - 'err' (numpy.ndarray): Flux error values for sources.
+        - 'nice_lya' (numpy.ndarray): Boolean mask for selecting sources.
+
+    wavelength (float, optional): The desired wavelength in Angstroms in the rest-frame.
+        Default is 1450 Angstroms.
+
+    Returns:
+    tuple: A tuple containing two numpy arrays:
+        - M_Arr (numpy.ndarray): Absolute magnitude for sources. Sources without valid
+          data are assigned a value of 99.
+        - magAB_err_Arr (numpy.ndarray): Error in the absolute magnitude.
+    '''
     # Find the NB of the specified wavelength in rest-frame
     nb_w_rest = NB_z(cat['z_NB'], wavelength)
     dist_lum_Arr = cosmo.luminosity_distance(cat['z_NB']).to(u.pc).value
