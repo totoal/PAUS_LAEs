@@ -115,7 +115,7 @@ def transform(theta):
     Phistar_range = [-7, -3]
     Mbreak_range = [-25, -20]
     beta_range = [0, 3]
-    gamma_range = [0, 3]
+    gamma_range = [1, 5]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Mbreak_range[0] + (Mbreak_range[1] - Mbreak_range[0]) * theta[1]
@@ -214,14 +214,14 @@ def initialize_csv(filename, columns):
 
 
 if __name__ == '__main__':
-    region_list = ['W3', 'W2', 'W1']
+    region_list = ['W3']
 
     nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
                [8, 10], [10, 12], [12, 14], [14, 16],
                [16, 18]]
 
     # Add individual NB LFs
-    nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
+    # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
 
     # Initialize file to write the fit parameters
     param_filename = 'UV_dpl_fit_parameters.csv'
