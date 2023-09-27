@@ -77,15 +77,15 @@ def load_and_compute_invcovmat(nb_list, where_fit):
 
 ##########################
 
-def doble_power_law(M, Phistar, Mbreak, beta, gamma):
+def double_power_law(M, Phistar, Mbreak, beta, gamma):
     exp1 = 0.4 * (Mbreak - M) * (beta - 1)
     exp2 = 0.4 * (Mbreak - M) * (gamma - 1)
 
-    return 10 ** Phistar / (10 ** exp1 + 10 ** exp2)
+    return 10. ** Phistar / (10. ** exp1 + 10. ** exp2)
 
 # The fitting curve
 def dpl_fit(*args):
-    return np.log10(doble_power_law(*args))
+    return np.log10(double_power_law(*args))
 
 ################################################
 ### A set of functions to compute MCMC stuff ###
@@ -151,7 +151,7 @@ def run_mcmc_fit(nb_list, region_list):
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Mbreak', 'beta', 'gamma']
 
-    Lx = 10**LF_bins[where_fit]
+    Lx = LF_bins[where_fit]
     Phi = np.log10(LF_phi[where_fit])
 
     def log_like(theta):
@@ -189,7 +189,7 @@ def run_mcmc_fit(nb_list, region_list):
     
     # Save the chain
     flat_samples = sampler.results['samples']
-    np.save(f'chains/mcmc_schechter_fit_chain_nb{nb1}-{nb2}', flat_samples)
+    np.save(f'chains/mcmc_UV_dpl_fit_chain_nb{nb1}-{nb2}', flat_samples)
 
     # Obtain the fit parameters
     fit_params = sampler.results['posterior']['median']
@@ -222,6 +222,7 @@ if __name__ == '__main__':
 
     # Add individual NB LFs
     # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
+    nb_list = [[nbl] for nbl in nb_list]
 
     # Initialize file to write the fit parameters
     param_filename = 'UV_dpl_fit_parameters.csv'
