@@ -193,9 +193,9 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
         'QSO_LAEs_loL': 400,
         'QSO_LAEs_hiL': 4000,
         'GAL': 59.97,
-        'W3': 17.02043,
-        'W2': 10.36,
-        'W1': 8.6303547,
+        'W3': 17.020433524313027,
+        'W2': 12.15641565856906,
+        'W1': 8.63035478164113,
     }
         
     try:

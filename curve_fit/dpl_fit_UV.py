@@ -14,7 +14,7 @@ matplotlib.rcParams.update({'font.size': 16})
 
 import corner
 
-from scipy import linalg
+from scipy import linalg, stats
 
 from multiprocessing import Pool
 from autoemcee import ReactiveAffineInvariantSampler
@@ -114,7 +114,7 @@ def transform(theta):
     # Flat Priors
     Phistar_range = [-7, -3]
     Mbreak_range = [-25, -20]
-    beta_range = [0, 3]
+    beta_range = [-2, 3]
     gamma_range = [1, 5]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
@@ -131,12 +131,12 @@ def run_mcmc_fit(nb_list, region_list):
         combined_LF = False
     else:
         combined_LF = True
-    LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
+    uv_LF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
                              LF_kind='UV')
-    LF_yerr_minus = LyaLF['LF_total_err'][0]
-    LF_yerr_plus = LyaLF['LF_total_err'][1]
-    LF_phi = LyaLF['LF_boots']
-    LF_bins = LyaLF['LF_bins']
+    LF_yerr_minus = uv_LF['LF_total_err'][0]
+    LF_yerr_plus = uv_LF['LF_total_err'][1]
+    LF_phi = uv_LF['LF_boots']
+    LF_bins = uv_LF['LF_bins']
     
 
     # Error to use
