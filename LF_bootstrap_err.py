@@ -51,10 +51,6 @@ def bootstrapped_LFs(nb_list, region_list, boot_i,
             else:
                 this_hist += hist_i_mat
 
-    # Normalize hist
-    norm = np.load(f'{pathname}/boot_norm.npy')
-    this_hist *= norm
-
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
 
     if combined_LF:
@@ -109,7 +105,7 @@ def main(kind_surname=''):
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs(nb_list, region_list,
                                                   boot_i, combined_LF=True,
-                                                  kind_surname=kind_surname)
+                                                  kind_surname=kind_surname) / N_boots
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -162,7 +158,7 @@ def main(kind_surname=''):
             for boot_i in boots_ids:
                 this_hist_mat += bootstrapped_LFs([[nb1, nb2]], region_list,
                                                 boot_i, combined_LF=False,
-                                                kind_surname=kind_surname)
+                                                kind_surname=kind_surname) / N_boots
 
             if hist_mat is None:
                 hist_mat = this_hist_mat
@@ -213,7 +209,7 @@ def main(kind_surname=''):
                 for boot_i in boots_ids:
                     this_hist_mat += bootstrapped_LFs([[nb1, nb2]], [reg],
                                                     boot_i, combined_LF=False,
-                                                  kind_surname=kind_surname)
+                                                  kind_surname=kind_surname) / N_boots
 
                 if hist_mat is None:
                     hist_mat = this_hist_mat

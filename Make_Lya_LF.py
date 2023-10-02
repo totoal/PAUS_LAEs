@@ -65,7 +65,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 
-def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
+def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
                   N_iter=500, N_boots=5):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
@@ -115,22 +115,9 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
     hist_i_mat = np.zeros((N_iter, N_bins))
     hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
 
-    unique_pointing_ids = np.unique(cat['pointing_id'])
-    N_boots = 10
-    pointings_per_boot, remainder = divmod(len(unique_pointing_ids), N_boots)
-    N_pointings_Arr = np.ones(N_boots).astype(int) * pointings_per_boot
-    N_pointings_Arr[-1] += remainder
-
-    # Compute normalization for bootstrapped LFs:
-    # Every pointing has a slightly different area (not so slightly in some cases)
-    # so, we compute the total number of sources in the catalog as a proxy for
-    # the pointing area. Then, we will normalize the bootstrapped LFs according
-    # to this number.
-    region_N_sources_Arr = np.empty_like(unique_pointing_ids).astype(float)
-    for jjj, pid in enumerate(unique_pointing_ids):
-        region_N_sources_Arr[jjj] = sum(cat['pointing_id'] == pid)
-    N_sources = len(cat['pointing_id']) # Total number of sources
-    total_N_sources_boot = 0.
+    N_boots = 50
+    region_IDs = np.load(f'/home/alberto/almacen/PAUS_data/masks/reg_id_Arr_{field_name}.npy')
+    unique_region_IDs = np.unique(region_IDs)
 
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
@@ -138,27 +125,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
             # First compute the LF with all the sources
             boot_nice_lya = np.copy(total_nice_lya)
         else:
-            # point_ids_boot_i = np.random.choice(np.arange(len(unique_pointing_ids)),
-            #                                     size=N_pointings_Arr[boot_i - 1],
-            #                                     replace=True)
-            # point_ids_boot = unique_pointing_ids[point_ids_boot_i]
-            
-            # boot_nice_lya = np.concatenate([
-            #     np.where((cat['pointing_id'] == int(pid)) & total_nice_lya)[0]
-            #     for pid in point_ids_boot
-            # ]).astype(int)
-            # total_N_sources_boot += sum(region_N_sources_Arr[point_ids_boot_i])
-
-            # TODO: Provisionally bootstrapping sources instead of areas.
-            # I have to define regios with equal areas to do this right
-            boot_ids = np.random.choice(np.arange(N_sources),
-                                        size=int(N_sources / N_boots),
-                                        replace=True)
-            boot_mask = np.zeros_like(total_nice_lya).astype(bool)
-            boot_mask[boot_ids] = True
-            boot_nice_lya = np.copy(total_nice_lya)
-            boot_nice_lya[~boot_mask] = False
-            total_N_sources_boot += N_sources / N_boots
+            rid_bootstrap = np.random.choice(unique_region_IDs,
+                                             size=len(unique_region_IDs),
+                                             replace=True)
+            boot_nice_lya = np.concatenate([
+                np.where((region_IDs == int(rid)) & total_nice_lya)[0]
+                for rid in rid_bootstrap
+            ]).astype(int)
 
 
         # Preliminar completeness
@@ -205,7 +178,6 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir,
         # Save hist_i_mat
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}_M.npy', hist_i_mat_M)
-    np.save(f'{LF_savedir}/boot_norm.npy', N_sources / total_N_sources_boot)
         
 
 
@@ -288,7 +260,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     np.save(f'{LF_savedir}/LF_L_bins.npy', L_bins)
 
     print('Making the LF')
-    Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir)
+    Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name)
 
     # Save a dictionary with useful data about the selection
     reduced_cat = {}
