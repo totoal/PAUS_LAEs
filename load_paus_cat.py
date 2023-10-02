@@ -37,10 +37,13 @@ def load_paus_cat(cat_paths_list):
             flx_err_mat = np.vstack([flx_err_mat,
                                      np.array(tab[f'{filter_name}_error'])])
         elif len(filter_name) == 1:
-            mag_cat_name = f'mag_{filter_name.lower()}'
+            magname = filter_name.lower()
+            if not f'mag_{magname}' in tab.keys():
+                magname = f'gaap_{filter_name.lower()}'
+            mag_cat_name = f'mag_{magname}'
             if mag_cat_name in tab.keys():
                 this_bb_mag = np.array(tab[mag_cat_name])
-                this_bb_mag_err = np.array(tab[f'magerr_{filter_name.lower()}'])
+                this_bb_mag_err = np.array(tab[f'magerr_{magname}'])
                 this_bb_flx = mag_to_flux(this_bb_mag, data_tab['w_eff'][jj])
                 this_bb_flx_err = this_bb_flx * this_bb_mag_err # magerr is approx. flx_relerr
             else:
