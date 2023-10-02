@@ -40,6 +40,9 @@ def load_paus_cat(cat_paths_list):
             magname = filter_name.lower()
             if not f'mag_{magname}' in tab.keys():
                 magname = f'gaap_{filter_name.lower()}'
+                gaap = '_gaap'
+            else:
+                gaap = ''
             mag_cat_name = f'mag_{magname}'
             if mag_cat_name in tab.keys():
                 this_bb_mag = np.array(tab[mag_cat_name])
@@ -81,7 +84,7 @@ def load_paus_cat(cat_paths_list):
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat
     cat['ref_id'] = ref_id_Arr
-    cat['r_mag'] = np.array(tab['mag_r'])
+    cat['r_mag'] = np.array(tab[f'mag{gaap}_r'])
     cat['NB_mask'] = measured_mask
     cat['NB_number'] = measured_NBs
     cat['RA'] = np.array(tab['alpha_j2000'])
