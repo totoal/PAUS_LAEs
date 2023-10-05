@@ -44,17 +44,21 @@ def covmat_simple(xiallreal):
     return covmat, corrmat
 
 
-def compute_invcovmat(hist_mat, where_fit):
+def compute_invcovmat(hist_mat, where_fit, poisson_err):
     '''
     Computes the inverse covariance matrix of hist_mat in a range defined by the mask where_fit
     '''
     this_hist_mat = hist_mat.T[where_fit]
     this_hist_mat[~np.isfinite(this_hist_mat)] = np.nan
     covmat = covmat_simple(this_hist_mat)[0]
+
+    # Add poisson errors
+    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**2) ** 0.5
+
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
 
-def load_and_compute_invcovmat(nb_list, where_fit):
+def load_and_compute_invcovmat(nb_list, where_fit, region_list):
     if len(nb_list) == 1:
         [nb1, nb2] = nb_list[0]
         combined_LF = False
@@ -71,7 +75,13 @@ def load_and_compute_invcovmat(nb_list, where_fit):
 
     hist_i_mat = np.load(filename_hist)
 
-    return compute_invcovmat(np.log10(hist_i_mat), where_fit)
+    # Load Poisson errors
+    LF_dict = load_combined_LF(region_list, nb_list, combined_LF=False,
+                                   LF_kind='UV')
+    poisson_err = np.log10(1 + LF_dict['poisson_err'] / LF_dict['LF_boots'])
+
+
+    return compute_invcovmat(np.log10(hist_i_mat), where_fit, poisson_err)
 
 
 
@@ -133,20 +143,21 @@ def run_mcmc_fit(nb_list, region_list):
         combined_LF = True
     uv_LF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
                              LF_kind='UV')
-    LF_yerr_minus = uv_LF['LF_total_err'][0]
-    LF_yerr_plus = uv_LF['LF_total_err'][1]
-    LF_phi = uv_LF['LF_boots']
+    [yerr_up, yerr_down] = uv_LF['LF_total_err']
+    yerr_up = (yerr_up**2 + uv_LF['poisson_err']**2)**0.5
+    yerr_down = (yerr_down**2 + uv_LF['poisson_err']**2)**0.5
+    LF_phi = uv_LF['LF_total']
     LF_bins = uv_LF['LF_bins']
     
 
     # Error to use
-    yerr = (LF_yerr_plus + LF_yerr_minus) * 0.5
+    yerr = (yerr_up + yerr_down) * 0.5
     yerr[LF_phi == 0] = np.inf
 
     # In which LF bins fit
-    where_fit = np.isfinite(yerr) & (LF_bins > -27) & (LF_bins < -15)
+    where_fit = np.isfinite(yerr) & (LF_bins > -27) & (LF_bins < -15) & (uv_LF['poisson_err'] > 0)
 
-    invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit)
+    invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Mbreak', 'beta', 'gamma']
