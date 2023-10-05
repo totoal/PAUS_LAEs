@@ -112,10 +112,10 @@ def transform(theta):
     theta_trans = np.empty_like(theta)
     
     # Flat Priors
-    Phistar_range = [-7, -3]
-    Mbreak_range = [-25, -20]
-    beta_range = [-2, 3]
-    gamma_range = [1, 5]
+    Phistar_range = [-10, -1]
+    Mbreak_range = [-27, -15]
+    beta_range = [-5, 0]
+    gamma_range = [0, 5]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Mbreak_range[0] + (Mbreak_range[1] - Mbreak_range[0]) * theta[1]
@@ -214,7 +214,7 @@ def initialize_csv(filename, columns):
 
 
 if __name__ == '__main__':
-    region_list = ['W3']
+    region_list = ['W3', 'W1']
 
     nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
                [8, 10], [10, 12], [12, 14], [14, 16],
