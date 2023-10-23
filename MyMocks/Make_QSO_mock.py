@@ -22,7 +22,7 @@ with open(f'{path_to_paus_data}/paus_tcurves.pkl', 'rb') as f:
 
 
 def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
-         surname='', contaminants=False):
+         surname='', contaminants=False, train_or_test='none'):
     # Load the SDSS catalog
     filename_pm_DR16 = '/home/alberto/almacen/PAUS_data/PAUS-PHOTOSPECTRA_QSO_Superset_DR16_v2.csv'
 
@@ -94,11 +94,32 @@ def main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
     # Look for the closest source of SDSS in redshift
     out_sdss_idx_list = np.zeros(out_z_Arr.shape).astype(int)
     print('Looking for the sources in SDSS catalog')
-    # general_mask = (((z_Arr > 2.55) & (L > 40) & (EW0 > 0)) | (z_Arr <= 2.55))
     if contaminants:
         general_mask = np.ones_like(z_Arr).astype(bool)
     else:
         general_mask = (L > 40) & (EW0 > 0)
+
+    # Add extra constraint to general mask if the mock is going to be used for a ML
+    # train/test set
+    # Let's use 80% train, 20% test
+    if len(train_or_test) > 0:
+        N_sources_SDSS = len(general_mask)
+        np.random.seed(685757192)
+        rand_ids = np.random.choice(np.arange(N_sources_SDSS),
+                                    size=int(N_sources_SDSS * 0.8),
+                                    replace=False)
+
+        tt_mask = np.ones_like(general_mask).astype(bool)
+        tt_mask[rand_ids] = False
+
+        if train_or_test == 'train':
+            pass
+        elif train_or_test == 'test':
+            tt_mask = ~tt_mask
+        else:
+            raise Exception('What?')
+
+        general_mask = general_mask & tt_mask
 
     for src in range(N_src):
         if src % 500 == 0:
@@ -184,33 +205,66 @@ if __name__ == '__main__':
     zs_list = [[0., 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1.], [1., 1.25],
                [1.25, 1.5], [1.5, 1.75], [1.75, 2.], [2., 2.25], [2.25, 2.50],
                [2.50, 2.75]]
-    for z_min, z_max in zs_list:
-        r_min = 16
-        r_max = 24
-        L_min = 0
-        L_max = 0
-        area_obs = 200
-        surname = 'PAUS_contaminants_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
-             surname=surname, contaminants=True)
+    # for z_min, z_max in zs_list:
+    #     r_min = 16
+    #     r_max = 24
+    #     L_min = 0
+    #     L_max = 0
+    #     area_obs = 200
+    #     surname = 'PAUS_contaminants_2'
+    #     main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+    #          surname=surname, contaminants=True)
 
-    zs_list = [[2.25, 2.5], [2.5, 2.75], [2.75, 3],
-               [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
-    for z_min, z_max in zs_list:
-        r_min = 16
-        r_max = 24
-        L_min = 40
-        L_max = 47
-        area_obs = 400
-        surname = 'PAUS_LAES_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
-             surname=surname, contaminants=False)
+    # zs_list = [[2.25, 2.5], [2.5, 2.75], [2.75, 3],
+    #            [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
+    # for z_min, z_max in zs_list:
+    #     r_min = 16
+    #     r_max = 24
+    #     L_min = 40
+    #     L_max = 47
+    #     area_obs = 400
+    #     surname = 'PAUS_LAES_2'
+    #     main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+    #          surname=surname, contaminants=False)
 
-        r_min = 16
-        r_max = 24
-        L_min = 44
-        L_max = 47
-        area_obs = 4000
-        surname = 'PAUS_LAES_hiL_2'
-        main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
-             surname=surname, contaminants=False)
+    #     r_min = 16
+    #     r_max = 24
+    #     L_min = 44
+    #     L_max = 47
+    #     area_obs = 4000
+    #     surname = 'PAUS_LAES_hiL_2'
+    #     main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+    #          surname=surname, contaminants=False)
+
+
+    for t_or_t in ['train', 'test']:
+        for z_min, z_max in zs_list:
+            r_min = 16
+            r_max = 24
+            L_min = 0
+            L_max = 0
+            area_obs = 200
+            surname = f'PAUS_contaminants_2_{t_or_t}'
+            main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+                surname=surname, contaminants=True, train_or_test=t_or_t)
+
+        zs_list = [[2.25, 2.5], [2.5, 2.75], [2.75, 3],
+                [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
+        for z_min, z_max in zs_list:
+            r_min = 16
+            r_max = 24
+            L_min = 40
+            L_max = 47
+            area_obs = 400
+            surname = f'PAUS_LAES_2_{t_or_t}'
+            main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+                surname=surname, contaminants=False, train_or_test=t_or_t)
+
+            r_min = 16
+            r_max = 24
+            L_min = 44
+            L_max = 47
+            area_obs = 4000
+            surname = f'PAUS_LAES_hiL_2_{t_or_t}'
+            main(z_min, z_max, r_min, r_max, L_min, L_max, area_obs,
+                surname=surname, contaminants=False, train_or_test=t_or_t)

@@ -76,7 +76,7 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
     hist_i_mat = np.load(filename_hist)
 
     # Load Poisson errors
-    LF_dict = load_combined_LF(region_list, nb_list, combined_LF=False,
+    LF_dict = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
                                    LF_kind='Lya')
     poisson_err = np.log10(1 + LF_dict['poisson_err'] / LF_dict['LF_boots'])
 
