@@ -17,7 +17,7 @@ from jpasLAEs.utils import flux_to_mag
 
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
-w_central = np.array(data_tab['w_eff'])
+w_central = np.array(data_tab['w_max_trans'])
 fwhm_Arr = np.array(data_tab['fwhm'])
 
 w_lya = 1215.67
@@ -261,6 +261,8 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
     for src in src_list:
         nb_min = np.max([nb_w_rest[src] - 1, 0])
         nb_max = nb_w_rest[src] + 1
+        if nb_max == nb_min:
+            continue
 
         w = cat['err'][nb_min : nb_max, src] ** -2
         flambda_Arr[src] = np.average(cat['flx'][nb_min : nb_max, src],
