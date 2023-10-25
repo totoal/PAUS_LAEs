@@ -17,7 +17,7 @@ from jpasLAEs.utils import flux_to_mag
 
 fil_properties_dir = '/home/alberto/almacen/PAUS_data/Filter_properties.csv'
 data_tab = pd.read_csv(fil_properties_dir)
-w_central = np.array(data_tab['w_max_trans'])
+w_central = np.array(data_tab['w_eff'])
 fwhm_Arr = np.array(data_tab['fwhm'])
 
 w_lya = 1215.67

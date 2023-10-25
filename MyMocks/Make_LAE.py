@@ -12,7 +12,7 @@ import pandas as pd
 
 from scipy.integrate import simpson
 
-from my_utilities import generate_spectrum
+from .my_utilities import generate_spectrum
 
 from astropy.cosmology import Planck18 as cosmo
 import astropy.units as u

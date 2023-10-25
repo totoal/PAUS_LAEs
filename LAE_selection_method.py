@@ -196,7 +196,8 @@ def identify_lines(line_mat, flux_mat, continuum_flux,
                 continue
 
             where_detection = np.where(this_src_detections)[0]
-            line_pos = where_detection[np.argmax(flux_diff_mat[:, src][where_detection])]
+            # line_pos = where_detection[np.argmax(flux_diff_mat[:, src][where_detection])]
+            line_pos = where_detection[0]
             line_positions.append(line_pos)
 
     if not mult_lines:
@@ -371,6 +372,42 @@ def ML_LAE_class(cat, p_min=0.0, nice_col_name='nice_lya'):
     return prediction, log_p
 
 
+def ML_z_Lya_regression(cat, nice_col_name='nice_lya'):
+    '''
+    This function applies a pre-trained machine learning classifier to predict the class of a given input catalog.
+
+    Parameters:
+    cat (numpy.ndarray): The input catalog containing relevant data for classification.
+
+    Returns:
+    numpy.ndarray: An array representing the predicted classes for the input catalog.
+    '''
+    # import the classifier
+    save_dir = '/home/alberto/almacen/PAUS_data/ML_z_reg'
+    with open(f'{save_dir}/z_fit_NN_reg.sav', 'rb') as file:
+        regressor = pickle.load(file)
+
+    # Pre-processing
+    selection = cat[nice_col_name]
+    dataset = np.hstack([
+        cat['flx'][:40, selection].T * 1e17,
+        cat['r_mag'][selection].reshape(-1, 1),
+        cat['flx'][40:45, selection].T * 1e17, # BBs
+        cat['lya_NB'][selection].reshape(-1, 1),
+    ])
+
+    # Apply scaler and PCA
+    dataset[:, :40] /= np.sum(dataset[:, :40], axis=1).reshape(-1, 1)
+    dataset[:, 41:46] /= np.sum(dataset[:, 41:46], axis=1).reshape(-1, 1)
+    dataset[:, 40] /= 30
+    dataset[:, 46] /= 30
+
+    predicted_z = regressor.predict(dataset)
+
+
+    return predicted_z
+
+
 def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
                 ewmin_other=100, check_nice_z=False):
     N_sources = cat['flx'].shape[1]
@@ -417,6 +454,9 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     cat['lya_NB'] = lya_lines
     cat['other_lines_NBs'] = other_lines
     cat['lya_snr'] = snr
+
+    # cat['z_ML'] = ML_z_Lya_regression(cat)
+    cat['z_NB'][nice_lya] = ML_z_Lya_regression(cat)
 
     # Machine learning classification
     prediction, _ = ML_LAE_class(cat)
