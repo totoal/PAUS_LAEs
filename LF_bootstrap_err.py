@@ -90,7 +90,7 @@ def main(kind_surname=''):
 
         hist_mat = None
         
-        N_realizations = 100
+        N_realizations = 200
         for iter_i in range(N_realizations):
             print(f'{iter_i + 1} / {N_realizations}', end='\r')
 

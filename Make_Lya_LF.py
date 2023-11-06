@@ -115,7 +115,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     hist_i_mat = np.zeros((N_iter, N_bins))
     hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
 
-    N_boots = 50
+    N_boots = 20
     region_IDs = np.load(f'/home/alberto/almacen/PAUS_data/masks/reg_id_Arr_{field_name}.npy')
     unique_region_IDs = np.unique(region_IDs)
 
@@ -261,7 +261,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # Save a dictionary with useful data about the selection
     reduced_cat = {}
     keys_to_save = ['ref_id', 'RA', 'DEC', 'r_mag', 'lya_NB', 'EW0_lya', 'EW0_lya_err',
-                    'L_lya', 'L_lya_corr', 'L_lya_corr_err', 'class_pred']
+                    'L_lya', 'L_lya_corr', 'L_lya_corr_err', 'class_pred', 'z_NB']
     for key in keys_to_save:
         reduced_cat[key] = cat[key][..., cat['nice_lya']]
     with open(f'{LF_savedir}/selection.pkl', 'wb') as f:

@@ -455,8 +455,11 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     cat['other_lines_NBs'] = other_lines
     cat['lya_snr'] = snr
 
-    # cat['z_ML'] = ML_z_Lya_regression(cat)
-    cat['z_NB'][nice_lya] = ML_z_Lya_regression(cat)
+    z_ML = ML_z_Lya_regression(cat)
+    cat['z_ML'] = np.ones_like(cat['z_NB']) * -1
+    cat['z_ML'][nice_lya] = z_ML
+    mask_nice_z_ML = np.abs(z_Arr - cat['z_ML']) < 0.3
+    cat['z_NB'][mask_nice_z_ML] = cat['z_ML'][mask_nice_z_ML]
 
     # Machine learning classification
     prediction, _ = ML_LAE_class(cat)
