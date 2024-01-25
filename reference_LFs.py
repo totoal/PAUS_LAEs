@@ -446,7 +446,7 @@ for jj, [nb1, nb2] in enumerate(nbs_list):
     miniJPAS_LF_list[jj]['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
     miniJPAS_LF_list[jj]['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
     miniJPAS_LF_list[jj]['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
-    miniJPAS_LF_list[jj]['label'] = f'Torralba-Torregrosa+23 ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
+    miniJPAS_LF_list[jj]['label'] = f'TT23 ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
     miniJPAS_LF_list[jj]['fmt'] = 's'
     # miniJPAS_LF_list[jj]['color'] = 'r'
 
@@ -461,7 +461,7 @@ tt23_z2038['Phi'] = this_mjj_LF['LF_total']
 tt23_z2038['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
 tt23_z2038['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
 tt23_z2038['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
-tt23_z2038['label'] = f'Torralba-Torregrosa+23 ($z=2-3.8$)'
+tt23_z2038['label'] = f'TT23 ($z=2-3.8$)'
 tt23_z2038['fmt'] = 's'
 # tt23_z2038['color'] = 'r'
 
