@@ -446,7 +446,7 @@ for jj, [nb1, nb2] in enumerate(nbs_list):
     miniJPAS_LF_list[jj]['yerr_minus'] = this_mjj_LF['LF_total_err'][0]
     miniJPAS_LF_list[jj]['yerr_plus'] = this_mjj_LF['LF_total_err'][1]
     miniJPAS_LF_list[jj]['z'] = (z_NB_jpas(nb1) + z_NB_jpas(nb2)) * 0.25
-    miniJPAS_LF_list[jj]['label'] = f'miniJPAS ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
+    miniJPAS_LF_list[jj]['label'] = f'Torralba-Torregrosa+23 ($z={z_NB_jpas(nb1):0.1f}-{z_NB_jpas(nb2):0.1f}$)'
     miniJPAS_LF_list[jj]['fmt'] = 's'
     # miniJPAS_LF_list[jj]['color'] = 'r'
 
