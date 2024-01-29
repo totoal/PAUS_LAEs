@@ -259,7 +259,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
 
     src_list = np.where(cat['nice_lya'])[0]
     for src in src_list:
-        nb_min = np.max([nb_w_rest[src] - 1, 0])
+        nb_min = np.max([nb_w_rest[src] - 2, 0])
         nb_max = nb_w_rest[src] + 1
         if nb_max == nb_min:
             continue

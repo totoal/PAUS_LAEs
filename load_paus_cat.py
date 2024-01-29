@@ -77,9 +77,12 @@ def load_paus_cat(cat_paths_list):
     if 'ref_id' in tab.keys():
         ref_id_Arr = np.array(tab['ref_id'])
     else:
-        print('Warning: \'ref_id\' not found in catalog. Making up fake IDs.')
-        ref_id_Arr = (np.array(tab['alpha_j2000'] * 10000).astype(int)
-                      + np.array(tab['delta_j2000'] * 10000).astype(int) * 10000000)
+        try:
+            ref_id_Arr = np.array(tab.index)
+        except:
+            print('Warning: \'ref_id\' not found in catalog. Making up fake IDs.')
+            ref_id_Arr = (np.array(tab['alpha_j2000'] * 10000).astype(int)
+                        + np.array(tab['delta_j2000'] * 10000).astype(int) * 10000000)
 
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat

@@ -136,11 +136,12 @@ if __name__ == '__main__':
             text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
                     f'RA: {selection["RA"][sel_src]:0.2f}\n'
                     f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
-                    f'r_synth = {cat["r_mag"][cat_src]:0.1f}')
+                    f'r_synth = {cat["r_mag"][cat_src]:0.1f}\n'
+                    f'star-galaxy = {cat["sg_flag"][cat_src]}')
 
             text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
-                    f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}\AA\n'
-                    f'pred_class = {ml_class}\n'
+                    f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}' + r'\AA'
+                    f'\npred_class = {ml_class}\n'
                     f'z_NB = {selection["z_NB"][sel_src]:0.2f}')
 
             text3 = ('SDSS\n'
