@@ -1,10 +1,13 @@
 import pandas as pd
-import glob
-# import pickle
-from paus_utils import w_central, fwhm_Arr, NB_z
-from jpasLAEs.utils import flux_to_mag, mag_to_flux
 import numpy as np
-from astropy.table import Table
+
+import glob
+
+from paus_utils import fwhm_Arr, z_NB
+from lightcone_mock.read_lightcone import load_lightcone_mock
+
+from astropy.cosmology import Planck18 as cosmo
+import astropy.units as u
 
 '''
 Functions to load the mocks.
@@ -89,60 +92,47 @@ def load_sfg_mock(path_to_mock):
 
     return cat
 
-def load_gal_mock(path_to_mock, cat_fraction=1.):
+
+def load_gal_mock(directory, suffix):
     '''
-    Load galaxy mock data from a file and return a dictionary containing relevant information.
-
-    Args:
-        path_to_mock (str): The path to the mock data file.
-        cat_fraction (float, optional): The fraction of objects to select from the mock data.
-                                        Defaults to 1.0, which selects all objects.
-
-    Returns:
-        dict: A dictionary containing the following keys and corresponding values:
-            - 'flx_0': A 2D NumPy array representing the flux data from the mock file.
-                       The array shape is (N, M), where N is the number of selected objects and M is the number of filters.
-                       Flux values are converted from magnitudes using central wavelengths.
-            - 'zspec': A NumPy array representing the spectroscopic redshifts of the selected objects.
-            - 'L_lya_spec': A NumPy array representing the Lyman-alpha luminosities of the selected objects.
-            - 'EW0_lya_spec': A NumPy array representing the Lyman-alpha equivalent widths of the selected objects.
+    Previous version substituted with this one.
     '''
-    tab = Table.read(path_to_mock).to_pandas().to_numpy()
-    mock_size = len(tab)
+    return load_lightcone_mock(directory, suffix)
 
-    np.random.seed(1312)
-    sel = np.random.choice(np.arange(mock_size),
-                           int(mock_size * cat_fraction),
-                           replace=False)
-    
-    cat = {}
+def add_artifacts(mock, min_fake_L_lya=43.5, max_fake_L_lya=46,
+                  nb_min=0, nb_max=18):
+    '''
+    Adds random fluxes to random NBs in a mock catalog to simulate
+    cosmic rays and artifacts.
+    '''
+    N_sources = mock['flx_0'].shape[1]
 
-    cat['flx_0'] = mag_to_flux(tab[sel, 11 : 11 + 40],
-                                    w_central[:-6]).T
+    random_fake_L_Lya = np.random.uniform(min_fake_L_lya, max_fake_L_lya,
+                                          size=N_sources)
+    random_NB_idx = np.random.randint(nb_min, nb_max + 1, size=N_sources)
 
-    # Add BBs
-    cat['flx_0'] = np.vstack([cat['flx_0'],
-                             mag_to_flux(tab[sel, 11 + 40 : 11 + 40 + 5].T,
-                                         w_central[-6:-1].reshape(-1,1)),
-                             np.zeros(len(sel))])
+    fake_NB_redshift = z_NB(random_NB_idx)
+    fake_lumdist = cosmo.luminosity_distance(fake_NB_redshift).to(u.cm).value
 
-    # Precompute r and mask by r. Otherwise the mock is too large
-    r_mag = flux_to_mag(cat['flx_0'][-4], w_central[-4])
-    i_mag = flux_to_mag(cat['flx_0'][-3], w_central[-3])
-    mag_mask = np.array(r_mag < 24.3) & np.array(i_mag < 23.3)
-    cat['flx_0'] = cat['flx_0'][:, mag_mask]
+    artifact_Flux_Arr = 10**random_fake_L_Lya / (4 * np.pi * fake_lumdist**2)
 
-    cat['zspec'] = np.array(tab[:, 4])[sel][mag_mask]
-    
-    # L_lya and EW0_lya are zero for all these objects.
-    cat['L_lya_spec'] = np.zeros_like(cat['zspec'])
-    cat['EW0_lya_spec'] = np.zeros_like(cat['zspec'])
+    for src in range(N_sources):
+        this_NB = random_NB_idx[src]
+        this_F = artifact_Flux_Arr[src]
 
-    return cat
+        mock['flx_0'][this_NB, src] += this_F / fwhm_Arr[this_NB]
+
+    # Add two columns with introduced artifact info.
+    mock['fake_L_lya'] = random_fake_L_Lya
+    mock['artifact_NB'] = random_NB_idx
+
+    return mock
+
 
 
 def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
-                    mock_QSO_LAEs_hiL_path, mock_GAL_path, gal_fraction=1.):
+                    mock_QSO_LAEs_hiL_path, mock_GAL_dir, mock_GAL_suff,
+                    gal_fraction=1.):
     '''
     Loads all the mocks needed to compute the Lya LF corrections, and returns
     a dictionary of mocks.
@@ -151,7 +141,7 @@ def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
                       mock_QSO_cont_path,
                       mock_QSO_LAEs_loL_path,
                       mock_QSO_LAEs_hiL_path,
-                      mock_GAL_path]
+                      (mock_GAL_dir, mock_GAL_suff)]
     mock_name_list = ['SFG', 'QSO_cont', 'QSO_LAEs_loL', 'QSO_LAEs_hiL',
                    'GAL']
 
@@ -162,7 +152,7 @@ def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
         elif i > 0 and i < 4:
             mock_dict[mock_name] = load_qso_mock(mock_path)
         elif i == 4:
-            mock_dict[mock_name] = load_gal_mock(mock_path, gal_fraction)
+            mock_dict[mock_name] = load_gal_mock(*mock_path)
 
     return mock_dict
 
