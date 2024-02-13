@@ -27,6 +27,15 @@ def load_paus_cat(cat_paths_list):
 
     tab = pd.concat([pd_read_func(path) for path in cat_paths_list])
 
+    # Read class star from a different file
+    class_star = pd.DataFrame()
+    for path in cat_paths_list:
+        class_star_filename = f'{path.split('/')[-1][:15]}_class_star.csv'
+        class_star_path = '/'.join(path.split('/')[:-1]) + f'/{class_star_filename}'
+        class_star = pd.concat([class_star,
+                                pd.read_csv(class_star_path, index_col=0)])
+    tab = tab.merge(class_star, on='ref_id', how='left')
+
     # Stack the NBs and BBs
     flx_mat = np.array([]).reshape(0, len(tab))
     flx_err_mat = np.array([]).reshape(0, len(tab))
@@ -92,6 +101,7 @@ def load_paus_cat(cat_paths_list):
     cat['NB_number'] = measured_NBs
     cat['RA'] = np.array(tab['alpha_j2000'])
     cat['DEC'] = np.array(tab['delta_j2000'])
+    cat['class_star'] = np.array(tab['class_star'])
     
     if 'sg_flag' in tab.keys():
         star_flag_name = 'sg_flag'
