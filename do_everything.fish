@@ -14,16 +14,16 @@ for nb in $nb_list
     # check_py_exception
     /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
     check_py_exception
-    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
-    check_py_exception
+    # /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
+    # check_py_exception
 end
 
-py LF_bootstrap_err.py "combi"
+# py LF_bootstrap_err.py "combi"
 
-for i in (seq 0 18)
-    set nb "$i $i"
-    /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
-    check_py_exception
-    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
-    check_py_exception
-end
+# for i in (seq 0 18)
+#     set nb "$i $i"
+#     /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
+#     check_py_exception
+#     /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
+#     check_py_exception
+# end
