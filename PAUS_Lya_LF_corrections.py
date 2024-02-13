@@ -287,10 +287,11 @@ def main(nb_min, nb_max, r_min, r_max):
     mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
     mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
     mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
-    mock_GAL_path = '/home/alberto/almacen/PAUS_data/catalogs/LightCone_mock.fits'
+    mock_GAL_dir = "/home/alberto/almacen/PAUS_data/20240207_mock_data_with_FluxLines_columns_MR_150vols_3x3deg_z0-5"  # path where the data is store
+    mock_GAL_suff = "_magCut[PAUS_BBF_i_25]_LC_chunks[0-150].npy"
     mock_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
-                                 mock_GAL_path, gal_fraction=gal_fraction)
+                                 mock_GAL_dir, mock_GAL_suff, gal_fraction=gal_fraction)
 
     # State the mock area in deg²:
     area_dict = {
