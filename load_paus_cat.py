@@ -36,6 +36,11 @@ def load_paus_cat(cat_paths_list):
                                 pd.read_csv(class_star_path, index_col=0)])
     tab = tab.merge(class_star, on='ref_id', how='left')
 
+    # Check if there's a "mask" column
+    if 'mask' in tab.keys():
+        tab = tab[(tab['mask'].values & 16412) == 0]
+    print(f'Parent catalog length: {len(tab)}')
+
     # Stack the NBs and BBs
     flx_mat = np.array([]).reshape(0, len(tab))
     flx_err_mat = np.array([]).reshape(0, len(tab))
