@@ -262,9 +262,9 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     reduced_cat = {}
     keys_to_save = ['ref_id', 'RA', 'DEC', 'r_mag', 'lya_NB', 'EW0_lya', 'EW0_lya_err',
                     'L_lya', 'L_lya_corr', 'L_lya_corr_err', 'class_pred', 'z_NB',
-                    'class_star']
+                    'class_star', 'nice_lya', 'nice_ml', 'nice_color']
     for key in keys_to_save:
-        reduced_cat[key] = cat[key][..., cat['nice_lya']]
+        reduced_cat[key] = cat[key][..., cat['nice_lya_0']]
     with open(f'{LF_savedir}/selection.pkl', 'wb') as f:
         pickle.dump(reduced_cat, f)
 
