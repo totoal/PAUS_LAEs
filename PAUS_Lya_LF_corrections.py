@@ -274,6 +274,7 @@ def compute_LF_corrections(mock_dict, field_name,
         reduced_mock_dict[mock_name] = {}
         for key in keys_to_save:
             reduced_mock_dict[mock_name][key] = mock_dict[mock_name][key]
+
     with open(f'{savedir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'wb') as f:
         pickle.dump(reduced_mock_dict, f)
 
@@ -287,11 +288,12 @@ def main(nb_min, nb_max, r_min, r_max):
     mock_QSO_cont_path = f'{source_cats_dir}/QSO_PAUS_contaminants_2'
     mock_QSO_LAEs_loL_path = f'{source_cats_dir}/QSO_PAUS_LAES_2'
     mock_QSO_LAEs_hiL_path = f'{source_cats_dir}/QSO_PAUS_LAES_hiL_2'
-    mock_GAL_dir = "/home/alberto/almacen/PAUS_data/20240207_mock_data_with_FluxLines_columns_MR_150vols_3x3deg_z0-5"  # path where the data is store
-    mock_GAL_suff = "_magCut[PAUS_BBF_i_25]_LC_chunks[0-150].npy"
+    mock_GAL_dir = '/home/alberto/almacen/PAUS_data/Dani_Lightcone/columns'  # path where the data is store
+    mock_GAL_suff = '_magCut[PAUS_BBF_i_25]_LC_chunks[0-511].npy'
     mock_dict = load_mock_dict(mock_SFG_path, mock_QSO_cont_path,
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
-                                 mock_GAL_dir, mock_GAL_suff, gal_fraction=gal_fraction)
+                                 mock_GAL_dir, mock_GAL_suff, gal_fraction=gal_fraction,
+                                 load_artifact_mock=False)
 
     # State the mock area in deg²:
     area_dict = {
@@ -299,7 +301,8 @@ def main(nb_min, nb_max, r_min, r_max):
         'QSO_cont': 200,
         'QSO_LAEs_loL': 400,
         'QSO_LAEs_hiL': 4000,
-        'GAL': 59.97 * gal_fraction
+        'GAL': 59.97 * gal_fraction,
+        'GAL_artifact': 59.97 * gal_fraction
     }
 
     for mock_name, area in area_dict.items():
@@ -307,6 +310,7 @@ def main(nb_min, nb_max, r_min, r_max):
 
     # List of PAUS fields
     field_list = ['W1', 'W2', 'W3']
+    # field_list = ['W3']
     for field_name in field_list:
         print(f'Field: {field_name}')
         print('----------------------')

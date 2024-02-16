@@ -146,6 +146,11 @@ def load_lightcone_mock(directory, suffix):
     # L_lya and EW0_lya are zero for all these objects.
     OUT['L_lya_spec'] = np.zeros_like(OUT['zspec'])
     OUT['EW0_lya_spec'] = np.zeros_like(OUT['zspec'])
+
+    #### Use Dust uncorrected OII ####
+    # pm_flx_lc = M_Arr_to_pm_flx(lc['ObsMagDustLine'], z, xx, yy, zz)
+    # pm_flx_c = M_Arr_to_pm_flx(lc['ObsMagDustNoLine'], z, xx, yy, zz)
+    # pm_flx_l = pm_flx_lc - pm_flx_c
     
     return OUT
 

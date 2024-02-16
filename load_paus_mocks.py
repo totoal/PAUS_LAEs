@@ -132,7 +132,7 @@ def add_artifacts(mock, min_fake_L_lya=43.5, max_fake_L_lya=46,
 
 def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
                     mock_QSO_LAEs_hiL_path, mock_GAL_dir, mock_GAL_suff,
-                    gal_fraction=1.):
+                    gal_fraction=1., load_artifact_mock=False):
     '''
     Loads all the mocks needed to compute the Lya LF corrections, and returns
     a dictionary of mocks.
@@ -153,6 +153,9 @@ def load_mock_dict(mock_SFG_path, mock_QSO_cont_path, mock_QSO_LAEs_loL_path,
             mock_dict[mock_name] = load_qso_mock(mock_path)
         elif i == 4:
             mock_dict[mock_name] = load_gal_mock(*mock_path)
+
+    if load_artifact_mock:
+        mock_dict['GAL_artifact'] = add_artifacts(load_gal_mock(mock_GAL_dir, mock_GAL_suff))
 
     return mock_dict
 
