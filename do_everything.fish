@@ -15,13 +15,13 @@ for nb in $nb_list
 end
 
 for nb in $nb_list
-    /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb &
+    /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
     check_py_exception
 end
 wait
 
 for nb in $nb_list
-    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb &
+    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
     check_py_exception
 end
 wait
@@ -30,13 +30,13 @@ py LF_bootstrap_err.py "combi"
 
 for i in (seq 0 18)
     set nb "$i $i"
-    /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb &
+    /home/alberto/cosmos/PAUS_LAEs/Make_Lya_LF.py $nb
     check_py_exception
 end
 wait
 
 for i in (seq 0 18)
     set nb "$i $i"
-    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb &
+    /home/alberto/cosmos/PAUS_LAEs/LF_bootstrap_err.py $nb
     check_py_exception
 end

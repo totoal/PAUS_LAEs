@@ -361,13 +361,15 @@ def ML_LAE_class(cat, p_min=0.0, nice_col_name='nice_lya'):
     for src in range(len(prediction)):
         if prediction[src] == 4:
             pred_i = 2
+        elif prediction[src] == 5:
+            pred_i = 3
         else:
             pred_i = prediction[src] - 1
 
         class_log_p = log_p[src, pred_i]
         if p_min > 0:
             if class_log_p < np.log(p_min):
-                prediction[src] = 5
+                prediction[src] = 6
 
     return prediction, log_p
 
