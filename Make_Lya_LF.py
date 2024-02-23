@@ -1,6 +1,6 @@
 #!/home/alberto/miniconda3/bin/python3
 
-from load_paus_mocks import add_errors, load_mock_dict
+# from load_paus_mocks import add_errors, load_mock_dict
 from load_paus_cat import load_paus_cat
 
 import numpy as np
@@ -66,7 +66,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
-                  N_iter=500, N_boots=5):
+                  N_iter=200, N_boots=20):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
@@ -115,7 +115,6 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     hist_i_mat = np.zeros((N_iter, N_bins))
     hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
 
-    N_boots = 20
     region_IDs = np.load(f'/home/alberto/almacen/PAUS_data/masks/reg_id_Arr_{field_name}.npy')
     unique_region_IDs = np.unique(region_IDs)
 

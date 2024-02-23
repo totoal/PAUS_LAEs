@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
         # Load selection
         save_to_path = '/home/alberto/almacen/PAUS_data/catalogs/'
-        selection = pd.read_csv(f'{save_to_path}/LAE_selection.tsv', sep='\t')
+        selection = pd.read_csv(f'{save_to_path}/LAE_selection_vi.csv')
 
         # Directory of the spectra .fits files
         fits_dir = '/home/alberto/almacen/SDSS_spectra_fits/DR16/QSO'
@@ -66,17 +66,19 @@ if __name__ == '__main__':
             try:
                 cat_src = np.where(refid == cat['ref_id'])[0][0]
             except:
-                print(f'{refid=} not found.')
+                print(f'{refid=} not found in {field_name}.')
                 continue
             flx = cat['flx'][:, cat_src]
             err = cat['err'][:, cat_src]
             r_synth_mag = synth_BB_flx[cat_src]
             cat['r_mag'] = flux_to_mag(synth_BB_flx, w_central[-4])
 
-            fig = plt.figure(figsize=(16, 4))
+            fig, axes = plt.subplots(1, 3, figsize=(16, 4),
+                                   width_ratios=[0.7, 0.15, 0.15])
 
             #### Plot the P-spectra ####
-            ax = plot_PAUS_source(flx, err, set_ylim=True)
+            ax = axes[0]
+            plot_PAUS_source(flx, err, set_ylim=True, ax=ax)
 
             #### Mark the selected NB ####
             ax.axvline(w_lya * (selection['z_NB'][sel_src] + 1),
@@ -85,7 +87,7 @@ if __name__ == '__main__':
             #### Plot SDSS spectrum if available ####
             plate = selection['plate'][sel_src]
             mjd = selection['mjd'][sel_src]
-            fiber = selection['fiberid'][sel_src]
+            fiber = selection['fiber'][sel_src]
             spec_name = f'spec-{plate:04d}-{mjd:05d}-{fiber:04d}.fits'
             print(spec_name)
             spec_bool = True
@@ -146,7 +148,7 @@ if __name__ == '__main__':
 
             text3 = ('SDSS\n'
                     f'MJD: {selection["mjd"][sel_src]}\n'
-                    f'fiber: {selection["fiberid"][sel_src]}\n'
+                    f'fiber: {selection["fiber"][sel_src]}\n'
                     f'plate: {selection["plate"][sel_src]}\n'
                     f'L_lya = {selection["L_lya_SDSS"][sel_src]:0.2f}\n'
                     f'z_spec = {selection["z_best"][sel_src]:0.2f}')
@@ -173,3 +175,5 @@ if __name__ == '__main__':
             fig.savefig(f'{fig_save_dir}/{subfolder}/{savename}',
                         pad_inches=0.1, bbox_inches='tight', facecolor='w')
             plt.close()
+
+        break

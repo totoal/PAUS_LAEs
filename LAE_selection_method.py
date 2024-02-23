@@ -473,11 +473,11 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     class_pred = np.ones_like(nice_lya).astype(int) * -1
     class_mask[nice_lya] = prediction == 2 # 2 for LAEs
     class_pred[nice_lya] = prediction
-    nice_lya = nice_lya & class_mask
     
     # Update cat
     cat['nice_lya_0'] = np.copy(cat['nice_lya'])
-    cat['nice_lya'] = nice_lya & color_mask & ml_mask
+    cat['nice_lya'] = nice_lya & color_mask & ml_mask & class_mask
+    # cat['nice_lya'] = nice_lya & color_mask & ml_mask
     cat['class_pred'] = class_pred
 
     if check_nice_z:

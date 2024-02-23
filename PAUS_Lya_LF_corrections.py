@@ -294,6 +294,7 @@ def main(nb_min, nb_max, r_min, r_max):
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_dir, mock_GAL_suff, gal_fraction=gal_fraction,
                                  load_artifact_mock=False)
+                                #  load_artifact_mock=True)
 
     # State the mock area in deg²:
     area_dict = {
