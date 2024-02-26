@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 matplotlib.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams.update({'font.size': 16})
+import matplotlib.gridspec as gridspec
 
 import numpy as np
 
@@ -17,10 +18,15 @@ from paus_utils import w_central, plot_PAUS_source
 from jpasLAEs.utils import flux_to_mag, mag_to_flux, rebin_1d_arr
 
 from astropy.table import Table
+from astropy.io import fits
+from astropy.visualization import ZScaleInterval
 
 w_lya = 1215.67
 w_CIV = 1549.48
 w_CIII = 1908.734
+
+cutouts_dir = '/home/alberto/almacen/PAUS_data/cutouts'
+NB_wav_Arr = np.arange(455, 855, 10).astype(int)
 
 def nanomaggie_to_flux(nmagg, wavelength):
     mAB = -2.5 * np.log10(nmagg * 1e-9)
@@ -73,11 +79,11 @@ if __name__ == '__main__':
             r_synth_mag = synth_BB_flx[cat_src]
             cat['r_mag'] = flux_to_mag(synth_BB_flx, w_central[-4])
 
-            fig, axes = plt.subplots(1, 3, figsize=(16, 4),
-                                   width_ratios=[0.7, 0.15, 0.15])
+            fig = plt.figure(figsize=(16, 7))
+            gs = gridspec.GridSpec(2, 6, figure=fig)
 
             #### Plot the P-spectra ####
-            ax = axes[0]
+            ax = fig.add_subplot(gs[:, :4])
             plot_PAUS_source(flx, err, set_ylim=True, ax=ax)
 
             #### Mark the selected NB ####
@@ -139,7 +145,7 @@ if __name__ == '__main__':
                     f'RA: {selection["RA"][sel_src]:0.2f}\n'
                     f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
                     f'r_synth = {cat["r_mag"][cat_src]:0.1f}\n'
-                    f'star-galaxy = {cat["sg_flag"][cat_src]}')
+                    f'class_star = {cat["class_star"][cat_src]:0.2f}')
 
             text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
                     f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}' + r'\AA'
@@ -150,8 +156,8 @@ if __name__ == '__main__':
                     f'MJD: {selection["mjd"][sel_src]}\n'
                     f'fiber: {selection["fiber"][sel_src]}\n'
                     f'plate: {selection["plate"][sel_src]}\n'
-                    f'L_lya = {selection["L_lya_SDSS"][sel_src]:0.2f}\n'
-                    f'z_spec = {selection["z_best"][sel_src]:0.2f}')
+                    # f'L_lya = {selection["L_lya_SDSS"][sel_src]:0.2f}\n'
+                    f'z_spec = {selection["z_spec"][sel_src]:0.2f}')
 
             text_to_plot = [[3500, text1],
                             [5500, text2],
@@ -164,6 +170,58 @@ if __name__ == '__main__':
             for w in [w_CIV, w_CIII]:
                 ax.axvline(w * (1 + selection['z_NB'][sel_src]),
                         ls=':', color='dimgray')
+
+            #########################################
+            ax_NB_img = fig.add_subplot(gs[0, 4])
+            ax_NB_wht = fig.add_subplot(gs[0, 5])
+            ax_r_img = fig.add_subplot(gs[1, 4])
+            ax_r_wht = fig.add_subplot(gs[1, 5])
+
+            # Load NB cutout
+            lya_NB = int(selection['lya_NB'][sel_src])
+            ref_id = int(selection['ref_id'][sel_src])
+            NB_int_wav = NB_wav_Arr[lya_NB]
+
+            cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
+            cutout = fits.open(cutout_path)
+            cutout_img = cutout[0].data[8 : -8, 8 : -8]
+            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            ax_NB_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                             rasterized=True, interpolation='nearest')
+
+            cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.fits'
+            cutout = fits.open(cutout_path)
+            cutout_img = cutout[0].data[8 : -8, 8 : -8]
+            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            ax_r_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                             rasterized=True, interpolation='nearest')
+
+            cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.weight.fits'
+            cutout = fits.open(cutout_path)
+            cutout_img = cutout[0].data[8 : -8, 8 : -8]
+            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            ax_NB_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                             rasterized=True, interpolation='nearest')
+
+            cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.weight.fits'
+            cutout = fits.open(cutout_path)
+            cutout_img = cutout[0].data[8 : -8, 8 : -8]
+            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            ax_r_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                             rasterized=True, interpolation='nearest')
+
+            for ax in [ax_NB_img, ax_NB_wht, ax_r_img, ax_r_wht]:
+                ax.set_yticks([])
+                ax.set_xticks([])
+
+                # Add circumference showing aperture 3arcsec diameter
+                aper_r_px = 1.5 / 0.2645
+                circ1 = plt.Circle(np.array(cutout_img.shape).T / 2,
+                                radius=aper_r_px, ec='r', fc='none')
+                circ2 = plt.Circle(np.array(cutout_img.shape).T / 2,
+                                radius=aper_r_px, ec='r', fc='none')
+                ax.add_patch(circ1)
+                ax.add_patch(circ2)
 
             #########################################
 
