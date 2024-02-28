@@ -37,7 +37,7 @@ def nanomaggie_to_flux(nmagg, wavelength):
 if __name__ == '__main__':
     # Load the PAUS cat
 
-    for field_name in  ['W3', 'W2', 'W1']:
+    for field_name in  ['W2', 'W3', 'W1']:
         path_to_cat = [f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_3arcsec_{field_name}_extinction_corrected.pq']
         cat = load_paus_cat(path_to_cat)
 
@@ -185,28 +185,28 @@ if __name__ == '__main__':
             cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
             cutout = fits.open(cutout_path)
             cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
             ax_NB_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
                              rasterized=True, interpolation='nearest')
 
             cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.fits'
             cutout = fits.open(cutout_path)
             cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
             ax_r_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
                              rasterized=True, interpolation='nearest')
 
             cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.weight.fits'
             cutout = fits.open(cutout_path)
             cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
             ax_NB_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
                              rasterized=True, interpolation='nearest')
 
             cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.weight.fits'
             cutout = fits.open(cutout_path)
             cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.3).get_limits(cutout_img.flatten())
+            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
             ax_r_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
                              rasterized=True, interpolation='nearest')
 
@@ -233,5 +233,3 @@ if __name__ == '__main__':
             fig.savefig(f'{fig_save_dir}/{subfolder}/{savename}',
                         pad_inches=0.1, bbox_inches='tight', facecolor='w')
             plt.close()
-
-        break

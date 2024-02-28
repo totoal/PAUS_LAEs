@@ -18,6 +18,7 @@ def paus_flux_units(paus_flx, w):
 
 def load_paus_cat(cat_paths_list):
     extension = cat_paths_list[0].split('.')[-1]
+    field_name = cat_paths_list[0].split('_')[3]
     if extension == 'pq':
         pd_read_func = pd.read_parquet
     elif extension == 'csv':
@@ -38,7 +39,15 @@ def load_paus_cat(cat_paths_list):
 
     # Check if there's a "mask" column
     if 'mask' in tab.keys():
-        tab = tab[(tab['mask'].values & 16412) == 0]
+        field_mask = (tab['mask'].values & 16412) == 0
+    else:
+        field_mask = np.ones(len(tab)).astype(bool)
+    
+    # Load mask to remove objects with 3 arcsec neighbors
+    mask_3arcsec_blended = np.load(f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_{field_name}_mask_3arcsec_separation.npy')
+
+    tab = tab[field_mask & ~mask_3arcsec_blended]
+
     print(f'Parent catalog length: {len(tab)}')
 
     # Stack the NBs and BBs
