@@ -116,8 +116,6 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     hist_i_mat_M = np.zeros((N_iter, N_bins_UV - 1))
 
     region_IDs = np.load(f'/home/alberto/almacen/PAUS_data/masks/reg_id_Arr_{field_name}.npy')
-    mask_3arcsec_blended = np.load(f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_{field_name}_mask_3arcsec_separation.npy')
-    region_IDs = region_IDs[mask_3arcsec_blended]
     unique_region_IDs = np.unique(region_IDs)
 
     for boot_i in range(N_boots + 1):

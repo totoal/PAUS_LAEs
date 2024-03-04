@@ -14,8 +14,9 @@ import numpy as np
 import pandas as pd
 
 from load_paus_cat import load_paus_cat
-from paus_utils import w_central, plot_PAUS_source
+from paus_utils import w_central, plot_PAUS_source, z_NB
 from jpasLAEs.utils import flux_to_mag, mag_to_flux, rebin_1d_arr
+from LAE_selection_method import estimate_continuum
 
 from astropy.table import Table
 from astropy.io import fits
@@ -37,7 +38,7 @@ def nanomaggie_to_flux(nmagg, wavelength):
 if __name__ == '__main__':
     # Load the PAUS cat
 
-    for field_name in  ['W2', 'W3', 'W1']:
+    for field_name in  ['W3', 'W2', 'W1']:
         path_to_cat = [f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_3arcsec_{field_name}_extinction_corrected.pq']
         cat = load_paus_cat(path_to_cat)
 
@@ -58,6 +59,11 @@ if __name__ == '__main__':
         # Load selection
         save_to_path = '/home/alberto/almacen/PAUS_data/catalogs/'
         selection = pd.read_csv(f'{save_to_path}/LAE_selection_vi.csv')
+        selection = selection[selection['nice_lya']].reset_index(drop=True)
+        print(f'{len(selection)=}')
+
+        cont_est, cont_err = estimate_continuum(cat['flx'], cat['err'],
+                                                IGM_T_correct=True, N_nb=6)
 
         # Directory of the spectra .fits files
         fits_dir = '/home/alberto/almacen/SDSS_spectra_fits/DR16/QSO'
@@ -85,6 +91,8 @@ if __name__ == '__main__':
             #### Plot the P-spectra ####
             ax = fig.add_subplot(gs[:, :4])
             plot_PAUS_source(flx, err, set_ylim=True, ax=ax)
+            ax.errorbar(w_central[:35], cont_est[:35, cat_src] * 1e17,
+                        yerr=cont_err[:35, cat_src] * 1e17)
 
             #### Mark the selected NB ####
             ax.axvline(w_lya * (selection['z_NB'][sel_src] + 1),
@@ -130,6 +138,7 @@ if __name__ == '__main__':
 
             # Define the ML predicted class
             cl_num = selection["class_pred"][sel_src]
+            lya_NB = int(selection['lya_NB'][sel_src])
             if cl_num == 1:
                 ml_class = 'QSO Cont.'
             elif cl_num == 2:
@@ -140,17 +149,25 @@ if __name__ == '__main__':
                 ml_class = '?'
             else:
                 raise Exception(f'I don\'t know this class: {cl_num}')
+                
+            # Signal to noise BBs
+            SN_u = flx[-6] / err[-6]
+            SN_g = flx[-5] / err[-5]
+            SN_r = flx[-4] / err[-4]
+            SN_i = flx[-3] / err[-3]
 
             text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
                     f'RA: {selection["RA"][sel_src]:0.2f}\n'
                     f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
                     f'r_synth = {cat["r_mag"][cat_src]:0.1f}\n'
-                    f'class_star = {cat["class_star"][cat_src]:0.2f}')
+                    f'class_star = {cat["class_star"][cat_src]:0.2f}\n'
+                    f'S/N(u, g, r) = {SN_u:0.1f}, {SN_g:0.1f}, {SN_r:0.1f}, {SN_i:0.1f}')
 
             text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
                     f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}' + r'\AA'
                     f'\npred_class = {ml_class}\n'
-                    f'z_NB = {selection["z_NB"][sel_src]:0.2f}')
+                    f'lya_NB = {lya_NB}\n'
+                    f'z_phot = {selection["z_NB"][sel_src]:0.2f}')
 
             text3 = ('SDSS\n'
                     f'MJD: {selection["mjd"][sel_src]}\n'
@@ -167,9 +184,16 @@ if __name__ == '__main__':
 
             
             # Draw CIV and CIII positions
-            for w in [w_CIV, w_CIII]:
-                ax.axvline(w * (1 + selection['z_NB'][sel_src]),
-                        ls=':', color='dimgray')
+            for linename, w in {'LyC': 912., 'CIV': w_CIV, 'CIII': w_CIII}.items():
+                this_w_obs = w * (1 + selection['z_NB'][sel_src])
+                if this_w_obs > 4000 and this_w_obs < 9000:
+                    ax.axvline(this_w_obs,
+                               ls=':', color='dimgray')
+                    ax.text(this_w_obs + 10, ax.get_ylim()[0] * 1.1,
+                            linename)
+            # Lya NB
+            ax.axvline(w_lya * (1 + z_NB(selection['lya_NB'][sel_src])),
+                    ls=':', color='dimgray')
 
             #########################################
             ax_NB_img = fig.add_subplot(gs[0, 4])
@@ -178,50 +202,53 @@ if __name__ == '__main__':
             ax_r_wht = fig.add_subplot(gs[1, 5])
 
             # Load NB cutout
-            lya_NB = int(selection['lya_NB'][sel_src])
-            ref_id = int(selection['ref_id'][sel_src])
-            NB_int_wav = NB_wav_Arr[lya_NB]
+            try:
+                lya_NB = int(selection['lya_NB'][sel_src])
+                ref_id = int(selection['ref_id'][sel_src])
+                NB_int_wav = NB_wav_Arr[lya_NB]
 
-            cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
-            cutout = fits.open(cutout_path)
-            cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-            ax_NB_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
-                             rasterized=True, interpolation='nearest')
+                cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
+                cutout = fits.open(cutout_path)
+                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
+                ax_NB_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                                rasterized=True, interpolation='nearest')
 
-            cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.fits'
-            cutout = fits.open(cutout_path)
-            cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-            ax_r_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
-                             rasterized=True, interpolation='nearest')
+                cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.fits'
+                cutout = fits.open(cutout_path)
+                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
+                ax_r_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                                rasterized=True, interpolation='nearest')
 
-            cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.weight.fits'
-            cutout = fits.open(cutout_path)
-            cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-            ax_NB_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
-                             rasterized=True, interpolation='nearest')
+                cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.weight.fits'
+                cutout = fits.open(cutout_path)
+                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
+                ax_NB_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                                rasterized=True, interpolation='nearest')
 
-            cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.weight.fits'
-            cutout = fits.open(cutout_path)
-            cutout_img = cutout[0].data[8 : -8, 8 : -8]
-            [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-            ax_r_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
-                             rasterized=True, interpolation='nearest')
+                cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.weight.fits'
+                cutout = fits.open(cutout_path)
+                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
+                ax_r_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                                rasterized=True, interpolation='nearest')
 
-            for ax in [ax_NB_img, ax_NB_wht, ax_r_img, ax_r_wht]:
-                ax.set_yticks([])
-                ax.set_xticks([])
+                for ax in [ax_NB_img, ax_NB_wht, ax_r_img, ax_r_wht]:
+                    ax.set_yticks([])
+                    ax.set_xticks([])
 
-                # Add circumference showing aperture 3arcsec diameter
-                aper_r_px = 1.5 / 0.2645
-                circ1 = plt.Circle(np.array(cutout_img.shape).T / 2,
-                                radius=aper_r_px, ec='r', fc='none')
-                circ2 = plt.Circle(np.array(cutout_img.shape).T / 2,
-                                radius=aper_r_px, ec='r', fc='none')
-                ax.add_patch(circ1)
-                ax.add_patch(circ2)
+                    # Add circumference showing aperture 3arcsec diameter
+                    aper_r_px = 1.5 / 0.2645
+                    circ1 = plt.Circle(np.array(cutout_img.shape).T / 2,
+                                    radius=aper_r_px, ec='r', fc='none')
+                    circ2 = plt.Circle(np.array(cutout_img.shape).T / 2,
+                                    radius=aper_r_px, ec='r', fc='none')
+                    ax.add_patch(circ1)
+                    ax.add_patch(circ2)
+            except:
+                print('NO IMAGES FOR THIS ONE')
 
             #########################################
 

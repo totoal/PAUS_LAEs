@@ -206,7 +206,8 @@ def identify_lines(line_mat, flux_mat, continuum_flux,
     return line_positions
 
 
-def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
+def nice_lya_select(lya_lines, other_lines, pm_flx, pm_err,
+                    z_Arr, mask=None):
     '''
     Apply selection criteria to a list of Lyman-alpha (Lya) line candidates.
 
@@ -269,6 +270,9 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
     # NBs: 16-18
     mask_llines = (lya_lines >= 16) & (lya_lines <= 18)
     color_aux[mask_llines] = ((gr > 1.12) & (ug > 0.31))[mask_llines]
+    # NBs: >18
+    mask_llines = (lya_lines > 18)
+    color_aux[mask_llines] = ((gr > 1.12) & (pm_flx[-6] / pm_err[-6] < 3))[mask_llines]
 
 
     N_sources = pm_flx.shape[1]
@@ -308,7 +312,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
                 mlines_mask[src] = False
                 break
 
-        if len(other_lines[src]) > 1:
+        if len(other_lines[src]) > 1 and lya_lines[src] < 18:
             pass
         else:
             good_colors = color_aux[src]
@@ -317,7 +321,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, z_Arr, mask=None):
                 color_mask[src] = False
 
     # Define nice_lya
-    nice_lya = (lya_lines >= 0) # & color_mask & mlines_mask
+    nice_lya = (lya_lines >= 0)
     if mask is not None:
         nice_lya = nice_lya & mask
 
@@ -445,7 +449,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
         & (cat['r_mag'] >= r_min) & (cat['r_mag'] <= r_max)
 
     nice_lya, color_mask, ml_mask =\
-        nice_lya_select(lya_lines, other_lines, cat['flx'],
+        nice_lya_select(lya_lines, other_lines, cat['flx'], cat['err'],
                         z_Arr, mask=nice_lya_mask)
 
     # Add columns to cat
@@ -473,10 +477,16 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     class_pred = np.ones_like(nice_lya).astype(int) * -1
     class_mask[nice_lya] = prediction == 2 # 2 for LAEs
     class_pred[nice_lya] = prediction
+
+    # Mask based on class_star if not mock
+    if check_nice_z:
+        class_star_mask = np.ones_like(nice_lya).astype(bool)
+    else:
+        class_star_mask = cat['class_star'] > -1
     
     # Update cat
     cat['nice_lya_0'] = np.copy(cat['nice_lya'])
-    cat['nice_lya'] = nice_lya & color_mask & ml_mask & class_mask
+    cat['nice_lya'] = nice_lya & color_mask & ml_mask & class_mask & class_star_mask
     # cat['nice_lya'] = nice_lya & color_mask & ml_mask
     cat['class_pred'] = class_pred
 
