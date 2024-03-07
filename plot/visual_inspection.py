@@ -21,12 +21,16 @@ from LAE_selection_method import estimate_continuum
 from astropy.table import Table
 from astropy.io import fits
 from astropy.visualization import ZScaleInterval
+from astropy.wcs import WCS
+from astropy.coordinates import SkyCoord
+from astropy.nddata import Cutout2D
+import astropy.units as u
 
 w_lya = 1215.67
 w_CIV = 1549.48
 w_CIII = 1908.734
 
-cutouts_dir = '/home/alberto/almacen/PAUS_data/cutouts'
+cutouts_dir = '/home/alberto/almacen/PAUS_data/cutouts/out_cutouts'
 NB_wav_Arr = np.arange(455, 855, 10).astype(int)
 
 def nanomaggie_to_flux(nmagg, wavelength):
@@ -76,7 +80,8 @@ if __name__ == '__main__':
 
         for sel_src, refid in enumerate(selection['ref_id']):
             try:
-                cat_src = np.where(refid == cat['ref_id'])[0][0]
+                cat_src = np.where((refid == cat['ref_id'])
+                                   & (selection['field'][sel_src] == field_name))[0][0]
             except:
                 print(f'{refid=} not found in {field_name}.')
                 continue
@@ -121,7 +126,7 @@ if __name__ == '__main__':
                 spec_flx_sdss = spec_sdss['FLUX'] * norm
                 spec_w_sdss = 10 ** spec_sdss['LOGLAM']
 
-                rebin_factor = 2
+                rebin_factor = 5
                 spec_flx_sdss_rb, _ = rebin_1d_arr(spec_flx_sdss,
                                                 spec_w_sdss,
                                                 rebin_factor)
@@ -157,11 +162,11 @@ if __name__ == '__main__':
             SN_i = flx[-3] / err[-3]
 
             text1 = (f'REF_ID: {selection["ref_id"][sel_src]}\n'
-                    f'RA: {selection["RA"][sel_src]:0.2f}\n'
-                    f'DEC: {selection["DEC"][sel_src]:0.2f}\n'
+                    f'RA: {selection["RA"][sel_src]:0.5f}\n'
+                    f'DEC: {selection["DEC"][sel_src]:0.5f}\n'
                     f'r_synth = {cat["r_mag"][cat_src]:0.1f}\n'
                     f'class_star = {cat["class_star"][cat_src]:0.2f}\n'
-                    f'S/N(u, g, r) = {SN_u:0.1f}, {SN_g:0.1f}, {SN_r:0.1f}, {SN_i:0.1f}')
+                    f'S/N(u, g, r, i) =\n{SN_u:0.1f}, {SN_g:0.1f}, {SN_r:0.1f}, {SN_i:0.1f}')
 
             text2 = (f'L_lya = {selection["L_lya_corr"][sel_src]:0.2f}\n'
                     f'EW0_lya = {selection["EW0_lya"][sel_src]:0.2f}' + r'\AA'
@@ -173,12 +178,11 @@ if __name__ == '__main__':
                     f'MJD: {selection["mjd"][sel_src]}\n'
                     f'fiber: {selection["fiber"][sel_src]}\n'
                     f'plate: {selection["plate"][sel_src]}\n'
-                    # f'L_lya = {selection["L_lya_SDSS"][sel_src]:0.2f}\n'
                     f'z_spec = {selection["z_spec"][sel_src]:0.2f}')
 
             text_to_plot = [[3500, text1],
-                            [5500, text2],
-                            [7400, text3]]
+                            [5700, text2],
+                            [7600, text3]]
             for [xpos, txt] in text_to_plot:
                 ax.text(xpos, ypos, txt, fontsize=12)
 
@@ -197,11 +201,15 @@ if __name__ == '__main__':
 
             #########################################
             ax_NB_img = fig.add_subplot(gs[0, 4])
-            ax_NB_wht = fig.add_subplot(gs[0, 5])
+            ax_cont_img = fig.add_subplot(gs[0, 5])
             ax_r_img = fig.add_subplot(gs[1, 4])
             ax_r_wht = fig.add_subplot(gs[1, 5])
 
+            RA = selection['RA'][sel_src]
+            DEC = selection['DEC'][sel_src]
+
             # Load NB cutout
+            cutout_square_size = 10 * u.arcsec
             try:
                 lya_NB = int(selection['lya_NB'][sel_src])
                 ref_id = int(selection['ref_id'][sel_src])
@@ -209,33 +217,53 @@ if __name__ == '__main__':
 
                 cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
-                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                img = cutout[0].data
+                coords = SkyCoord(RA, DEC, unit='deg')
+                wcs = WCS(cutout[0])
+                cutout_img = Cutout2D(img, coords, size=cutout_square_size,
+                                  wcs=wcs, mode='partial', fill_value=0.).data
                 [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
                 ax_NB_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
                                 rasterized=True, interpolation='nearest')
 
-                cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.fits'
+                r_synth_folder = 'NB575_585_595_605_615_625_635_645_655_665_675_685_695_705_715'
+                cutout_path = f'{cutouts_dir}/{r_synth_folder}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
-                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                img = cutout[0].data
+                coords = SkyCoord(RA, DEC, unit='deg')
+                wcs = WCS(cutout[0])
+                cutout_img = Cutout2D(img, coords, size=cutout_square_size,
+                                  wcs=wcs, mode='partial', fill_value=0.).data
                 [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
                 ax_r_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
                                 rasterized=True, interpolation='nearest')
 
-                cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.weight.fits'
+                
+                # Where to look for the continuum cutout
+                NB_Arr_cont = np.concatenate(
+                    [np.arange(max(0, lya_NB - 6), max(0, lya_NB - 1)),
+                    np.arange(min(lya_NB + 2, 39), min(lya_NB + 6 + 1, 39))]       
+                )
+                NB_wav_Arr_cont = NB_wav_Arr[NB_Arr_cont]
+                save_coadds_to = f'NB' + '_'.join(NB_wav_Arr_cont.astype(str))
+
+                cutout_path = f'{cutouts_dir}/{save_coadds_to}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
-                cutout_img = cutout[0].data[8 : -8, 8 : -8]
+                img = cutout[0].data
+                coords = SkyCoord(RA, DEC, unit='deg')
+                wcs = WCS(cutout[0])
+                cutout_img = Cutout2D(img, coords, size=cutout_square_size,
+                                  wcs=wcs, mode='partial', fill_value=0.).data
                 [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-                ax_NB_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
+                ax_cont_img.imshow(cutout_img, vmin=vmin, vmax=vmax,
                                 rasterized=True, interpolation='nearest')
 
-                cutout_path = f'{cutouts_dir}/r_synth/coadd_cutout_{ref_id}.weight.fits'
-                cutout = fits.open(cutout_path)
-                cutout_img = cutout[0].data[8 : -8, 8 : -8]
-                [vmin, vmax] = ZScaleInterval(contrast=0.1).get_limits(cutout_img.flatten())
-                ax_r_wht.imshow(cutout_img, vmin=vmin, vmax=vmax,
-                                rasterized=True, interpolation='nearest')
+                ax_NB_img.set_title('Lya NB')
+                ax_cont_img.set_title('Continuum')
+                ax_r_img.set_title('r_synth')
 
-                for ax in [ax_NB_img, ax_NB_wht, ax_r_img, ax_r_wht]:
+
+                for ax in [ax_NB_img, ax_cont_img, ax_r_img, ax_r_wht]:
                     ax.set_yticks([])
                     ax.set_xticks([])
 
@@ -247,8 +275,10 @@ if __name__ == '__main__':
                                     radius=aper_r_px, ec='r', fc='none')
                     ax.add_patch(circ1)
                     ax.add_patch(circ2)
+            except FileNotFoundError as err:
+                print(err)
             except:
-                print('NO IMAGES FOR THIS ONE')
+                raise
 
             #########################################
 

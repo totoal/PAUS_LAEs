@@ -196,8 +196,8 @@ def identify_lines(line_mat, flux_mat, continuum_flux,
                 continue
 
             where_detection = np.where(this_src_detections)[0]
-            # line_pos = where_detection[np.argmax(flux_diff_mat[:, src][where_detection])]
-            line_pos = where_detection[0]
+            line_pos = where_detection[np.argmax(flux_mat[:, src][where_detection])]
+            # line_pos = where_detection[0]
             line_positions.append(line_pos)
 
     if not mult_lines:
@@ -272,7 +272,7 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, pm_err,
     color_aux[mask_llines] = ((gr > 1.12) & (ug > 0.31))[mask_llines]
     # NBs: >18
     mask_llines = (lya_lines > 18)
-    color_aux[mask_llines] = ((gr > 1.12) & (pm_flx[-6] / pm_err[-6] < 3))[mask_llines]
+    color_aux[mask_llines] = ((pm_flx[-6] / pm_err[-6] < 3))[mask_llines]
 
 
     N_sources = pm_flx.shape[1]
