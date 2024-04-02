@@ -168,3 +168,4 @@ curve_fit/chains
 curve_fit/figures
 tables
 PAUS_LAEs.code-workspace
+stacks/stacked_seds*

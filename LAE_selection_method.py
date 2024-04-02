@@ -482,7 +482,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     if check_nice_z:
         class_star_mask = np.ones_like(nice_lya).astype(bool)
     else:
-        class_star_mask = cat['class_star'] > -1
+        class_star_mask = cat['class_star'] > 0.1
     
     # Update cat
     cat['nice_lya_0'] = np.copy(cat['nice_lya'])

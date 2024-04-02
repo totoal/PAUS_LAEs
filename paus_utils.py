@@ -58,7 +58,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
             bb_err = err[i - 6]
 
             # Check if bb is well measured
-            if bb_err < 0:
+            if bb_err <= 0:
                 continue
 
             ax.errorbar(w_central[i - 6], bb_flx, yerr=bb_err,

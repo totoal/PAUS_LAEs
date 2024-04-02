@@ -29,8 +29,10 @@ import astropy.units as u
 w_lya = 1215.67
 w_CIV = 1549.48
 w_CIII = 1908.734
+w_lyb = 1025.72
+w_SiIV = 1399.8
 
-cutouts_dir = '/home/alberto/almacen/PAUS_data/cutouts/out_cutouts'
+cutouts_dir = '/home/alberto/almacen/PAUS_data/cutouts'
 NB_wav_Arr = np.arange(455, 855, 10).astype(int)
 
 def nanomaggie_to_flux(nmagg, wavelength):
@@ -109,7 +111,8 @@ if __name__ == '__main__':
             fiber = selection['fiber'][sel_src]
             spec_name = f'spec-{plate:04d}-{mjd:05d}-{fiber:04d}.fits'
             print(spec_name)
-            spec_bool = True
+            # spec_bool = True
+            spec_bool = False
             try:
                 spec_sdss = Table.read(f'{fits_dir}/{spec_name}', hdu=1, format='fits')
                 sdss_bbs = Table.read(f'{fits_dir}/{spec_name}', hdu=2, format='fits')['SPECTROFLUX']
@@ -181,29 +184,33 @@ if __name__ == '__main__':
                     f'z_spec = {selection["z_spec"][sel_src]:0.2f}')
 
             text_to_plot = [[3500, text1],
-                            [5700, text2],
-                            [7600, text3]]
+                            [5700, text2],]
+                            # [7600, text3]]
             for [xpos, txt] in text_to_plot:
                 ax.text(xpos, ypos, txt, fontsize=12)
 
             
             # Draw CIV and CIII positions
-            for linename, w in {'LyC': 912., 'CIV': w_CIV, 'CIII': w_CIII}.items():
+            line_dict = {r'Ly$\alpha$': 1215.67, 'LyC': 912., 'CIV': w_CIV, 'CIII': w_CIII,
+                         r'Ly$\beta$': w_lyb, 'SiIV': w_SiIV}
+            for linename, w in line_dict.items():
                 this_w_obs = w * (1 + selection['z_NB'][sel_src])
                 if this_w_obs > 4000 and this_w_obs < 9000:
                     ax.axvline(this_w_obs,
                                ls=':', color='dimgray')
-                    ax.text(this_w_obs + 10, ax.get_ylim()[0] * 1.1,
-                            linename)
+                    ax.text(this_w_obs + 10, ax.get_ylim()[0] + 0.1,
+                            linename, verticalalignment='bottom')
             # Lya NB
             ax.axvline(w_lya * (1 + z_NB(selection['lya_NB'][sel_src])),
                     ls=':', color='dimgray')
+
+            # Mark the zero flux level
+            ax.axhline(0, color='k', zorder=-9999)
 
             #########################################
             ax_NB_img = fig.add_subplot(gs[0, 4])
             ax_cont_img = fig.add_subplot(gs[0, 5])
             ax_r_img = fig.add_subplot(gs[1, 4])
-            ax_r_wht = fig.add_subplot(gs[1, 5])
 
             RA = selection['RA'][sel_src]
             DEC = selection['DEC'][sel_src]
@@ -215,7 +222,7 @@ if __name__ == '__main__':
                 ref_id = int(selection['ref_id'][sel_src])
                 NB_int_wav = NB_wav_Arr[lya_NB]
 
-                cutout_path = f'{cutouts_dir}/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
+                cutout_path = f'{cutouts_dir}/coadd_cutouts/NB{NB_int_wav}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
                 img = cutout[0].data
                 coords = SkyCoord(RA, DEC, unit='deg')
@@ -227,7 +234,7 @@ if __name__ == '__main__':
                                 rasterized=True, interpolation='nearest')
 
                 r_synth_folder = 'NB575_585_595_605_615_625_635_645_655_665_675_685_695_705_715'
-                cutout_path = f'{cutouts_dir}/{r_synth_folder}/coadd_cutout_{ref_id}.fits'
+                cutout_path = f'{cutouts_dir}/coadd_cutouts/{r_synth_folder}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
                 img = cutout[0].data
                 coords = SkyCoord(RA, DEC, unit='deg')
@@ -247,7 +254,7 @@ if __name__ == '__main__':
                 NB_wav_Arr_cont = NB_wav_Arr[NB_Arr_cont]
                 save_coadds_to = f'NB' + '_'.join(NB_wav_Arr_cont.astype(str))
 
-                cutout_path = f'{cutouts_dir}/{save_coadds_to}/coadd_cutout_{ref_id}.fits'
+                cutout_path = f'{cutouts_dir}/coadd_cutouts/{save_coadds_to}/coadd_cutout_{ref_id}.fits'
                 cutout = fits.open(cutout_path)
                 img = cutout[0].data
                 coords = SkyCoord(RA, DEC, unit='deg')
@@ -263,9 +270,9 @@ if __name__ == '__main__':
                 ax_r_img.set_title('r_synth')
 
 
-                for ax in [ax_NB_img, ax_cont_img, ax_r_img, ax_r_wht]:
-                    ax.set_yticks([])
-                    ax.set_xticks([])
+                for this_ax in [ax_NB_img, ax_cont_img, ax_r_img]:
+                    this_ax.set_yticks([])
+                    this_ax.set_xticks([])
 
                     # Add circumference showing aperture 3arcsec diameter
                     aper_r_px = 1.5 / 0.2645
@@ -273,8 +280,15 @@ if __name__ == '__main__':
                                     radius=aper_r_px, ec='r', fc='none')
                     circ2 = plt.Circle(np.array(cutout_img.shape).T / 2,
                                     radius=aper_r_px, ec='r', fc='none')
-                    ax.add_patch(circ1)
-                    ax.add_patch(circ2)
+                    this_ax.add_patch(circ1)
+                    this_ax.add_patch(circ2)
+
+                # Load zero points of NB
+                path_to_zp = f'{cutouts_dir}/single_epoch/single_epoch_cutouts_{ref_id}/{NB_int_wav}/zero_points.txt'
+                zps = np.atleast_1d(np.genfromtxt(path_to_zp)).astype(str)
+                zp_txt = 'NB zero points\n' + '\n'.join(zps)
+                ax.text(9300, ypos, zp_txt, fontsize=12)
+
             except FileNotFoundError as err:
                 print(err)
             except:
@@ -282,7 +296,7 @@ if __name__ == '__main__':
 
             #########################################
 
-            savename = f'{field_name}_{sel_src}-{selection["ref_id"][sel_src]}.png'
+            savename = f'{sel_src+1:04d}-{field_name}_{selection["ref_id"][sel_src]}.png'
             if spec_bool:
                 subfolder = 'with_spec'
             else:
@@ -290,3 +304,5 @@ if __name__ == '__main__':
             fig.savefig(f'{fig_save_dir}/{subfolder}/{savename}',
                         pad_inches=0.1, bbox_inches='tight', facecolor='w')
             plt.close()
+
+    print('\n\nDone.\n')

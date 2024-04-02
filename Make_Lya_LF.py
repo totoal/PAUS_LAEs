@@ -12,6 +12,8 @@ import pickle
 
 from scipy.stats import binned_statistic_2d
 
+from astropy.io import fits
+
 from jpasLAEs.utils import hms_since_t0, flux_to_mag
 
 from paus_utils import *
@@ -138,7 +140,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.05)
+        pre_comp_mask = (comp_preliminar > 0.1)
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -161,7 +163,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
+            include_mask = (w <= puri_k) & (comp_k > 0.1) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
@@ -231,6 +233,19 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print('Selecting LAEs')
     cat = select_LAEs(cat, nb_min, nb_max, r_min, r_max)
     print(f'N nice_lya = {sum(cat["nice_lya"])}')
+
+    # NOW remove candidates rejected by the visual inspection
+    vi_cat = fits.open('/home/alberto/almacen/PAUS_data/catalogs/PAUS_LAE_selection_visual_insp_AT.fits')
+    vi_ref_ID = vi_cat[1].data['ref_id']
+    vi_is_junk = vi_cat[1].data['is_junk_VI']
+    vi_field = vi_cat[1].data['field']
+
+    vi_ref_ID = vi_ref_ID[vi_field == field_name]
+    vi_is_junk = vi_is_junk[vi_field == field_name]
+    junk_IDs = vi_ref_ID[vi_is_junk]
+    for thisid in junk_IDs:
+        if thisid in cat['ref_id']:
+            cat['nice_lya'][cat['ref_id'] == thisid] = False
 
     # Apply the bias correction and compute L statistical errors
     cat = L_lya_bias_apply(cat, field_name, nb_min, nb_max)

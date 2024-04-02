@@ -53,7 +53,7 @@ def compute_invcovmat(hist_mat, where_fit, poisson_err):
     covmat = covmat_simple(this_hist_mat)[0]
 
     # Add poisson errors
-    # covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**2) ** 0.5
+    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**2) ** 0.5
 
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
@@ -154,7 +154,7 @@ def run_mcmc_fit(nb_list, region_list):
     yerr[LF_phi == 0] = np.inf
 
     # In which LF bins fit
-    where_fit = np.isfinite(yerr) & (LF_bins > 44) & (LF_bins < 45.6) & (LyaLF['poisson_err'] > 0)
+    where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)# & (LyaLF['poisson_err'] > 0)
 
     invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
 
@@ -231,6 +231,7 @@ if __name__ == '__main__':
 
     # Add individual NB LFs
     nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
+    # nb_list = [[nbl] for nbl in nb_list] + [nb_list]
 
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
