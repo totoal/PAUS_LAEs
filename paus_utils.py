@@ -269,6 +269,9 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
                                       weights=w)
         flambda_err_Arr[src] = np.sum(w, axis=0) ** -0.5
 
+    flambda_Arr *= (1 + cat['z_NB'])
+    flambda_err_Arr *= (1 + cat['z_NB'])
+
     magAB_Arr = flux_to_mag(flambda_Arr, wavelength)
     magAB_err_Arr = magAB_Arr - flux_to_mag(flambda_Arr + flambda_err_Arr,
                                              wavelength)

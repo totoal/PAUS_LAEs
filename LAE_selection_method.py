@@ -245,31 +245,31 @@ def nice_lya_select(lya_lines, other_lines, pm_flx, pm_err,
     color_aux = np.ones_like(gr).astype(bool)
     # NBs: 0-2
     mask_llines = (lya_lines >= 0) & (lya_lines < 2)
-    color_aux[mask_llines] = ((gr > -0.23) & (ug > 0.024))[mask_llines]
+    # color_aux[mask_llines] = ((gr > -0.23) & (ug > 0.024))[mask_llines]
     # NBs: 2-4
     mask_llines = (lya_lines >= 2) & (lya_lines < 4)
-    color_aux[mask_llines] = ((gr > -0.19) & (ug > 0.18))[mask_llines]
+    # color_aux[mask_llines] = ((gr > -0.19) & (ug > 0.18))[mask_llines]
     # NBs: 4-6
     mask_llines = (lya_lines >= 4) & (lya_lines < 6)
-    color_aux[mask_llines] = ((gr > -0.16) & (ug > 0.35))[mask_llines]
+    # color_aux[mask_llines] = ((gr > -0.16) & (ug > 0.35))[mask_llines]
     # NBs: 6-8
     mask_llines = (lya_lines >= 6) & (lya_lines < 8)
-    color_aux[mask_llines] = ((gr > -0.06) & (ug > 0.5))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.5)[mask_llines]
     # NBs: 8-10
     mask_llines = (lya_lines >= 8) & (lya_lines < 10)
-    color_aux[mask_llines] = ((gr > 0.10) & (ug > 0.56))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.42)[mask_llines]
     # NBs: 10-12
     mask_llines = (lya_lines >= 10) & (lya_lines < 12)
-    color_aux[mask_llines] = ((gr > 0.6) & (ug > 0.51))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.37)[mask_llines]
     # NBs: 12-14
     mask_llines = (lya_lines >= 12) & (lya_lines < 14)
-    color_aux[mask_llines] = ((gr > 0.81) & (ug > 0.58))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.34)[mask_llines]
     # NBs: 14-16
     mask_llines = (lya_lines >= 14) & (lya_lines <= 16)
-    color_aux[mask_llines] = ((gr > 0.93) & (ug > 0.63))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.45)[mask_llines]
     # NBs: 16-18
     mask_llines = (lya_lines >= 16) & (lya_lines <= 18)
-    color_aux[mask_llines] = ((gr > 1.12) & (ug > 0.31))[mask_llines]
+    # color_aux[mask_llines] = (ug < 0.47)[mask_llines]
     # NBs: >18
     mask_llines = (lya_lines > 18)
     color_aux[mask_llines] = ((pm_flx[-6] / pm_err[-6] < 3))[mask_llines]
@@ -464,7 +464,7 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     z_ML = ML_z_Lya_regression(cat)
     cat['z_ML'] = np.ones_like(cat['z_NB']) * -1
     cat['z_ML'][nice_lya] = z_ML
-    mask_nice_z_ML = np.abs(z_Arr - cat['z_ML']) < 0.3
+    mask_nice_z_ML = np.abs(z_Arr - cat['z_ML']) < 0.24
     cat['z_NB'][mask_nice_z_ML] = cat['z_ML'][mask_nice_z_ML]
 
     # Machine learning classification

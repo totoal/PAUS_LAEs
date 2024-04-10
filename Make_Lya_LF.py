@@ -271,11 +271,15 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     print('Making the LF')
     Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name)
 
+    M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    cat['M_UV'] = M_UV_Arr
+    cat['M_UV_err'] = M_UV_err_Arr
+
     # Save a dictionary with useful data about the selection
     reduced_cat = {}
     keys_to_save = ['ref_id', 'RA', 'DEC', 'r_mag', 'lya_NB', 'EW0_lya', 'EW0_lya_err',
                     'L_lya', 'L_lya_corr', 'L_lya_corr_err', 'class_pred', 'z_NB',
-                    'class_star', 'nice_lya', 'nice_ml', 'nice_color']
+                    'class_star', 'nice_lya', 'nice_ml', 'nice_color', 'M_UV', 'M_UV_err']
     for key in keys_to_save:
         reduced_cat[key] = cat[key][..., cat['nice_lya_0']]
     with open(f'{LF_savedir}/selection.pkl', 'wb') as f:

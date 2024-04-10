@@ -111,8 +111,8 @@ if __name__ == '__main__':
             fiber = selection['fiber'][sel_src]
             spec_name = f'spec-{plate:04d}-{mjd:05d}-{fiber:04d}.fits'
             print(spec_name)
-            # spec_bool = True
-            spec_bool = False
+            spec_bool = True
+            # spec_bool = False
             try:
                 spec_sdss = Table.read(f'{fits_dir}/{spec_name}', hdu=1, format='fits')
                 sdss_bbs = Table.read(f'{fits_dir}/{spec_name}', hdu=2, format='fits')['SPECTROFLUX']
@@ -140,6 +140,9 @@ if __name__ == '__main__':
 
                 ax.plot(spec_w_sdss_rb, spec_flx_sdss_rb,
                         c='dimgray', zorder=-99, alpha=0.7)
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            else:
+                continue
 
             #### Info text ####
             ypos = ax.get_ylim()[1] * 1.05

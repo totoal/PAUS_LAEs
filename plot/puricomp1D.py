@@ -45,7 +45,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
                     & (mock['lya_NB'] >= nb_min)
                     & (mock['lya_NB'] <= nb_max)
                     & mask_r)
-        mask_parent = ((mock['EW0_lya_spec'] > 0)
+        mask_parent = ((mock['EW0_lya_spec'] > 20)
                        & (NB_z(mock['zspec']) >= nb_min)
                        & (NB_z(mock['zspec']) <= nb_max)
                        & mask_r)
@@ -53,9 +53,9 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
         area_obs = area_dict[mock_name]
 
-        h_sel += np.histogram(mock['L_lya'][mask_sel],
+        h_sel += np.histogram(mock['L_lya_corr'][mask_sel],
                               L_bins)[0] / area_obs
-        h_nice += np.histogram(mock['L_lya'][mask_nice],
+        h_nice += np.histogram(mock['L_lya_corr'][mask_nice],
                                     L_bins)[0] / area_obs
         h_nice_spec += np.histogram(mock['L_lya_spec'][mask_nice & mask_parent],
                                     L_bins)[0] / area_obs
