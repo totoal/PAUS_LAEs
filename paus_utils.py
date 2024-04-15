@@ -261,6 +261,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
     for src in src_list:
         nb_min = np.max([nb_w_rest[src] - 2, 0])
         nb_max = nb_w_rest[src] + 1
+        print(nb_min, nb_max)
         if nb_max == nb_min:
             continue
 

@@ -85,8 +85,7 @@ def main(kind_surname=''):
         print('\n##########################')
         print('\nBootstrapping combined sky regions')
 
-        nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
-                [8, 10], [10, 12], [12, 14], [14, 16], [16, 18]]
+        nb_list = [[0, 3], [2, 5], [4, 7], [6, 9], [8, 11], [10, 13], [12, 15], [14, 18]]
 
         hist_mat = None
         
@@ -232,5 +231,5 @@ def main(kind_surname=''):
             np.save(f'{pathname}/hist_mat_boots_nb{nb1}-{nb2}_{reg}{kind_surname}', hist_mat)
 
 if __name__ == '__main__':
-    main('')
     main('_M')
+    main('')

@@ -2,6 +2,11 @@ import os
 import sys
 sys.path.insert(0, '..')
 
+from paus_utils import Lya_effective_volume
+from jpasLAEs.utils import bin_centers
+
+from astropy.io import fits
+
 import csv
 
 import numpy as np
@@ -141,22 +146,68 @@ def run_mcmc_fit(nb_list, region_list):
         combined_LF = False
     else:
         combined_LF = True
-    LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF)
-    [yerr_up, yerr_down] = LyaLF['LF_total_err']
-    yerr_up = (yerr_up**2 + LyaLF['poisson_err']**2)**0.5
-    yerr_down = (yerr_down**2 + LyaLF['poisson_err']**2)**0.5
-    LF_phi = LyaLF['LF_boots']
-    LF_bins = LyaLF['LF_bins']
-    
+    if len(nb_list) == 3:
+        last_bin = True
+    else:
+        last_bin = False
 
-    # Error to use
-    yerr = (yerr_up + yerr_down) * 0.5
-    yerr[LF_phi == 0] = np.inf
+    if last_bin:
+        ## For the last bin
+        vi_cat_hiz = fits.open('/home/alberto/almacen/PAUS_data/catalogs/LAE_selection_VI_hiZ.fits')[1].data
+        hiz_mask = vi_cat_hiz['is_hiZ_LAE']
 
-    # In which LF bins fit
-    where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)# & (LyaLF['poisson_err'] > 0)
+        L_min, L_max = 40, 47
+        N_bins = 50
+        L_bins = np.linspace(L_min, L_max, N_bins + 1)
+        LF_bins = bin_centers(L_bins)
 
-    invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+        nb_min = vi_cat_hiz['lya_NB'][hiz_mask].min()
+        nb_max = vi_cat_hiz['lya_NB_VI'][hiz_mask].max()
+
+        vol_hiz = 0.
+        for field_name in ['W1', 'W2', 'W3']:
+            vol_hiz += Lya_effective_volume(nb_min, nb_max, field_name)
+
+        L_Arr_hiz = vi_cat_hiz['L_lya_corr'][hiz_mask]
+        L_e_Arr = [vi_cat_hiz['L_lya_corr_err_down'][hiz_mask], vi_cat_hiz['L_lya_corr_err_up'][hiz_mask]]
+        LF_mat_hiz = []
+        for _ in range(100):
+            L_Arr = np.random.choice(L_Arr_hiz, len(L_Arr_hiz), replace=True)
+
+            randN = np.random.randn(len(L_Arr))
+            L_perturbed = np.empty_like(L_Arr)
+            L_perturbed[randN <= 0] = (L_Arr + L_e_Arr[0] * randN)[randN <= 0]
+            L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
+            L_perturbed[np.isnan(L_perturbed)] = 0.
+
+            LF_mat_hiz.append(np.histogram(L_perturbed, L_bins)[0] / (L_bins[1] - L_bins[0]) / vol_hiz)
+
+        LF_phi = np.mean(LF_mat_hiz, axis=0)
+        yerr = np.std(LF_mat_hiz, axis=0)
+        yerr = np.log10(LF_phi + yerr) - np.log10(LF_phi)
+
+        # In which LF bins fit
+        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46) & (yerr > 0)
+
+        covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
+        invcovmat = linalg.inv(covmat)
+    else:
+        LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF)
+        [yerr_up, yerr_down] = LyaLF['LF_total_err']
+        yerr_up = (yerr_up**2 + LyaLF['poisson_err']**2)**0.5
+        yerr_down = (yerr_down**2 + LyaLF['poisson_err']**2)**0.5
+        LF_phi = LyaLF['LF_boots']
+        LF_bins = LyaLF['LF_bins']
+
+        # Error to use
+        yerr = (yerr_up + yerr_down) * 0.5
+        yerr[LF_phi == 0] = np.inf
+
+        # In which LF bins fit
+        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)
+
+        invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Lstar', 'alpha']
@@ -187,8 +238,12 @@ def run_mcmc_fit(nb_list, region_list):
     sampler.print_results()
 
     # Plot results
-    nb1 = np.array(nb_list).flatten()[0]
-    nb2 = np.array(nb_list).flatten()[-1]
+    if last_bin:
+        nb1 = nb_min
+        nb2 = nb_max
+    else:
+        nb1 = np.array(nb_list).flatten()[0]
+        nb2 = np.array(nb_list).flatten()[-1]
     fig = corner.corner(sampler.results['samples'], labels=paramnames,
                         show_titles=True, truths=sampler.results['posterior']['median'])
     fig.savefig(f'figures/corner_nb{nb1}-{nb2}.pdf', pad_inches=0.1,
@@ -225,13 +280,12 @@ def initialize_csv(filename, columns):
 if __name__ == '__main__':
     region_list = ['W3', 'W2', 'W1']
 
-    nb_list = [[0, 2], [2, 4], [4, 6], [6, 8],
-               [8, 10], [10, 12], [12, 14], [14, 16],
-               [16, 18]]
+    nb_list = [[0, 3], [2, 5], [4, 7], [6, 9], [8, 11], [10, 13], [12, 15], [14, 18]]
+    # nb_list = [[1, 1, 1]]
 
     # Add individual NB LFs
-    nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
-    # nb_list = [[nbl] for nbl in nb_list] + [nb_list]
+    # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
+    nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
 
     # Initialize file to write the fit parameters
     param_filename = 'schechter_fit_parameters.csv'
@@ -249,11 +303,19 @@ if __name__ == '__main__':
         # Append the parameters to csv file
         with open(param_filename, 'a', newline='') as param_file:
             writer = csv.writer(param_file)
-            row_to_write = np.concatenate([
-                [nbl[0][0], nbl[-1][-1]],
-                fit_params,
-                fit_params_err_up,
-                fit_params_err_down
-            ])
+            if len(nbl) < 2:
+                row_to_write = np.concatenate([
+                    [nbl[0][0], nbl[-1][-1]],
+                    fit_params,
+                    fit_params_err_up,
+                    fit_params_err_down
+                ])
+            else:
+                row_to_write = np.concatenate([
+                    [19, 50],
+                    fit_params,
+                    fit_params_err_up,
+                    fit_params_err_down
+                ])
             
             writer.writerow(row_to_write)

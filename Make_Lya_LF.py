@@ -109,8 +109,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
 
     # Compute the absolute UV magnitude
     M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
-    N_bins_UV = 20 + 1
-    M_UV_bins = np.linspace(-26, -17, N_bins_UV)
+    N_bins_UV = 23 + 1
+    M_UV_bins = np.linspace(-28, -17, N_bins_UV)
     # Save the M_bins
     np.save(f'{LF_savedir}/M_UV_bins.npy', M_UV_bins)
 
