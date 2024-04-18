@@ -68,7 +68,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
-                  N_iter=200, N_boots=20):
+                  N_iter=1000, N_boots=20):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
@@ -95,9 +95,12 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
 
     puri2d = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}.npy')
     comp2d = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}.npy')
+    puri2d_uv = np.load(f'{corr_dir}/puri2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}_UV.npy')
+    comp2d_uv = np.load(f'{corr_dir}/comp2D_{field_name}_nb{nb_min_corr}-{nb_max_corr}_UV.npy')
 
     puricomp2d_L_bins = np.load(f'{corr_dir}/puricomp2D_L_bins.npy')
     puricomp2d_r_bins = np.load(f'{corr_dir}/puricomp2D_r_bins.npy')
+    puricomp2d_M_UV_bins = np.load(f'{corr_dir}/puricomp2D_M_UV_bins.npy')
 
     N_bins = len(L_bins) - 1
 
@@ -109,6 +112,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
 
     # Compute the absolute UV magnitude
     M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+
     N_bins_UV = 23 + 1
     M_UV_bins = np.linspace(-28, -17, N_bins_UV)
     # Save the M_bins
@@ -140,7 +144,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.1)
+        pre_comp_mask = (comp_preliminar > 0.05)
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -153,20 +157,33 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
             L_perturbed[np.isnan(L_perturbed)] = 0.
 
-            M_perturbed = M_UV_Arr + randN * M_UV_err_Arr
+            M_perturbed = M_UV_Arr - randN * M_UV_err_Arr
 
             puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
                                puri2d, comp2d,
                                puricomp2d_L_bins, puricomp2d_r_bins)
 
+            puri_k_uv, comp_k_uv =\
+                Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
+                               puri2d_uv, comp2d_uv,
+                               puricomp2d_M_UV_bins, puricomp2d_r_bins)
+
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.1) & pre_comp_mask
+            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
+
+            # The array of weights w
+            w_uv = np.random.rand(len(puri_k_uv))
+            # Mask very low completeness and randomly according to purity
+            include_mask = (w <= puri_k_uv) & (comp_k_uv > 0.05) & pre_comp_mask
+            w_uv[~include_mask] = 0.
+            w_uv[include_mask] = 1. / comp_k_uv[include_mask]
+            w_uv[np.isnan(w_uv) | np.isinf(w_uv)] = 0. # Just in case
 
             # Store the realization of the LF in the hist matrix
             # For Lya Luminosity
@@ -174,7 +191,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
                                             bins=L_bins, weights=w)
             # And for UV absolute magnitude
             hist_i_mat_M[k], _ = np.histogram(M_perturbed[boot_nice_lya],
-                                              bins=M_UV_bins, weights=w)
+                                              bins=M_UV_bins, weights=w_uv)
             
         # Save hist_i_mat
         np.save(f'{LF_savedir}/hist_i_mat_{boot_i}.npy', hist_i_mat)

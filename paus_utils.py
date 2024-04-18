@@ -72,13 +72,13 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
     except:
         pass
 
-    ax.set_xlabel('$\lambda$ [\AA]', size=fs)
+    ax.set_xlabel(r'$\lambda$ [\AA]', size=fs)
     if e17scale:
         ax.set_ylabel(
             r'$f_\lambda\cdot10^{17}$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
     else:
         ax.set_ylabel(
-            '$f_\lambda$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
+            r'$f_\lambda$ [erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$]', size=fs)
 
     return ax
     
@@ -227,7 +227,8 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
     return volume_abs + volume_overlap * 0.5
 
 
-def PAUS_monochromatic_Mag(cat, wavelength=1450):
+def PAUS_monochromatic_Mag(cat, wavelength=1450,
+                           flx_cat_key='flx', redshift_cat_key='z_NB'):
     '''
     Calculate the absolute magnitude (M) and its error for sources in a catalog
     at a specified monochromatic wavelength in the rest-frame.
@@ -248,11 +249,13 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
           data are assigned a value of 99.
         - magAB_err_Arr (numpy.ndarray): Error in the absolute magnitude.
     '''
-    # Find the NB of the specified wavelength in rest-frame
-    nb_w_rest = NB_z(cat['z_NB'], wavelength)
-    dist_lum_Arr = cosmo.luminosity_distance(cat['z_NB']).to(u.pc).value
+    redshift = np.asarray(cat[redshift_cat_key])
 
-    N_sources = len(cat['z_NB'])
+    # Find the NB of the specified wavelength in rest-frame
+    nb_w_rest = NB_z(redshift, wavelength)
+    dist_lum_Arr = cosmo.luminosity_distance(redshift).to(u.pc).value
+
+    N_sources = len(redshift)
 
     flambda_Arr = np.ones(N_sources).astype(float) * 99.
     flambda_err_Arr = np.copy(flambda_Arr)
@@ -261,17 +264,16 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450):
     for src in src_list:
         nb_min = np.max([nb_w_rest[src] - 2, 0])
         nb_max = nb_w_rest[src] + 1
-        print(nb_min, nb_max)
         if nb_max == nb_min:
             continue
 
         w = cat['err'][nb_min : nb_max, src] ** -2
-        flambda_Arr[src] = np.average(cat['flx'][nb_min : nb_max, src],
+        flambda_Arr[src] = np.average(cat[flx_cat_key][nb_min : nb_max, src],
                                       weights=w)
         flambda_err_Arr[src] = np.sum(w, axis=0) ** -0.5
 
-    flambda_Arr *= (1 + cat['z_NB'])
-    flambda_err_Arr *= (1 + cat['z_NB'])
+    flambda_Arr *= (1 + redshift)
+    flambda_err_Arr *= (1 + redshift)
 
     magAB_Arr = flux_to_mag(flambda_Arr, wavelength)
     magAB_err_Arr = magAB_Arr - flux_to_mag(flambda_Arr + flambda_err_Arr,

@@ -110,7 +110,8 @@ def L_lya_bias_apply(cat, field_name, nb_min, nb_max):
 
 
 def puricomp_corrections(mock_dict, L_bins, r_bins,
-                         nb_min, nb_max, ew0_min=0):
+                         nb_min, nb_max, ew0_min=0,
+                         LF_kind='Lya'):
     # Perturb L
     N_iter = 500
 
@@ -139,12 +140,22 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
                       end=('\r' if k + 1 < N_iter else '\n'))
             # Generate random numbers
             randN = np.random.randn(N_sources)
-            L_perturbed = np.empty(N_sources)
-            L_perturbed[randN <= 0] = (mock['L_lya_corr']
-                                    + mock['L_lya_corr_err'][0] * randN)[randN <= 0]
-            L_perturbed[randN > 0] = (mock['L_lya_corr']
-                                    + mock['L_lya_corr_err'][1] * randN)[randN > 0]
-            L_perturbed[np.isnan(L_perturbed)] = 0.
+
+            if LF_kind == 'Lya':
+                L_perturbed = np.empty(N_sources)
+                L_perturbed[randN <= 0] = (mock['L_lya_corr']
+                                        + mock['L_lya_corr_err'][0] * randN)[randN <= 0]
+                L_perturbed[randN > 0] = (mock['L_lya_corr']
+                                        + mock['L_lya_corr_err'][1] * randN)[randN > 0]
+                L_perturbed[np.isnan(L_perturbed)] = 0.
+
+                L_spec = mock['L_lya_spec']
+            elif LF_kind == 'UV':
+                L_perturbed = mock['M_UV'] - randN * mock['M_UV_err']
+
+                L_spec = mock['M_UV_spec']
+            else:
+                raise Exception('what?')
 
             nice_mask = (mock['nice_lya'] & mock['nice_z']
                          & (mock['lya_NB'] >= nb_min) & (mock['lya_NB'] <= nb_max)
@@ -159,6 +170,7 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
             hist_dict[f'{mock_name}_sel'][..., k] =\
                 np.histogram2d(L_perturbed[sel_mask], mock['r_mag'][sel_mask],
                                bins=[L_bins, r_bins])[0]
+                
 
         # Apply area factor
         hist_dict[f'{mock_name}_nice'] /= area_obs
@@ -176,7 +188,7 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
                        & (mock['EW0_lya_spec'] >= ew0_min)
                        & mask_hiL)
         hist_dict[f'{mock_name}_parent'] =\
-            np.histogram2d(mock['L_lya_spec'][parent_mask],
+            np.histogram2d(L_spec[parent_mask],
                            mock['r_mag'][parent_mask],
                            bins=[L_bins, r_bins])[0] / area_obs
 
@@ -196,10 +208,6 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
     h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, 0.2, 0.5)
     h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, 0.2, 0.5)
     h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, 0.2, 0.5)
-
-    # np.save(f'{dirname}/h2d_nice_smooth_{survey_name}', h2d_nice_smooth)
-    # np.save(f'{dirname}/h2d_sel_smooth_{survey_name}', h2d_sel_smooth)
-    # np.save(f'{dirname}/h2d_parent_smooth_{survey_name}', h2d_parent_smooth)
 
     puri2d = np.empty_like(h2d_nice_smooth).astype(float)
     comp2d = np.empty_like(h2d_nice_smooth).astype(float)
@@ -250,18 +258,40 @@ def compute_LF_corrections(mock_dict, field_name,
     # Now apply the bias correction and compute L statistical errors
     for _, mock in mock_dict.items():
         mock = L_lya_bias_apply(mock, field_name, nb_min, nb_max)
+        ## Compute UV magnitudes
+        M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(mock, wavelength=1450)
+        mock['M_UV'] = M_UV_Arr
+        mock['M_UV_err'] = M_UV_err_Arr
+
+        M_UV_spec_Arr, _ = PAUS_monochromatic_Mag(mock, wavelength=1450,
+                                                  flx_cat_key='flx_0',
+                                                  redshift_cat_key='zspec')
+        mock['M_UV_spec'] = M_UV_spec_Arr
 
     # Now compute the correction matrices
     r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
+
+
+    N_bins_UV = 23 + 1
+    M_UV_bins = np.linspace(-28, -17, N_bins_UV)
+    
+    # For the Lya LF
     puri2d, comp2d = puricomp_corrections(mock_dict, L_bins, r_bins,
-                                          nb_min, nb_max)
+                                          nb_min, nb_max, LF_kind='Lya')
     savedir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     os.makedirs(savedir, exist_ok=True)
     np.save(f'{savedir}/puricomp2D_L_bins.npy', L_bins)
     np.save(f'{savedir}/puricomp2D_r_bins.npy', r_bins)
     np.save(f'{savedir}/puri2D_{field_name}_nb{nb_min}-{nb_max}.npy', puri2d)
     np.save(f'{savedir}/comp2D_{field_name}_nb{nb_min}-{nb_max}.npy', comp2d)
+
+    # For the UV LF
+    puri2d_uv, comp2d_uv = puricomp_corrections(mock_dict, M_UV_bins, r_bins,
+                                                nb_min, nb_max, LF_kind='UV')
+    np.save(f'{savedir}/puricomp2D_M_UV_bins.npy', M_UV_bins)
+    np.save(f'{savedir}/puri2D_{field_name}_nb{nb_min}-{nb_max}_UV.npy', puri2d_uv)
+    np.save(f'{savedir}/comp2D_{field_name}_nb{nb_min}-{nb_max}_UV.npy', comp2d_uv)
 
     # Finally, let's save the full mocks in the final state to later compute
     # 1D purity, completeness and other stuff.
