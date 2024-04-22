@@ -254,6 +254,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
     # Find the NB of the specified wavelength in rest-frame
     nb_w_rest = NB_z(redshift, wavelength)
     dist_lum_Arr = cosmo.luminosity_distance(redshift).to(u.pc).value
+    dist_lum_err_Arr = cosmo.luminosity_distance(redshift + 0.025).to(u.pc).value - dist_lum_Arr
 
     N_sources = len(redshift)
 
@@ -262,8 +263,10 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
 
     src_list = np.where(cat['nice_lya'])[0]
     for src in src_list:
-        nb_min = np.max([nb_w_rest[src] - 2, 0])
-        nb_max = nb_w_rest[src] + 1
+        nb_min = nb_w_rest[src]
+        if nb_min == -1:
+            nb_min = 38
+        nb_max = nb_min + 1
         if nb_max == nb_min:
             continue
 
@@ -272,15 +275,16 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
                                       weights=w)
         flambda_err_Arr[src] = np.sum(w, axis=0) ** -0.5
 
-    flambda_Arr *= (1 + redshift)
-    flambda_err_Arr *= (1 + redshift)
-
-    magAB_Arr = flux_to_mag(flambda_Arr, wavelength)
+    magAB_Arr = flux_to_mag(flambda_Arr, wavelength * (1 + redshift))
     magAB_err_Arr = magAB_Arr - flux_to_mag(flambda_Arr + flambda_err_Arr,
-                                             wavelength)
+                                             wavelength * (1 + redshift))
+
     M_Arr = np.ones(N_sources) * 99
+    M_Arr_err = np.ones(N_sources) * 99
 
     mask = cat['nice_lya']
     M_Arr[mask] = magAB_Arr[mask] - 5 * (np.log10(dist_lum_Arr[mask]) - 1)
 
-    return M_Arr, magAB_err_Arr
+    M_Arr_err[mask] = (magAB_err_Arr[mask] ** 2 + (5 / dist_lum_Arr[mask] * np.log10(np.e) * dist_lum_err_Arr[mask]) ** 2) ** 0.5
+
+    return M_Arr, M_Arr_err

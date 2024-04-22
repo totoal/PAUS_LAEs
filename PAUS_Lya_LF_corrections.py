@@ -176,7 +176,7 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
         hist_dict[f'{mock_name}_nice'] /= area_obs
         hist_dict[f'{mock_name}_sel'] /= area_obs
         
-        # Take the average
+        # Take the median
         hist_dict[f'{mock_name}_nice'] = np.average(hist_dict[f'{mock_name}_nice'],
                                                     axis=2)
         hist_dict[f'{mock_name}_sel'] = np.average(hist_dict[f'{mock_name}_sel'],
@@ -205,9 +205,15 @@ def puricomp_corrections(mock_dict, L_bins, r_bins,
     r_bins_c = bin_centers(r_bins)
     L_bins_c = bin_centers(L_bins)
 
-    h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, 0.2, 0.5)
-    h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, 0.2, 0.5)
-    h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, 0.2, 0.5)
+    if LF_kind == 'Lya':
+        DL = 0.2
+    elif LF_kind == 'UV':
+        DL = 0.5
+    Dr = 0.5
+
+    h2d_nice_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_nice, DL, Dr)
+    h2d_sel_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_sel, DL, Dr)
+    h2d_parent_smooth = smooth_Image(L_bins_c, r_bins_c, h2d_parent, DL, Dr)
 
     puri2d = np.empty_like(h2d_nice_smooth).astype(float)
     comp2d = np.empty_like(h2d_nice_smooth).astype(float)
@@ -271,11 +277,9 @@ def compute_LF_corrections(mock_dict, field_name,
     # Now compute the correction matrices
     r_bins = np.linspace(r_min, r_max, 200 + 1)
     L_bins = np.linspace(40, 47, 200 + 1)
+    M_UV_bins = np.linspace(-29, -16, 300 + 1)
 
 
-    N_bins_UV = 23 + 1
-    M_UV_bins = np.linspace(-28, -17, N_bins_UV)
-    
     # For the Lya LF
     puri2d, comp2d = puricomp_corrections(mock_dict, L_bins, r_bins,
                                           nb_min, nb_max, LF_kind='Lya')

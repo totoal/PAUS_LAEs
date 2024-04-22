@@ -101,7 +101,10 @@ def schechter(L, phistar, Lstar, alpha):
 
 # The fitting curve
 def sch_fit(Lx, Phistar, Lstar, alpha):
-    Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
+    Phi = schechter(Lx, 10 ** -7.272644273019171, 10 ** Lstar, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** 45.05131814514616, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, -1.6842352626274895) * Lx * np.log(10)
     return np.log10(Phi)
 
 
@@ -140,7 +143,7 @@ def transform(theta):
     return theta_trans
 
 # Main function
-def run_mcmc_fit(nb_list, region_list):
+def run_mcmc_fit(nb_list, region_list, suffix=''):
     # Load the Lya LF
     if len(nb_list) == 1:
         combined_LF = False
@@ -246,14 +249,14 @@ def run_mcmc_fit(nb_list, region_list):
         nb2 = np.array(nb_list).flatten()[-1]
     fig = corner.corner(sampler.results['samples'], labels=paramnames,
                         show_titles=True, truths=sampler.results['posterior']['median'])
-    fig.savefig(f'figures/corner_nb{nb1}-{nb2}.pdf', pad_inches=0.1,
+    fig.savefig(f'figures/corner_nb{nb1}-{nb2}{suffix}.pdf', pad_inches=0.1,
                 bbox_inches='tight', facecolor='w')
     plt.close()
 
     
     # Save the chain
     flat_samples = sampler.results['samples']
-    np.save(f'chains/mcmc_schechter_fit_chain_nb{nb1}-{nb2}', flat_samples)
+    np.save(f'chains/mcmc_schechter_fit_chain_nb{nb1}-{nb2}{suffix}', flat_samples)
 
     # Obtain the fit parameters
     fit_params = sampler.results['posterior']['median']
@@ -287,8 +290,11 @@ if __name__ == '__main__':
     # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
     nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
 
+    suffix = '_fixed_Phistar'
+    # suffix = ''
+
     # Initialize file to write the fit parameters
-    param_filename = 'schechter_fit_parameters.csv'
+    param_filename = f'schechter_fit_parameters{suffix}.csv'
     columns = ['nb_min', 'nb_max', 'Phistar', 'Lstar', 'alpha',
                'Phistar_err_up', 'Lstar_err_up', 'alpha_err_up',
                'Phistar_err_down', 'Lstar_err_down', 'alpha_err_down']
@@ -298,7 +304,7 @@ if __name__ == '__main__':
         print(nbl)
         # Run the MCMC fit
         fit_params, fit_params_err_up, fit_params_err_down =\
-            run_mcmc_fit(nbl, region_list)
+            run_mcmc_fit(nbl, region_list, suffix)
 
         # Append the parameters to csv file
         with open(param_filename, 'a', newline='') as param_file:

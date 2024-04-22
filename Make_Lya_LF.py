@@ -68,7 +68,7 @@ def Lya_LF_weights(r_Arr, L_lya_Arr, puri2d, comp2d,
 
 
 def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
-                  N_iter=1000, N_boots=20):
+                  N_iter=200, N_boots=20):
     '''
     Makes a matrix of Lya LFs. Each row is a LF made perturbing the L_lya estimate
     with its bin error.
@@ -111,10 +111,12 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     total_nice_lya = cat['nice_lya']
 
     # Compute the absolute UV magnitude
-    M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    # M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    M_UV_Arr = cat['M_UV']
+    M_UV_err_Arr = cat['M_UV_err']
 
     N_bins_UV = 23 + 1
-    M_UV_bins = np.linspace(-28, -17, N_bins_UV)
+    M_UV_bins = np.linspace(-30, -19, N_bins_UV)
     # Save the M_bins
     np.save(f'{LF_savedir}/M_UV_bins.npy', M_UV_bins)
 
@@ -140,11 +142,16 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
 
 
         # Preliminar completeness
-        _, comp_preliminar =\
+        puri_preliminar, comp_preliminar =\
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.05)
+        pre_comp_mask = (comp_preliminar > 0.05)# & (puri_preliminar > 0.05)
+
+        # puri_k_uv = puri_preliminar
+        # comp_k_uv = comp_preliminar
+        # puri_k = puri_preliminar
+        # comp_k = comp_preliminar
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -172,7 +179,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
+            include_mask = (w <= puri_k) & (comp_k > 0.1) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
@@ -180,7 +187,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w_uv = np.random.rand(len(puri_k_uv))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k_uv) & (comp_k_uv > 0.05) & pre_comp_mask
+            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.1) & pre_comp_mask
             w_uv[~include_mask] = 0.
             w_uv[include_mask] = 1. / comp_k_uv[include_mask]
             w_uv[np.isnan(w_uv) | np.isinf(w_uv)] = 0. # Just in case
@@ -285,12 +292,13 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # Save the bins
     np.save(f'{LF_savedir}/LF_L_bins.npy', L_bins)
 
-    print('Making the LF')
-    Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name)
-
     M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
     cat['M_UV'] = M_UV_Arr
     cat['M_UV_err'] = M_UV_err_Arr
+
+    print('Making the LF')
+    Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name)
+
 
     # Save a dictionary with useful data about the selection
     reduced_cat = {}

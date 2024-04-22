@@ -155,7 +155,7 @@ def run_mcmc_fit(nb_list, region_list):
         ## For the last bin
 
         N_bins_UV = 23 + 1
-        M_UV_bins = np.linspace(-28, -17, N_bins_UV)
+        M_UV_bins = np.linspace(-30, -19, N_bins_UV)
         LF_bins = bin_centers(M_UV_bins)
 
         vi_cat_hiz = fits.open('/home/alberto/almacen/PAUS_data/catalogs/LAE_selection_VI_hiZ_with_MUV.fits')[1].data
