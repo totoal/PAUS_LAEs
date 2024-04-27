@@ -148,8 +148,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
                            puricomp2d_L_bins, puricomp2d_r_bins)
         pre_comp_mask = (comp_preliminar > 0.05)# & (puri_preliminar > 0.05)
 
-        # puri_k_uv = puri_preliminar
-        # comp_k_uv = comp_preliminar
+        puri_k_uv = puri_preliminar
+        comp_k_uv = comp_preliminar
         # puri_k = puri_preliminar
         # comp_k = comp_preliminar
 
@@ -171,10 +171,10 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
                                puri2d, comp2d,
                                puricomp2d_L_bins, puricomp2d_r_bins)
 
-            puri_k_uv, comp_k_uv =\
-                Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
-                               puri2d_uv, comp2d_uv,
-                               puricomp2d_M_UV_bins, puricomp2d_r_bins)
+            # puri_k_uv, comp_k_uv =\
+            #     Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
+            #                    puri2d_uv, comp2d_uv,
+            #                    puricomp2d_M_UV_bins, puricomp2d_r_bins)
 
             # The array of weights w
             w = np.random.rand(len(puri_k))

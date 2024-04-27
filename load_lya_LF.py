@@ -29,9 +29,9 @@ def load_combined_LF(region_list, NB_list, combined_LF=False,
             if combined_LF:
                 this_volume = Lya_effective_volume(nb1, nb2, region_name)
                 vol_Arr = this_volume * np.ones_like(L_bins_c)
-                N_median_hist = np.nanmedian(hist_i_mat, axis=0)
-                vol_Arr[N_median_hist <= 0] = 0
-                hist_i_mat[:, N_median_hist <= 0] = 0
+                # N_median_hist = np.nanmean(hist_i_mat, axis=0)
+                # vol_Arr[N_median_hist <= 0] = 0
+                # hist_i_mat[:, N_median_hist <= 0] = 0
 
                 if masked_volume is None:
                     masked_volume = vol_Arr

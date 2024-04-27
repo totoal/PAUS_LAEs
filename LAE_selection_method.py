@@ -487,7 +487,6 @@ def select_LAEs(cat, nb_min, nb_max, r_min, r_max, ew0min_lya=20,
     # Update cat
     cat['nice_lya_0'] = np.copy(cat['nice_lya'])
     cat['nice_lya'] = nice_lya & color_mask & ml_mask & class_mask & class_star_mask
-    # cat['nice_lya'] = nice_lya & color_mask & ml_mask
     cat['class_pred'] = class_pred
 
     if check_nice_z:

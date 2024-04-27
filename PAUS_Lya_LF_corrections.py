@@ -332,10 +332,11 @@ def main(nb_min, nb_max, r_min, r_max):
 
     # State the mock area in deg²:
     area_dict = {
-        'SFG': 400,
-        'QSO_cont': 200,
-        'QSO_LAEs_loL': 400,
-        'QSO_LAEs_hiL': 4000,
+        # 'SFG': 400,
+        'SFG': 1e99,
+        'QSO_cont': 1000,
+        'QSO_LAEs_loL': 1000,
+        'QSO_LAEs_hiL': 5000,
         'GAL': 59.97 * gal_fraction,
         # 'GAL_artifact': 59.97 * gal_fraction
     }

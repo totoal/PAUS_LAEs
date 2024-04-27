@@ -58,7 +58,7 @@ def compute_invcovmat(hist_mat, where_fit, poisson_err):
     covmat = covmat_simple(this_hist_mat)[0]
 
     # Add poisson errors
-    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**2) ** 0.5
+    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**4) ** 0.5
 
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
@@ -83,10 +83,10 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
     # Load Poisson errors
     LF_dict = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
                                    LF_kind='Lya')
-    poisson_err = np.log10(1 + LF_dict['poisson_err'] / LF_dict['LF_boots'])
+    poisson_err = LF_dict['poisson_err']
 
 
-    return compute_invcovmat(np.log10(hist_i_mat), where_fit, poisson_err)
+    return compute_invcovmat(hist_i_mat, where_fit, poisson_err)
 
 
 
@@ -101,11 +101,11 @@ def schechter(L, phistar, Lstar, alpha):
 
 # The fitting curve
 def sch_fit(Lx, Phistar, Lstar, alpha):
-    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
-    Phi = schechter(Lx, 10 ** -7.272644273019171, 10 ** Lstar, alpha) * Lx * np.log(10)
-    # Phi = schechter(Lx, 10 ** Phistar, 10 ** 45.05131814514616, alpha) * Lx * np.log(10)
-    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, -1.6842352626274895) * Lx * np.log(10)
-    return np.log10(Phi)
+    Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** -6.721022310205154, 10 ** Lstar, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** 44.898743, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, -1.44) * Lx * np.log(10)
+    return Phi
 
 
 ################################################
@@ -135,7 +135,7 @@ def transform(theta):
     # Flat Priors
     Phistar_range = [-9, -3]
     Lstar_range = [40, 47]
-    alpha_range = [-4, 2]
+    alpha_range = [-4, -1]
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Lstar_range[0] + (Lstar_range[1] - Lstar_range[0]) * theta[1]
     theta_trans[2] = alpha_range[0] + (alpha_range[1] - alpha_range[0]) * theta[2]
@@ -187,7 +187,6 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
 
         LF_phi = np.mean(LF_mat_hiz, axis=0)
         yerr = np.std(LF_mat_hiz, axis=0)
-        yerr = np.log10(LF_phi + yerr) - np.log10(LF_phi)
 
         # In which LF bins fit
         where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46) & (yerr > 0)
@@ -199,7 +198,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         [yerr_up, yerr_down] = LyaLF['LF_total_err']
         yerr_up = (yerr_up**2 + LyaLF['poisson_err']**2)**0.5
         yerr_down = (yerr_down**2 + LyaLF['poisson_err']**2)**0.5
-        LF_phi = LyaLF['LF_boots']
+        LF_phi = LyaLF['LF_total']
         LF_bins = LyaLF['LF_bins']
 
         # Error to use
@@ -216,7 +215,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
     paramnames = ['Phistar', 'Lstar', 'alpha']
 
     Lx = 10**LF_bins[where_fit]
-    Phi = np.log10(LF_phi[where_fit])
+    Phi = LF_phi[where_fit]
 
     def log_like(theta):
         Phistar0 = theta[0]
@@ -290,8 +289,8 @@ if __name__ == '__main__':
     # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
     nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
 
-    suffix = '_fixed_Phistar'
-    # suffix = ''
+    # suffix = '_fixed_Lstar'
+    suffix = ''
 
     # Initialize file to write the fit parameters
     param_filename = f'schechter_fit_parameters{suffix}.csv'

@@ -19,7 +19,7 @@ matplotlib.rcParams.update({'font.size': 16})
 
 import corner
 
-from scipy import linalg, stats
+from scipy import linalg
 
 from multiprocessing import Pool
 from autoemcee import ReactiveAffineInvariantSampler
@@ -58,7 +58,7 @@ def compute_invcovmat(hist_mat, where_fit, poisson_err):
     covmat = covmat_simple(this_hist_mat)[0]
 
     # Add poisson errors
-    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**2) ** 0.5
+    covmat = (covmat**2 + np.eye(sum(where_fit)) * poisson_err[where_fit]**4) ** 0.5
 
     invcovmat = linalg.inv(covmat)
     return invcovmat, covmat
@@ -83,10 +83,9 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
     # Load Poisson errors
     LF_dict = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
                                    LF_kind='UV')
-    poisson_err = np.log10(1 + LF_dict['poisson_err'] / LF_dict['LF_boots'])
+    poisson_err = LF_dict['poisson_err']
 
-
-    return compute_invcovmat(np.log10(hist_i_mat), where_fit, poisson_err)
+    return compute_invcovmat(hist_i_mat, where_fit, poisson_err)
 
 
 
@@ -95,12 +94,13 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
 def double_power_law(M, Phistar, Mbreak, beta, gamma):
     exp1 = 0.4 * (Mbreak - M) * (beta - 1)
     exp2 = 0.4 * (Mbreak - M) * (gamma - 1)
+    # exp2 = 0.4 * (Mbreak - M) * (4.5 - 1)
 
     return 10. ** Phistar / (10. ** exp1 + 10. ** exp2)
 
 # The fitting curve
 def dpl_fit(*args):
-    return np.log10(double_power_law(*args))
+    return double_power_law(*args)
 
 ################################################
 ### A set of functions to compute MCMC stuff ###
@@ -127,10 +127,10 @@ def transform(theta):
     theta_trans = np.empty_like(theta)
     
     # Flat Priors
-    Phistar_range = [-10, -1]
-    Mbreak_range = [-27, -15]
-    beta_range = [-5, 0]
-    gamma_range = [0, 5]
+    Phistar_range = [-12, -5]
+    Mbreak_range = [-29, -26]
+    beta_range = [1, 3]
+    gamma_range = [2, 9]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Mbreak_range[0] + (Mbreak_range[1] - Mbreak_range[0]) * theta[1]
@@ -140,7 +140,7 @@ def transform(theta):
     return theta_trans
 
 # Main function
-def run_mcmc_fit(nb_list, region_list):
+def run_mcmc_fit(nb_list, region_list, suffix=''):
     # Load the Lya LF
     if len(nb_list) == 1:
         combined_LF = False
@@ -167,13 +167,13 @@ def run_mcmc_fit(nb_list, region_list):
         for field_name in ['W1', 'W2', 'W3']:
             vol_hiz += Lya_effective_volume(nb_min, nb_max, field_name)
 
-        MUV_Arr_hiz = [-24.85033822, -73.68420369, -23.65994873, -23.69145089, -23.96237285,
-                       -73.57526006, -73.46105176, -73.57526006, -23.61200385, -23.7234547,
-                       -23.77824481, -23.81355431, -23.67256559, -26.60930838, -24.55089336,
-                     -73.46105176, -23.8043054,  -23.97002486]
-        MUV_e_Arr = [0.07865987, 0.75257499, 0.26237464, 0.20637891, 0.17488506, 0.75257499,
-                    0.75257499, 0.75257499, 0.17609249, 0.19124034, 0.22245714, 0.22387602,
-                    0.20254465, 0.01569782, 0.10766078, 0.75257499, 0.20308774, 0.19353003]
+        MUV_Arr_hiz = [-26.64933704, -27.34544384, -24.26615133, -24.99848223, -25.56594088,
+                    -27.95462391, -24.04118984, -26.23213355, -25.19705692, -25.85138907,
+                    -25.74956941, -24.88433883, -24.52910255, -28.59256792, -26.59937259,
+                    -28.15989179, -25.59742986, -25.57942274]
+        MUV_e_Arr = [0.11492704, 0.13326838, 1.02683403, 0.5146013,  0.37551692, 0.08681435,
+                    1.26536046, 0.32375991, 0.42998662, 0.28097567, 0.34768862, 0.67385293,
+                    0.72415228, 0.02892516, 0.15673604, 0.06065912, 0.38661833, 0.32060876]
         LF_mat_hiz = []
         for jjj in range(100):
             MUV_Arr = np.random.choice(MUV_Arr_hiz, len(MUV_Arr_hiz), replace=True)
@@ -187,10 +187,9 @@ def run_mcmc_fit(nb_list, region_list):
 
         LF_phi = np.mean(LF_mat_hiz, axis=0)
         yerr = np.std(LF_mat_hiz, axis=0)
-        yerr = np.log10(LF_phi + yerr) - np.log10(LF_phi)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -28) & (LF_bins < -15) & (yerr > 0) & np.isfinite(LF_phi)
+        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -25)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
@@ -200,7 +199,7 @@ def run_mcmc_fit(nb_list, region_list):
         [yerr_up, yerr_down] = uv_LF['LF_total_err']
         yerr_up = (yerr_up**2 + uv_LF['poisson_err']**2)**0.5
         yerr_down = (yerr_down**2 + uv_LF['poisson_err']**2)**0.5
-        LF_phi = uv_LF['LF_total']
+        LF_phi = uv_LF['LF_boots']
         LF_bins = uv_LF['LF_bins']
         
 
@@ -209,7 +208,7 @@ def run_mcmc_fit(nb_list, region_list):
         yerr[LF_phi == 0] = np.inf
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -28) & (LF_bins < -15) & (uv_LF['poisson_err'] > 0) & np.isfinite(LF_phi)
+        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -25)
 
         invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
 
@@ -217,7 +216,7 @@ def run_mcmc_fit(nb_list, region_list):
     paramnames = ['Phistar', 'Mbreak', 'beta', 'gamma']
 
     Lx = LF_bins[where_fit]
-    Phi = np.log10(LF_phi[where_fit])
+    Phi = LF_phi[where_fit]
 
     def log_like(theta):
         Phistar0 = theta[0]
@@ -258,7 +257,7 @@ def run_mcmc_fit(nb_list, region_list):
     
     # Save the chain
     flat_samples = sampler.results['samples']
-    np.save(f'chains/mcmc_UV_dpl_fit_chain_nb{nb1}-{nb2}', flat_samples)
+    np.save(f'chains/mcmc_UV_dpl_fit_chain_nb{nb1}-{nb2}{suffix}', flat_samples)
 
     # Obtain the fit parameters
     fit_params = sampler.results['posterior']['median']
@@ -288,10 +287,14 @@ if __name__ == '__main__':
     nb_list = [[0, 3], [2, 5], [4, 7], [6, 9], [8, 11], [10, 13], [12, 15], [14, 18]]
 
     # Add individual NB LFs
-    nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
+    nb_list = [[nbl] for nbl in nb_list] + [nb_list]# + [[1, 1, 1]]
+
+
+    # suffix = '_fixed_gamma'
+    suffix = ''
 
     # Initialize file to write the fit parameters
-    param_filename = 'UV_dpl_fit_parameters.csv'
+    param_filename = f'UV_dpl_fit_parameters{suffix}.csv'
     columns = ['nb_min', 'nb_max', 'Phistar', 'Mbreak', 'beta',
                'gamma', 'Phistar_err_up', 'Mbreak_err_up', 'beta_err_up',
                'gamma_err_up', 'Phistar_err_down', 'Mbreak_err_down',
@@ -302,7 +305,7 @@ if __name__ == '__main__':
         print(nbl)
         # Run the MCMC fit
         fit_params, fit_params_err_up, fit_params_err_down =\
-            run_mcmc_fit(nbl, region_list)
+            run_mcmc_fit(nbl, region_list, suffix=suffix)
 
         # Append the parameters to csv file
         with open(param_filename, 'a', newline='') as param_file:

@@ -14,6 +14,7 @@ MUV_err = []
 for field_name in ['W1', 'W2', 'W3']:
     path_to_cat = [f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_3arcsec_{field_name}_extinction_corrected.pq']
     cat = load_paus_cat(path_to_cat)
+    print(f'{sum(cat["NB_number"] > 39)=}')
 
     mask = vi_cat['is_hiZ_LAE'] & (vi_cat['field'] == field_name)
 

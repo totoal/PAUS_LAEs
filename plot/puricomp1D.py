@@ -11,18 +11,18 @@ import sys
 sys.path.insert(0, '..')
 
 from jpasLAEs.utils import bin_centers
-from paus_utils import NB_z, z_NB
+from paus_utils import NB_z, z_NB, PAUS_monochromatic_Mag
 
 area_dict = {
     'SFG': 400,
-    'QSO_cont': 200,
-    'QSO_LAEs_loL': 400,
-    'QSO_LAEs_hiL': 4000,
+    'QSO_cont': 1000,
+    'QSO_LAEs_loL': 1000,
+    'QSO_LAEs_hiL': 5000,
     'GAL': 59.97
 }
 
 def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
-                    L_bins=None):
+                    L_bins=None, LF_kind='Lya'):
     corr_dir = '/home/alberto/almacen/PAUS_data/LF_corrections'
     with open(f'{corr_dir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'rb') as f:
         mocks_dict = pickle.load(f)

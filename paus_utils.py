@@ -189,9 +189,9 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
     '''
     area_dict = {
         'SFG': 400,
-        'QSO_cont': 200,
-        'QSO_LAEs_loL': 400,
-        'QSO_LAEs_hiL': 4000,
+        'QSO_cont': 1000,
+        'QSO_LAEs_loL': 1000,
+        'QSO_LAEs_hiL': 5000,
         'GAL': 59.97,
         'W3': 17.020433524313027,
         'W2': 10.725131487901393,
@@ -254,7 +254,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
     # Find the NB of the specified wavelength in rest-frame
     nb_w_rest = NB_z(redshift, wavelength)
     dist_lum_Arr = cosmo.luminosity_distance(redshift).to(u.pc).value
-    dist_lum_err_Arr = cosmo.luminosity_distance(redshift + 0.025).to(u.pc).value - dist_lum_Arr
+    dist_lum_err_Arr = cosmo.luminosity_distance(redshift + 0.06).to(u.pc).value - dist_lum_Arr
 
     N_sources = len(redshift)
 
