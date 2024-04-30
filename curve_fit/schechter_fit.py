@@ -101,10 +101,10 @@ def schechter(L, phistar, Lstar, alpha):
 
 # The fitting curve
 def sch_fit(Lx, Phistar, Lstar, alpha):
-    Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, alpha) * Lx * np.log(10)
     # Phi = schechter(Lx, 10 ** -6.721022310205154, 10 ** Lstar, alpha) * Lx * np.log(10)
-    # Phi = schechter(Lx, 10 ** Phistar, 10 ** 44.898743, alpha) * Lx * np.log(10)
-    # Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, -1.44) * Lx * np.log(10)
+    # Phi = schechter(Lx, 10 ** Phistar, 10 ** 45., alpha) * Lx * np.log(10)
+    Phi = schechter(Lx, 10 ** Phistar, 10 ** Lstar, -1.67) * Lx * np.log(10)
     return Phi
 
 
@@ -134,8 +134,8 @@ def transform(theta):
     
     # Flat Priors
     Phistar_range = [-9, -3]
-    Lstar_range = [40, 47]
-    alpha_range = [-4, -1]
+    Lstar_range = [43, 45.5]
+    alpha_range = [-3, -1]
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Lstar_range[0] + (Lstar_range[1] - Lstar_range[0]) * theta[1]
     theta_trans[2] = alpha_range[0] + (alpha_range[1] - alpha_range[0]) * theta[2]
@@ -189,7 +189,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr = np.std(LF_mat_hiz, axis=0)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46) & (yerr > 0)
+        where_fit = np.isfinite(yerr) & (LF_bins > 43) & (LF_bins < 46) & (yerr > 0)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
@@ -206,7 +206,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr[LF_phi == 0] = np.inf
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 46)
+        where_fit = np.isfinite(yerr) & (LF_bins > 44) & (LF_bins < 46)
 
         invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
 
@@ -290,7 +290,8 @@ if __name__ == '__main__':
     nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
 
     # suffix = '_fixed_Lstar'
-    suffix = ''
+    suffix = '_fixed_alpha'
+    # suffix = ''
 
     # Initialize file to write the fit parameters
     param_filename = f'schechter_fit_parameters{suffix}.csv'

@@ -111,7 +111,6 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     total_nice_lya = cat['nice_lya']
 
     # Compute the absolute UV magnitude
-    # M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
     M_UV_Arr = cat['M_UV']
     M_UV_err_Arr = cat['M_UV_err']
 
@@ -148,10 +147,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
                            puricomp2d_L_bins, puricomp2d_r_bins)
         pre_comp_mask = (comp_preliminar > 0.05)# & (puri_preliminar > 0.05)
 
-        puri_k_uv = puri_preliminar
-        comp_k_uv = comp_preliminar
-        # puri_k = puri_preliminar
-        # comp_k = comp_preliminar
+        # puri_k_uv = puri_preliminar
+        # comp_k_uv = comp_preliminar
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -164,17 +161,17 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
             L_perturbed[np.isnan(L_perturbed)] = 0.
 
-            M_perturbed = M_UV_Arr - randN * M_UV_err_Arr
+            M_perturbed = M_UV_Arr + randN * M_UV_err_Arr
 
             puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
                                puri2d, comp2d,
                                puricomp2d_L_bins, puricomp2d_r_bins)
 
-            # puri_k_uv, comp_k_uv =\
-            #     Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
-            #                    puri2d_uv, comp2d_uv,
-            #                    puricomp2d_M_UV_bins, puricomp2d_r_bins)
+            puri_k_uv, comp_k_uv =\
+                Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
+                               puri2d_uv, comp2d_uv,
+                               puricomp2d_M_UV_bins, puricomp2d_r_bins)
 
             # The array of weights w
             w = np.random.rand(len(puri_k))
