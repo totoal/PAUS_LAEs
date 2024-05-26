@@ -27,6 +27,7 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
     with open(f'{corr_dir}/mock_dict_{field_name}_nb{nb_min}-{nb_max}.pkl', 'rb') as f:
         mocks_dict = pickle.load(f)
 
+
     if L_bins is None:
         L_bins = np.linspace(42, 46, 20)
     L_bins_c = bin_centers(L_bins)
@@ -53,13 +54,20 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
 
         area_obs = area_dict[mock_name]
 
-        h_sel += np.histogram(mock['L_lya_corr'][mask_sel],
+        if LF_kind == 'Lya':
+            L_key = 'L_lya_corr'
+            L_spec_key = 'L_lya_spec'
+        elif LF_kind == 'UV':
+            L_key = 'M_UV'
+            L_spec_key = 'M_UV_spec'
+
+        h_sel += np.histogram(mock[L_key][mask_sel],
                               L_bins)[0] / area_obs
-        h_nice += np.histogram(mock['L_lya_corr'][mask_nice],
+        h_nice += np.histogram(mock[L_key][mask_nice],
                                     L_bins)[0] / area_obs
-        h_nice_spec += np.histogram(mock['L_lya_spec'][mask_nice & mask_parent],
+        h_nice_spec += np.histogram(mock[L_spec_key][mask_nice & mask_parent],
                                     L_bins)[0] / area_obs
-        h_parent += np.histogram(mock['L_lya_spec'][mask_parent],
+        h_parent += np.histogram(mock[L_spec_key][mask_parent],
                                   L_bins)[0] / area_obs
 
     puri1d = np.zeros_like(h_sel)
@@ -73,7 +81,3 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
         h_nice_spec[mask_nonzero_parent] / h_parent[mask_nonzero_parent]
 
     return puri1d, comp1d
-
-
-if __name__ == '__main__':
-    plot_puricomp1d('foo', 0, 2, 17, 24)

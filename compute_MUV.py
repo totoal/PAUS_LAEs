@@ -10,6 +10,7 @@ vi_cat = fits.open('/home/alberto/almacen/PAUS_data/catalogs/LAE_selection_VI_hi
 
 MUV = []
 MUV_err = []
+redshifts_list = []
 
 for field_name in ['W1', 'W2', 'W3']:
     path_to_cat = [f'/home/alberto/almacen/PAUS_data/catalogs/PAUS_3arcsec_{field_name}_extinction_corrected.pq']
@@ -38,6 +39,8 @@ for field_name in ['W1', 'W2', 'W3']:
     this_MUV, this_MUV_err = PAUS_monochromatic_Mag(cat)
     MUV.append(this_MUV)
     MUV_err.append(this_MUV_err)
+    redshifts_list.append(redshifts)
 
 print(np.concatenate(MUV)[np.concatenate(MUV) < 0])
 print(np.concatenate(MUV_err)[np.concatenate(MUV) < 0])
+print(np.concatenate(redshifts_list))

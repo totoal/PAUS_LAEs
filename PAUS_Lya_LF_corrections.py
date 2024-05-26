@@ -1,6 +1,7 @@
 #!/home/alberto/miniconda3/bin/python3
 
 from jpasLAEs.utils import smooth_Image, bin_centers, hms_since_t0
+from K_corr import UV_magnitude_K
 
 from load_paus_mocks import load_mock_dict, add_errors
 from paus_utils import *
@@ -262,17 +263,30 @@ def compute_LF_corrections(mock_dict, field_name,
                           nb_min, nb_max)
 
     # Now apply the bias correction and compute L statistical errors
-    for _, mock in mock_dict.items():
+    for mock_name, mock in mock_dict.items():
         mock = L_lya_bias_apply(mock, field_name, nb_min, nb_max)
-        ## Compute UV magnitudes
-        M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(mock, wavelength=1450)
-        mock['M_UV'] = M_UV_Arr
-        mock['M_UV_err'] = M_UV_err_Arr
 
         M_UV_spec_Arr, _ = PAUS_monochromatic_Mag(mock, wavelength=1450,
                                                   flx_cat_key='flx_0',
-                                                  redshift_cat_key='zspec')
+                                                  redshift_cat_key='zspec',
+                                                  only_nice=False)
         mock['M_UV_spec'] = M_UV_spec_Arr
+
+    # Save M_UV and M_UV_spec
+    where_save = '/home/alberto/almacen/PAUS_data/K_corrections'
+    os.makedirs(where_save, exist_ok=True)
+    np.save(f'{where_save}/r_synth_nb{nb_min}-{nb_max}.npy', mock_dict['QSO_LAEs_loL']['r_mag'])
+    np.save(f'{where_save}/M_UV_spec_nb{nb_min}-{nb_max}.npy', mock_dict['QSO_LAEs_loL']['M_UV_spec'])
+    np.save(f'{where_save}/zspec_nb{nb_min}-{nb_max}.npy', mock_dict['QSO_LAEs_loL']['zspec'])
+
+    for mock_name, mock in mock_dict.items():
+        mock = L_lya_bias_apply(mock, field_name, nb_min, nb_max)
+        ## Compute UV magnitudes
+        M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(mock, wavelength=1450)
+        # M_UV_Arr, M_UV_err_Arr = UV_magnitude_K(mock['r_mag'], mock['z_NB'], nb_min, nb_max,
+        #                                         nice_mask=mock['nice_lya'])
+        mock['M_UV'] = M_UV_Arr
+        mock['M_UV_err'] = M_UV_err_Arr
 
     # Now compute the correction matrices
     r_bins = np.linspace(r_min, r_max, 200 + 1)
@@ -303,7 +317,7 @@ def compute_LF_corrections(mock_dict, field_name,
     reduced_mock_dict = {}
     keys_to_save = ['nice_lya', 'nice_lya_0', 'zspec', 'r_mag', 'lya_NB',
                     'EW0_lya_spec', 'L_lya_spec', 'EW0_lya',
-                    'L_lya', 'L_lya_corr', 'area', 'flx', 'err']
+                    'L_lya', 'L_lya_corr', 'area', 'flx', 'err', 'M_UV', 'M_UV_spec']
     for mock_name in mock_dict.keys():
         reduced_mock_dict[mock_name] = {}
         for key in keys_to_save:
@@ -328,7 +342,6 @@ def main(nb_min, nb_max, r_min, r_max):
                                  mock_QSO_LAEs_loL_path, mock_QSO_LAEs_hiL_path,
                                  mock_GAL_dir, mock_GAL_suff, gal_fraction=gal_fraction,
                                  load_artifact_mock=False)
-                                #  load_artifact_mock=True)
 
     # State the mock area in deg²:
     area_dict = {
@@ -338,7 +351,6 @@ def main(nb_min, nb_max, r_min, r_max):
         'QSO_LAEs_loL': 1000,
         'QSO_LAEs_hiL': 5000,
         'GAL': 59.97 * gal_fraction,
-        # 'GAL_artifact': 59.97 * gal_fraction
     }
 
     for mock_name, area in area_dict.items():

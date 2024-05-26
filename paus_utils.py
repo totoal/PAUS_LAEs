@@ -23,7 +23,7 @@ fwhm_Arr = np.array(data_tab['fwhm'])
 w_lya = 1215.67
 
 def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
-                     fs=15, sdss_range_mode=False, plot_BBs=True):
+                     fs=15, sdss_range_mode=False, plot_BBs=True, markersize=7):
     '''
     Generates a plot with the JPAS data.
     '''
@@ -46,7 +46,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
     for i, w in enumerate(w_central[:-6]):
         ax.errorbar(w, flx[i], yerr=err[i],
                     marker='s', markeredgecolor='dimgray', markerfacecolor=cmap[i],
-                    markersize=7, ecolor='dimgray', capsize=4, capthick=1, linestyle='',
+                    markersize=markersize, ecolor='dimgray', capsize=4, capthick=1, linestyle='',
                     zorder=-99)
     # If BBs are included, plot them
     if (len(flx) > 40) and plot_BBs:
@@ -63,7 +63,7 @@ def plot_PAUS_source(flx, err, ax=None, set_ylim=True, e17scale=True,
 
             ax.errorbar(w_central[i - 6], bb_flx, yerr=bb_err,
                         markeredgecolor='dimgray',
-                        fmt='^', markerfacecolor=cmap[i - 6], markersize=13,
+                        fmt='^', markerfacecolor=cmap[i - 6], markersize=markersize*2,
                         ecolor='dimgray', capsize=4, capthick=1, alpha=0.8)
 
     try:
@@ -228,7 +228,8 @@ def Lya_effective_volume(nb_min, nb_max, region_name=1):
 
 
 def PAUS_monochromatic_Mag(cat, wavelength=1450,
-                           flx_cat_key='flx', redshift_cat_key='z_NB'):
+                           flx_cat_key='flx', redshift_cat_key='z_NB',
+                           only_nice=True):
     '''
     Calculate the absolute magnitude (M) and its error for sources in a catalog
     at a specified monochromatic wavelength in the rest-frame.
@@ -261,16 +262,25 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
     flambda_Arr = np.ones(N_sources).astype(float) * 99.
     flambda_err_Arr = np.copy(flambda_Arr)
 
-    src_list = np.where(cat['nice_lya'])[0]
+    if only_nice:
+        src_list = np.where(cat['nice_lya'])[0]
+    else:
+        src_list = np.arange(len(cat['nice_lya']))
+
     for src in src_list:
-        nb_min = nb_w_rest[src]
+        if cat['lya_NB'][src] < 0:
+            continue
+
+        nb_min = nb_w_rest[src] - 3
         if nb_min == -1:
             nb_min = 38
-        nb_max = nb_min + 1
+        nb_max = nb_min + 2
         if nb_max == nb_min:
             continue
 
         w = cat['err'][nb_min : nb_max, src] ** -2
+        if sum(w) == 0:
+            continue
         flambda_Arr[src] = np.average(cat[flx_cat_key][nb_min : nb_max, src],
                                       weights=w)
         flambda_err_Arr[src] = np.sum(w, axis=0) ** -0.5
@@ -280,11 +290,16 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
                                              wavelength * (1 + redshift))
 
     M_Arr = np.ones(N_sources) * 99
-    M_Arr_err = np.ones(N_sources) * 99
+    M_Arr_err = np.ones(N_sources) * 0
 
-    mask = cat['nice_lya']
-    M_Arr[mask] = magAB_Arr[mask] - 5 * (np.log10(dist_lum_Arr[mask]) - 1)
+    K_corr = -2.5 * np.log10(1 + redshift) * (1 - 1.55 + 1)
 
+    if only_nice:
+        mask = cat['nice_lya']
+    else:
+        mask = cat[redshift_cat_key] > 2.7
+
+    M_Arr[mask] = magAB_Arr[mask] - 5 * (np.log10(dist_lum_Arr[mask]) - 1) - K_corr[mask]
     M_Arr_err[mask] = (magAB_err_Arr[mask] ** 2 + (5 / dist_lum_Arr[mask] * np.log10(np.e) * dist_lum_err_Arr[mask]) ** 2) ** 0.5
 
     return M_Arr, M_Arr_err

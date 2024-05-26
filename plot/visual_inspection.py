@@ -80,7 +80,11 @@ if __name__ == '__main__':
         os.makedirs(f'{fig_save_dir}/with_spec', exist_ok=True)
         os.makedirs(f'{fig_save_dir}/no_spec', exist_ok=True)
 
-        for sel_src, refid in enumerate(selection['ref_id']):
+        sel_to_plot = selection['ref_id']
+        # sel_to_plot = selection['ref_id'][selection['r_mag'] < 20]
+        # sel_src_list = np.where(selection['r_mag'] < 20)[0]
+
+        for sel_src, refid in enumerate(sel_to_plot):
             try:
                 cat_src = np.where((refid == cat['ref_id'])
                                    & (selection['field'][sel_src] == field_name))[0][0]
@@ -111,8 +115,8 @@ if __name__ == '__main__':
             fiber = selection['fiber'][sel_src]
             spec_name = f'spec-{plate:04d}-{mjd:05d}-{fiber:04d}.fits'
             print(spec_name)
-            spec_bool = True
-            # spec_bool = False
+            # spec_bool = True
+            spec_bool = False
             try:
                 spec_sdss = Table.read(f'{fits_dir}/{spec_name}', hdu=1, format='fits')
                 sdss_bbs = Table.read(f'{fits_dir}/{spec_name}', hdu=2, format='fits')['SPECTROFLUX']
@@ -140,9 +144,6 @@ if __name__ == '__main__':
 
                 ax.plot(spec_w_sdss_rb, spec_flx_sdss_rb,
                         c='dimgray', zorder=-99, alpha=0.7)
-            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            else:
-                continue
 
             #### Info text ####
             ypos = ax.get_ylim()[1] * 1.05
@@ -206,6 +207,10 @@ if __name__ == '__main__':
             # Lya NB
             ax.axvline(w_lya * (1 + z_NB(selection['lya_NB'][sel_src])),
                     ls=':', color='dimgray')
+
+            # 1450 NB
+            ax.axvline(1450 * (1 + selection['z_NB'][sel_src]),
+                    ls='--', color='g')
 
             # Mark the zero flux level
             ax.axhline(0, color='k', zorder=-9999)

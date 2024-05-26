@@ -94,7 +94,11 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
 def double_power_law(M, Phistar, Mbreak, beta, gamma):
     exp1 = 0.4 * (Mbreak - M) * (beta - 1)
     exp2 = 0.4 * (Mbreak - M) * (gamma - 1)
-    # exp2 = 0.4 * (Mbreak - M) * (4.5 - 1)
+    # exp2 = 0.4 * (Mbreak - M) * (4.34 - 1)
+
+
+    # exp1 = 0.4 * (-26.8 - M) * (beta - 1)
+    # exp2 = 0.4 * (-26.8 - M) * (gamma - 1)
 
     return 10. ** Phistar / (10. ** exp1 + 10. ** exp2)
 
@@ -130,7 +134,7 @@ def transform(theta):
     Phistar_range = [-12, -5]
     Mbreak_range = [-29, -26]
     beta_range = [1, 3]
-    gamma_range = [2, 9]
+    gamma_range = [3, 6]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Mbreak_range[0] + (Mbreak_range[1] - Mbreak_range[0]) * theta[1]
@@ -189,7 +193,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr = np.std(LF_mat_hiz, axis=0)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -25)
+        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -24)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
@@ -208,7 +212,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr[LF_phi == 0] = np.inf
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -25)
+        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -24)
 
         invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
 
@@ -237,7 +241,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
                                              log_like,
                                              transform=transform)
     # Run the sampler
-    sampler.run(max_ncalls=1e7, progress=False)
+    sampler.run(max_ncalls=1e7, progress=False, num_chains=16, num_initial_steps=100)
     # Print the results
     sampler.print_results()
 
@@ -290,7 +294,7 @@ if __name__ == '__main__':
     nb_list = [[nbl] for nbl in nb_list] + [nb_list]# + [[1, 1, 1]]
 
 
-    # suffix = '_fixed_gamma'
+    # suffix = '_fixed_M'
     suffix = ''
 
     # Initialize file to write the fit parameters

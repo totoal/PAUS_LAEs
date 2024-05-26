@@ -2,6 +2,7 @@
 
 # from load_paus_mocks import add_errors, load_mock_dict
 from load_paus_cat import load_paus_cat
+from K_corr import UV_magnitude_K
 
 import numpy as np
  
@@ -145,7 +146,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.05)# & (puri_preliminar > 0.05)
+        pre_comp_mask = (comp_preliminar > 0.05)
+        pre_comp_mask_uv = (comp_preliminar > 0.05)# & cat['LAE_VI'][boot_nice_lya]
 
         # puri_k_uv = puri_preliminar
         # comp_k_uv = comp_preliminar
@@ -176,7 +178,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.1) & pre_comp_mask
+            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
@@ -184,7 +186,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w_uv = np.random.rand(len(puri_k_uv))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.1) & pre_comp_mask
+            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.05) & pre_comp_mask_uv
             w_uv[~include_mask] = 0.
             w_uv[include_mask] = 1. / comp_k_uv[include_mask]
             w_uv[np.isnan(w_uv) | np.isinf(w_uv)] = 0. # Just in case
@@ -259,14 +261,28 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     vi_cat = fits.open('/home/alberto/almacen/PAUS_data/catalogs/PAUS_LAE_selection_visual_insp_AT.fits')
     vi_ref_ID = vi_cat[1].data['ref_id']
     vi_is_junk = vi_cat[1].data['is_junk_VI']
+    vi_is_lae = vi_cat[1].data['is_LAE_VI']
     vi_field = vi_cat[1].data['field']
 
     vi_ref_ID = vi_ref_ID[vi_field == field_name]
     vi_is_junk = vi_is_junk[vi_field == field_name]
     junk_IDs = vi_ref_ID[vi_is_junk]
+
+    vi_is_lae = vi_is_lae[vi_field == field_name]
+    lae_IDs = vi_ref_ID[vi_is_lae]
+    cat['LAE_VI'] = np.zeros_like(cat['ref_id']).astype(bool)
     for thisid in junk_IDs:
         if thisid in cat['ref_id']:
             cat['nice_lya'][cat['ref_id'] == thisid] = False
+
+    # Extra junk
+    for refid in [22483047, 2297114, 2307672, 16571662, 2316629, 2186228, 2300249, 2297927]:
+        cat['nice_lya'][np.where(cat['ref_id'] == refid)] = False
+        print(np.where(cat['ref_id'] == refid))
+
+    for thisid in lae_IDs:
+        if thisid in cat['ref_id']:
+            cat['LAE_VI'][cat['ref_id'] == thisid] = True
 
     # Apply the bias correction and compute L statistical errors
     cat = L_lya_bias_apply(cat, field_name, nb_min, nb_max)
@@ -289,7 +305,9 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
     # Save the bins
     np.save(f'{LF_savedir}/LF_L_bins.npy', L_bins)
 
-    M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450)
+    M_UV_Arr, M_UV_err_Arr = PAUS_monochromatic_Mag(cat, wavelength=1450, only_nice=True)
+    # M_UV_Arr, M_UV_err_Arr = UV_magnitude_K(cat['r_mag'], cat['z_NB'], nb_min, nb_max,
+    #                                         nice_mask=cat['nice_lya'])
     cat['M_UV'] = M_UV_Arr
     cat['M_UV_err'] = M_UV_err_Arr
 
