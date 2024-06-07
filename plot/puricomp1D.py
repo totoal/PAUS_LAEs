@@ -60,6 +60,11 @@ def plot_puricomp1d(field_name, nb_min, nb_max, r_min, r_max,
         elif LF_kind == 'UV':
             L_key = 'M_UV'
             L_spec_key = 'M_UV_spec'
+        elif LF_kind == 'r':
+            L_key = 'r_mag'
+            L_spec_key = 'r_mag'
+        else:
+            raise ValueError('What?')
 
         h_sel += np.histogram(mock[L_key][mask_sel],
                               L_bins)[0] / area_obs

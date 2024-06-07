@@ -284,6 +284,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
         flambda_Arr[src] = np.average(cat[flx_cat_key][nb_min : nb_max, src],
                                       weights=w)
         flambda_err_Arr[src] = np.sum(w, axis=0) ** -0.5
+    print(nb_min, nb_max)
 
     magAB_Arr = flux_to_mag(flambda_Arr, wavelength * (1 + redshift))
     magAB_err_Arr = magAB_Arr - flux_to_mag(flambda_Arr + flambda_err_Arr,
@@ -292,7 +293,7 @@ def PAUS_monochromatic_Mag(cat, wavelength=1450,
     M_Arr = np.ones(N_sources) * 99
     M_Arr_err = np.ones(N_sources) * 0
 
-    K_corr = -2.5 * np.log10(1 + redshift) * (1 - 1.55 + 1)
+    K_corr = -2.5 * np.log10(1 + redshift) * (1.55 - 2 + 1)
 
     if only_nice:
         mask = cat['nice_lya']

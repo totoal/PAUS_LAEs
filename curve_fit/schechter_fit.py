@@ -194,7 +194,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
     else:
-        LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF)
+        LyaLF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF, merge_bins=True)
         [yerr_up, yerr_down] = LyaLF['LF_total_err']
         yerr_up = (yerr_up**2 + LyaLF['poisson_err']**2)**0.5
         yerr_down = (yerr_down**2 + LyaLF['poisson_err']**2)**0.5
@@ -208,7 +208,9 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         # In which LF bins fit
         where_fit = np.isfinite(yerr) & (LF_bins > 44) & (LF_bins < 45.5)
 
-        invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+        # invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+        covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
+        invcovmat = linalg.inv(covmat)
 
 
     # Define the name of the fit parameters
@@ -287,7 +289,8 @@ if __name__ == '__main__':
 
     # Add individual NB LFs
     # nb_list = [[nbl] for nbl in nb_list] + [[[n, n]] for n in range(18 + 1)] + [nb_list]
-    nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
+    # nb_list = [[nbl] for nbl in nb_list] + [nb_list] + [[1, 1, 1]]
+    nb_list = [[nbl] for nbl in nb_list]# + [[1, 1, 1]]
 
     # suffix = '_fixed_Lstar'
     # suffix = '_fixed_alpha'

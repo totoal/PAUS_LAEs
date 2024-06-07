@@ -2,6 +2,8 @@ import os
 import sys
 sys.path.insert(0, '..')
 
+from plot.puricomp1D import plot_puricomp1d
+
 from astropy.io import fits
 
 from paus_utils import Lya_effective_volume
@@ -82,7 +84,7 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
 
     # Load Poisson errors
     LF_dict = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
-                                   LF_kind='UV')
+                                   LF_kind='UV', merge_bins=True)
     poisson_err = LF_dict['poisson_err']
 
     return compute_invcovmat(hist_i_mat, where_fit, poisson_err)
@@ -94,7 +96,7 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
 def double_power_law(M, Phistar, Mbreak, beta, gamma):
     exp1 = 0.4 * (Mbreak - M) * (beta - 1)
     exp2 = 0.4 * (Mbreak - M) * (gamma - 1)
-    # exp2 = 0.4 * (Mbreak - M) * (4.34 - 1)
+    # exp1 = 0.4 * (Mbreak - M) * (1.25 - 1)
 
 
     # exp1 = 0.4 * (-26.8 - M) * (beta - 1)
@@ -132,14 +134,22 @@ def transform(theta):
     
     # Flat Priors
     Phistar_range = [-12, -5]
-    Mbreak_range = [-29, -26]
+    Mbreak_range = [-28, -25]
     beta_range = [1, 3]
-    gamma_range = [3, 6]
+    gamma_range = [2, 6]
 
     theta_trans[0] = Phistar_range[0] + (Phistar_range[1] - Phistar_range[0]) * theta[0]
     theta_trans[1] = Mbreak_range[0] + (Mbreak_range[1] - Mbreak_range[0]) * theta[1]
     theta_trans[2] = beta_range[0] + (beta_range[1] - beta_range[0]) * theta[2]
     theta_trans[3] = gamma_range[0] + (gamma_range[1] - gamma_range[0]) * theta[3]
+
+    # Impose that beta is the faint-end
+    if theta_trans[2] > theta_trans[3]:
+        beta = theta_trans[3]
+        gamma = theta_trans[2]
+
+        theta_trans[2] = beta
+        theta_trans[3] = gamma
 
     return theta_trans
 
@@ -158,8 +168,8 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
     if last_bin:
         ## For the last bin
 
-        N_bins_UV = 23 + 1
-        M_UV_bins = np.linspace(-30, -19, N_bins_UV)
+        N_bins_UV = 15 + 1
+        M_UV_bins = np.linspace(-29, -20, N_bins_UV)
         LF_bins = bin_centers(M_UV_bins)
 
         vi_cat_hiz = fits.open('/home/alberto/almacen/PAUS_data/catalogs/LAE_selection_VI_hiZ_with_MUV.fits')[1].data
@@ -171,13 +181,28 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         for field_name in ['W1', 'W2', 'W3']:
             vol_hiz += Lya_effective_volume(nb_min, nb_max, field_name)
 
-        MUV_Arr_hiz = [-26.64933704, -27.34544384, -24.26615133, -24.99848223, -25.56594088,
-                    -27.95462391, -24.04118984, -26.23213355, -25.19705692, -25.85138907,
-                    -25.74956941, -24.88433883, -24.52910255, -28.59256792, -26.59937259,
-                    -28.15989179, -25.59742986, -25.57942274]
-        MUV_e_Arr = [0.11492704, 0.13326838, 1.02683403, 0.5146013,  0.37551692, 0.08681435,
-                    1.26536046, 0.32375991, 0.42998662, 0.28097567, 0.34768862, 0.67385293,
-                    0.72415228, 0.02892516, 0.15673604, 0.06065912, 0.38661833, 0.32060876]
+        MUV_Arr_hiz = [-26.00815908, -26.41098998, -24.93151548, -25.05933138, -25.35907622,
+                -25.79807691, -24.08467456, -24.1157897,  -24.87180146, -24.96650181,
+                -24.34114712, -25.28407456, -24.84394686, -27.67097554, -25.81566043,
+                -27.30858114, -25.19404038, -25.06438326]
+        MUV_e_Arr = [0.11818163, 0.0293309,  0.21122928, 0.18454289, 0.16338634, 0.04101937,
+                0.13203216, 0.12600382, 0.17985357, 0.22956735, 0.43273819, 0.25491924,
+                0.18425952, 0.04039247, 0.10596378, 0.03133059, 0.17442288, 0.21355674]
+
+        r_min, r_max = 17, 24
+        puricomp1d_L_bins = np.linspace(-31, -20, 10)
+        puricomp1d_L_bins_c = bin_centers(puricomp1d_L_bins)
+
+        puri1d, comp1d = plot_puricomp1d('W1', 0, 18,
+                                            r_min, r_max,
+                                            L_bins=puricomp1d_L_bins,
+                                            LF_kind='UV')
+
+        puri_sel = np.interp(MUV_Arr_hiz, puricomp1d_L_bins_c, puri1d)
+        comp_sel = np.interp(MUV_Arr_hiz, puricomp1d_L_bins_c, comp1d)
+        weights = puri_sel / comp_sel
+
+
         LF_mat_hiz = []
         for jjj in range(100):
             MUV_Arr = np.random.choice(MUV_Arr_hiz, len(MUV_Arr_hiz), replace=True)
@@ -187,19 +212,20 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
             MUV_perturbed = MUV_Arr + MUV_e_Arr * randN
             MUV_perturbed[np.isnan(MUV_perturbed)] = 0.
 
-            LF_mat_hiz.append(np.histogram(MUV_perturbed, M_UV_bins)[0] / (M_UV_bins[1] - M_UV_bins[0]) / vol_hiz)
+            LF_mat_hiz.append(np.histogram(MUV_perturbed, M_UV_bins,
+                                           weights=weights)[0] / (M_UV_bins[1] - M_UV_bins[0]) / vol_hiz)
 
         LF_phi = np.mean(LF_mat_hiz, axis=0)
         yerr = np.std(LF_mat_hiz, axis=0)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -24)
+        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24.2)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
     else:
         uv_LF = load_combined_LF(region_list, nb_list, combined_LF=combined_LF,
-                                LF_kind='UV')
+                                LF_kind='UV', merge_bins=True)
         [yerr_up, yerr_down] = uv_LF['LF_total_err']
         yerr_up = (yerr_up**2 + uv_LF['poisson_err']**2)**0.5
         yerr_down = (yerr_down**2 + uv_LF['poisson_err']**2)**0.5
@@ -209,12 +235,16 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
 
         # Error to use
         yerr = (yerr_up + yerr_down) * 0.5
-        yerr[LF_phi == 0] = np.inf
+        
+        effvol = Lya_effective_volume(*nb_list[0], 36)
+        yerr[LF_phi == 0] = 1.**0.5 / effvol
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -30) & (LF_bins < -24)
+        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24.2)
 
-        invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+        # invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
+        covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
+        invcovmat = linalg.inv(covmat)
 
     # Define the name of the fit parameters
     paramnames = ['Phistar', 'Mbreak', 'beta', 'gamma']
@@ -291,10 +321,11 @@ if __name__ == '__main__':
     nb_list = [[0, 3], [2, 5], [4, 7], [6, 9], [8, 11], [10, 13], [12, 15], [14, 18]]
 
     # Add individual NB LFs
-    nb_list = [[nbl] for nbl in nb_list] + [nb_list]# + [[1, 1, 1]]
+    nb_list = [[nbl] for nbl in nb_list]# + [nb_list]# + [[1, 1, 1]]
 
 
     # suffix = '_fixed_M'
+    # suffix = '_fixed_beta'
     suffix = ''
 
     # Initialize file to write the fit parameters

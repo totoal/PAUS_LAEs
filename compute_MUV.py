@@ -41,6 +41,6 @@ for field_name in ['W1', 'W2', 'W3']:
     MUV_err.append(this_MUV_err)
     redshifts_list.append(redshifts)
 
-print(np.concatenate(MUV)[np.concatenate(MUV) < 0])
-print(np.concatenate(MUV_err)[np.concatenate(MUV) < 0])
-print(np.concatenate(redshifts_list))
+print(list(np.concatenate(MUV)[np.concatenate(MUV) < 0]))
+print(list(np.concatenate(MUV_err)[np.concatenate(MUV) < 0]))
+print(list(np.concatenate(redshifts_list)))

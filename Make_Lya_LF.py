@@ -15,11 +15,12 @@ from scipy.stats import binned_statistic_2d
 
 from astropy.io import fits
 
-from jpasLAEs.utils import hms_since_t0, flux_to_mag
+from jpasLAEs.utils import hms_since_t0, flux_to_mag, bin_centers
 
 from paus_utils import *
 from LAE_selection_method import select_LAEs
 from PAUS_Lya_LF_corrections import L_lya_bias_apply
+from plot.puricomp1D import plot_puricomp1d
 
 
 def puricomp2d_weights(r_Arr, L_lya_Arr, puri_mat, comp_mat,
@@ -115,8 +116,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
     M_UV_Arr = cat['M_UV']
     M_UV_err_Arr = cat['M_UV_err']
 
-    N_bins_UV = 23 + 1
-    M_UV_bins = np.linspace(-30, -19, N_bins_UV)
+    N_bins_UV = 15 + 1
+    M_UV_bins = np.linspace(-29, -20, N_bins_UV)
     # Save the M_bins
     np.save(f'{LF_savedir}/M_UV_bins.npy', M_UV_bins)
 
@@ -125,6 +126,14 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
 
     region_IDs = np.load(f'/home/alberto/almacen/PAUS_data/masks/reg_id_Arr_{field_name}.npy')
     unique_region_IDs = np.unique(region_IDs)
+
+    # Load 1d puricomp curves
+    puricomp1d_L_bins = np.linspace(42.5, 45.5, 15)
+    puricomp1d_L_bins_c = bin_centers(puricomp1d_L_bins)
+    puri1d, comp1d = plot_puricomp1d('W1', 0, 18,
+                                        17, 24,
+                                        L_bins=puricomp1d_L_bins,
+                                        LF_kind='Lya')
 
     for boot_i in range(N_boots + 1):
         print(f'Subregion: {boot_i}')
@@ -146,11 +155,13 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.05)
-        pre_comp_mask_uv = (comp_preliminar > 0.05)# & cat['LAE_VI'][boot_nice_lya]
+        pre_comp_mask = (comp_preliminar > 0.5)# & ((cat['r_mag'][boot_nice_lya] < 22) | cat['LAE_VI'][boot_nice_lya])
+        pre_comp_mask_uv = (comp_preliminar > 0.5) & ((cat['r_mag'][boot_nice_lya] < 15) | cat['LAE_VI'][boot_nice_lya])
 
         # puri_k_uv = puri_preliminar
         # comp_k_uv = comp_preliminar
+        puri_k_uv = np.interp(cat['L_lya_corr'][boot_nice_lya], puricomp1d_L_bins_c, puri1d)
+        comp_k_uv = np.interp(cat['L_lya_corr'][boot_nice_lya], puricomp1d_L_bins_c, comp1d)
 
         for k in range(N_iter):
             if (k + 1) % 50 == 0:
@@ -163,17 +174,17 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             L_perturbed[randN > 0] = (L_Arr + L_e_Arr[1] * randN)[randN > 0]
             L_perturbed[np.isnan(L_perturbed)] = 0.
 
-            M_perturbed = M_UV_Arr + randN * M_UV_err_Arr
+            M_perturbed = M_UV_Arr + randN * (M_UV_err_Arr**2)**0.5
 
             puri_k, comp_k =\
                 Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_perturbed[boot_nice_lya],
                                puri2d, comp2d,
                                puricomp2d_L_bins, puricomp2d_r_bins)
 
-            puri_k_uv, comp_k_uv =\
-                Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
-                               puri2d_uv, comp2d_uv,
-                               puricomp2d_M_UV_bins, puricomp2d_r_bins)
+            # puri_k_uv, comp_k_uv =\
+            #     Lya_LF_weights(cat['r_mag'][boot_nice_lya], M_perturbed[boot_nice_lya],
+            #                    puri2d_uv, comp2d_uv,
+            #                    puricomp2d_M_UV_bins, puricomp2d_r_bins)
 
             # The array of weights w
             w = np.random.rand(len(puri_k))
@@ -186,7 +197,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w_uv = np.random.rand(len(puri_k_uv))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.05) & pre_comp_mask_uv
+            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.5) & pre_comp_mask_uv
+            # include_mask = (comp_k_uv > 0.1) & pre_comp_mask_uv
             w_uv[~include_mask] = 0.
             w_uv[include_mask] = 1. / comp_k_uv[include_mask]
             w_uv[np.isnan(w_uv) | np.isinf(w_uv)] = 0. # Just in case
@@ -275,6 +287,8 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
         if thisid in cat['ref_id']:
             cat['nice_lya'][cat['ref_id'] == thisid] = False
 
+    # cat['nice_lya'][(cat['r_mag'] > 22) & ~cat['LAE_VI']] = False
+
     # Extra junk
     for refid in [22483047, 2297114, 2307672, 16571662, 2316629, 2186228, 2300249, 2297927]:
         cat['nice_lya'][np.where(cat['ref_id'] == refid)] = False
@@ -294,7 +308,7 @@ def main(nb_min, nb_max, r_min, r_max, field_name):
 
     # Define the LF L binning
     L_min, L_max = 40, 47
-    N_bins = 50
+    N_bins = 35
     L_bins = np.linspace(L_min, L_max, N_bins + 1)
 
     # Dir to save the LFs and subproducts

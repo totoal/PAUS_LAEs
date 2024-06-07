@@ -27,7 +27,7 @@ for nb in $nb_list
 end
 wait
 
-# py LF_bootstrap_err.py "combi"
+py LF_bootstrap_err.py "combi"
 
 # for i in (seq 0 18)
 #     set nb "$i $i"

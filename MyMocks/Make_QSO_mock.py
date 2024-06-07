@@ -207,7 +207,7 @@ if __name__ == '__main__':
                [2.50, 2.75]]
     for z_min, z_max in zs_list:
         r_min = 16
-        r_max = 24
+        r_max = 25
         L_min = 0
         L_max = 0
         area_obs = 1000
@@ -219,7 +219,7 @@ if __name__ == '__main__':
                [3, 3.25], [3.25, 3.5], [3.5, 3.75], [3.75, 4], [4, 4.5]]
     for z_min, z_max in zs_list:
         r_min = 16
-        r_max = 24
+        r_max = 25
         L_min = 40
         L_max = 47
         area_obs = 1000
@@ -228,7 +228,7 @@ if __name__ == '__main__':
              surname=surname, contaminants=False)
 
         r_min = 16
-        r_max = 24
+        r_max = 25
         L_min = 44
         L_max = 47
         area_obs = 5000

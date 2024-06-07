@@ -3,7 +3,7 @@ from jpasLAEs.utils import bin_centers
 from paus_utils import Lya_effective_volume
 
 def load_combined_LF(region_list, NB_list, combined_LF=False,
-                     LF_kind='Lya'):
+                     LF_kind='Lya', merge_bins=False):
     this_hist = None
     masked_volume = None
     for region_name in region_list:
@@ -52,6 +52,7 @@ def load_combined_LF(region_list, NB_list, combined_LF=False,
     bin_width = np.array([L_bins[i + 1] - L_bins[i] for i in range(len(L_bins) - 1)])
 
     hist_median = np.percentile(this_hist, 50, axis=0)
+    # hist_median = np.mean(this_hist, axis=0)
 
     boots_path = f'/home/alberto/almacen/PAUS_data/Lya_LFs/bootstrap_errors'
     if combined_LF:
@@ -73,6 +74,15 @@ def load_combined_LF(region_list, NB_list, combined_LF=False,
     # Fix yerr_minus when LF_boots == 0
     yerr_minus[LF_boots == 0] = this_LF[LF_boots == 0]
 
+    if merge_bins:
+        L_bins_c = bin_centers(L_bins_c)
+        this_LF = np.array([(this_LF[i] + this_LF[i + 1]) * 0.5 for i in range(len(L_bins_c))])
+        LF_boots = np.array([(LF_boots[i] + LF_boots[i + 1]) * 0.5 for i in range(len(L_bins_c))])
+        yerr_plus = np.array([(yerr_plus[i]**2 + yerr_plus[i + 1]**2)**0.5 for i in range(len(L_bins_c))])
+        yerr_minus = np.array([(yerr_minus[i]**2 + yerr_minus[i + 1]**2)**0.5 for i in range(len(L_bins_c))])
+        poisson_err = np.array([((hist_median[eff_vol > 0][i] + hist_median[i + 1])*0.5)**0.5 for i in range(len(L_bins_c))])\
+            / bin_width[eff_vol > 0][0] / eff_vol[eff_vol > 0][0]
+    
     this_LF_dict = {
         'LF_bins': L_bins_c,
         'LF_total': this_LF,
