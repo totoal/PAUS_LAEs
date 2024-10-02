@@ -48,6 +48,10 @@ def load_paus_cat(cat_paths_list):
 
     tab = tab[field_mask & ~mask_3arcsec_blended]
 
+    N_masked_blended = sum(mask_3arcsec_blended & field_mask)
+    N_total = len(mask_3arcsec_blended)
+    print(f'Blended: {N_masked_blended} / {N_total} ({N_masked_blended / N_total * 100:0.2f}%)')
+
     print(f'Parent catalog length: {len(tab)}')
 
     # Stack the NBs and BBs
@@ -106,6 +110,8 @@ def load_paus_cat(cat_paths_list):
             print('Warning: \'ref_id\' not found in catalog. Making up fake IDs.')
             ref_id_Arr = (np.array(tab['alpha_j2000'] * 10000).astype(int)
                         + np.array(tab['delta_j2000'] * 10000).astype(int) * 10000000)
+
+    # print(f'Blended: {sum(mask_3arcsec_blended[field_mask])} / {sum(field_mask)}')
 
     cat['flx'] = flx_mat
     cat['err'] = flx_err_mat

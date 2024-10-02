@@ -155,8 +155,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             Lya_LF_weights(cat['r_mag'][boot_nice_lya], L_Arr[boot_nice_lya],
                            puri2d, comp2d,
                            puricomp2d_L_bins, puricomp2d_r_bins)
-        pre_comp_mask = (comp_preliminar > 0.5)# & ((cat['r_mag'][boot_nice_lya] < 22) | cat['LAE_VI'][boot_nice_lya])
-        pre_comp_mask_uv = (comp_preliminar > 0.5) & ((cat['r_mag'][boot_nice_lya] < 15) | cat['LAE_VI'][boot_nice_lya])
+        pre_comp_mask = (comp_preliminar > 0.0)# & ((cat['r_mag'][boot_nice_lya] < 22) | cat['LAE_VI'][boot_nice_lya])
+        pre_comp_mask_uv = (comp_preliminar > 0.0) & ((cat['r_mag'][boot_nice_lya] < 15) | cat['LAE_VI'][boot_nice_lya])
 
         # puri_k_uv = puri_preliminar
         # comp_k_uv = comp_preliminar
@@ -189,7 +189,7 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w = np.random.rand(len(puri_k))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w <= puri_k) & (comp_k > 0.05) & pre_comp_mask
+            include_mask = (w <= puri_k) & (comp_k > 0.00) & pre_comp_mask
             w[~include_mask] = 0.
             w[include_mask] = 1. / comp_k[include_mask]
             w[np.isnan(w) | np.isinf(w)] = 0. # Just in case
@@ -197,8 +197,8 @@ def Lya_LF_matrix(cat, L_bins, nb_min, nb_max, LF_savedir, field_name,
             # The array of weights w
             w_uv = np.random.rand(len(puri_k_uv))
             # Mask very low completeness and randomly according to purity
-            include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.5) & pre_comp_mask_uv
-            # include_mask = (comp_k_uv > 0.1) & pre_comp_mask_uv
+            # include_mask = (w_uv <= puri_k_uv) & (comp_k_uv > 0.0) & pre_comp_mask_uv
+            include_mask = (comp_k_uv > 0.0) & pre_comp_mask_uv
             w_uv[~include_mask] = 0.
             w_uv[include_mask] = 1. / comp_k_uv[include_mask]
             w_uv[np.isnan(w_uv) | np.isinf(w_uv)] = 0. # Just in case

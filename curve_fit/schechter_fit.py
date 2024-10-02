@@ -189,7 +189,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr = np.std(LF_mat_hiz, axis=0)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > 43) & (LF_bins < 45.5) & (yerr > 0)
+        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 48) & (yerr > 0)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
@@ -206,7 +206,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr[LF_phi == 0] = np.inf
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > 44) & (LF_bins < 45.5)
+        where_fit = np.isfinite(yerr) & (LF_bins > 43.5) & (LF_bins < 48)
 
         # invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2

@@ -94,8 +94,12 @@ def load_and_compute_invcovmat(nb_list, where_fit, region_list):
 ##########################
 
 def double_power_law(M, Phistar, Mbreak, beta, gamma):
+    # Mbreak = -25
+
     exp1 = 0.4 * (Mbreak - M) * (beta - 1)
     exp2 = 0.4 * (Mbreak - M) * (gamma - 1)
+
+    # exp2 = 0.4 * (Mbreak - M) * (3 - 1)
     # exp1 = 0.4 * (Mbreak - M) * (1.25 - 1)
 
 
@@ -134,7 +138,7 @@ def transform(theta):
     
     # Flat Priors
     Phistar_range = [-12, -5]
-    Mbreak_range = [-28, -25]
+    Mbreak_range = [-28, -22]
     beta_range = [1, 3]
     gamma_range = [2, 6]
 
@@ -219,7 +223,7 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         yerr = np.std(LF_mat_hiz, axis=0)
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24.2)
+        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24)
 
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2
         invcovmat = linalg.inv(covmat)
@@ -236,11 +240,13 @@ def run_mcmc_fit(nb_list, region_list, suffix=''):
         # Error to use
         yerr = (yerr_up + yerr_down) * 0.5
         
-        effvol = Lya_effective_volume(*nb_list[0], 36)
-        yerr[LF_phi == 0] = 1.**0.5 / effvol
+        # effvol = Lya_effective_volume(*nb_list[0], 36)
+        # yerr[LF_phi == 0] = 0.018 / effvol / (LF_bins[1] - LF_bins[0])
+        yerr[LF_phi == 0] = np.inf
+        # yerr[LF_phi == 0] = (1 - np.exp(-1.841 / (effvol * (LF_bins[1] - LF_bins[0]))))
 
         # In which LF bins fit
-        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24.2)
+        where_fit = np.isfinite(yerr) & (LF_bins > -40) & (LF_bins < -24)
 
         # invcovmat, _ = load_and_compute_invcovmat(nb_list, where_fit, region_list)
         covmat = np.eye(sum(where_fit)) * yerr[where_fit]**2

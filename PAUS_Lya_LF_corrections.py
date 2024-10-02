@@ -350,7 +350,7 @@ def main(nb_min, nb_max, r_min, r_max):
         'QSO_cont': 1000,
         'QSO_LAEs_loL': 1000,
         'QSO_LAEs_hiL': 5000,
-        'GAL': 59.97 * gal_fraction,
+        'GAL': 9 * gal_fraction,
     }
 
     for mock_name, area in area_dict.items():

@@ -76,7 +76,7 @@ def main():
                 ha='center', va='bottom',
                 # path_effects=this_patheffects, color=color,
                 color='k',
-                path_effects=[patheffects.withStroke(linewidth=0.3, foreground='k')],
+                path_effects=[patheffects.withStroke(linewidth=0.0, foreground='k')],
                 fontsize=nb_fontsize, rotation='vertical')
 
         # Lya redshift
@@ -86,14 +86,14 @@ def main():
                 ha='center', va='top',
                 # path_effects=this_patheffects, color=color,
                 color='k',
-                path_effects=[patheffects.withStroke(linewidth=0.3, foreground='k')],
+                path_effects=[patheffects.withStroke(linewidth=0.0, foreground='k')],
                 fontsize=nb_fontsize, rotation='vertical')
 
 
     # Text indicating z_lya
     ax.text(4200, bar_NB_h + z_text_delta_h - 0.015,
             r'$z_{\mathrm{Ly}\alpha}$', fontsize=nb_fontsize+1,
-            path_effects=[patheffects.withStroke(linewidth=0.3, foreground='k')],
+            path_effects=[patheffects.withStroke(linewidth=0.0, foreground='k')],
             va='top')
 
     # Now, the BBs
@@ -104,7 +104,7 @@ def main():
         fwhm = filter_properties['fwhm'][i]
         color = matplotlib.colors.to_rgb(filter_properties['color'][i])
         btext_color = np.array(color) * 0.6
-        this_patheffects = [patheffects.withStroke(linewidth=0.3, foreground=color)]
+        this_patheffects = [patheffects.withStroke(linewidth=0.1, foreground=color)]
         
         if i > 41:
             this_bar_BB_h = bar_BB_h + 0.015 * (i%2)
@@ -128,9 +128,9 @@ def main():
     #######################
 
     ax.set(xlim=(3000, 11000), ylim=(0, 1),
-           xlabel='Wavelength [\AA]',
-           ylabel='Response [A. U.]',
-           facecolor='darkgrey')
+           xlabel=r'Wavelength [\AA]',
+           ylabel='Response [A. U.]')
+           # facecolor='darkgrey')
 
     ax.set_xticks(np.arange(4000, 11000, 1000))
 
